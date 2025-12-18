@@ -87,7 +87,12 @@ function migrateIsDynamicToPresence(obj) {
  */
 async function loadSettingsUI() {
 	const settingsHtml = await $.get(`${extensionFolderPath}/html/settings.html`);
-	$("#extensions_settings2").append(settingsHtml);
+	const $target = $('#extensions_settings2').length
+  ? $('#extensions_settings2')
+  : $('#extensions_settings, #extensions-settings, #extensionsSettings').first();
+
+$target.append(settingsHtml);
+
 
 	setSettingsInitialValues();
 	registerSettingsListeners();
