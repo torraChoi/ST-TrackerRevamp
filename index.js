@@ -21,24 +21,30 @@ import { TrackerPreviewManager } from "./src/ui/trackerPreviewManager.js";
 import { generateTrackerCommand, getTrackerCommand, saveTrackerToMessageCommand, stateTrackerCommand, trackerOverrideCommand } from "./src/commands.js";
 import { FIELD_INCLUDE_OPTIONS } from "./src/trackerDataHandler.js";
 
-// === Unique ID for settings/storage (so it can coexist with the original Tracker) ===
+// ==============================
+// Tracker Revamp identity
+// ==============================
 export const extensionName = "TrackerRevamp";
 
-// === Compute folder path dynamically so you can name the folder whatever you want ===
-function getExtensionFolderPath() {
-  // Works for classic scripts (non-module) loaded by ST
-  const src = (document.currentScript && document.currentScript.src) ? document.currentScript.src : '';
-  // Example src:
-  // http://localhost:8000/scripts/extensions/third-party/ST-TrackerRevamp/index.js
-  const u = new URL(src || window.location.href);
-  const dir = u.pathname.replace(/\/[^/]*$/, ''); // strip filename -> folder
-  // Kaldigo code expects a relative path without the leading slash
-  return dir.startsWith('/') ? dir.slice(1) : dir;
-}
+// ==============================
+// Robust folder path detection (ST-compatible)
+// ==============================
+const EXT_URL = new URL(import.meta.url);
 
-export const extensionFolderPath = getExtensionFolderPath();
-// If you still want a long name for logging/UI:
+// Example:
+// http://localhost:8000/scripts/extensions/third-party/ST-TrackerRevamp/index.js
+const EXT_PATH = EXT_URL.pathname.replace(/\/[^/]*$/, '');
+
+// Remove leading slash to match Kaldigo-style fetches
+export const extensionFolderPath = EXT_PATH.startsWith('/')
+  ? EXT_PATH.slice(1)
+  : EXT_PATH;
+
+// Optional label / debug
 export const extensionNameLong = extensionFolderPath.split('/').pop();
+
+console.log('[TrackerRevamp] extensionFolderPath =', extensionFolderPath);
+
 
 
 if (!extension_settings[extensionName.toLowerCase()]) extension_settings[extensionName.toLowerCase()] = {};
