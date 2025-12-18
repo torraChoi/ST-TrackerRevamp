@@ -1,0 +1,11 @@
+{
+	"display_name": "Tracker",
+	"loading_order": 1,
+	"requires": [],
+	"optional": [],
+	"js": "index.js",
+	"css": "style.css",
+	"author": "606",
+	"version": "0.0.1",
+	"homePage": ""
+}
