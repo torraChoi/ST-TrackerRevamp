@@ -86,13 +86,10 @@ function migrateIsDynamicToPresence(obj) {
  * Sets initial values and registers event listeners.
  */
 async function loadSettingsUI() {
+	console.log('[TrackerRevamp] loadSettingsUI called');
+
 	const settingsHtml = await $.get(`${extensionFolderPath}/html/settings.html`);
-	const $target = $('#extensions_settings2').length
-  ? $('#extensions_settings2')
-  : $('#extensions_settings, #extensions-settings, #extensionsSettings').first();
-
-$target.append(settingsHtml);
-
+	$("#extensions_settings2").append(settingsHtml);
 
 	setSettingsInitialValues();
 	registerSettingsListeners();
