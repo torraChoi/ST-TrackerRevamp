@@ -91,9 +91,27 @@ async function loadSettingsUI() {
 	const settingsHtml = await $.get(`${extensionFolderPath}/html/settings.html`);
 	$("#extensions_settings2").append(settingsHtml);
 
-	setSettingsInitialValues();
-	registerSettingsListeners();
-	updateFieldVisibility(extensionSettings.generationMode);
+	try {
+  console.log('[TrackerRevamp] calling setSettingsInitialValues');
+  setSettingsInitialValues();
+} catch (e) {
+  console.error('setSettingsInitialValues failed', e);
+}
+
+try {
+  console.log('[TrackerRevamp] calling registerSettingsListeners');
+  registerSettingsListeners();
+} catch (e) {
+  console.error('registerSettingsListeners failed', e);
+}
+
+try {
+  console.log('[TrackerRevamp] calling updateFieldVisibility');
+  updateFieldVisibility(extensionSettings.generationMode);
+} catch (e) {
+  console.error('updateFieldVisibility failed', e);
+}
+
 }
 
 /**
