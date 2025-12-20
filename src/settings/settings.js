@@ -374,16 +374,22 @@ function onCompletionPresetSelectChange() {
  * Updates the presets dropdown with the available presets.
  */
 function updatePresetDropdown() {
-	const presetSelect = $("#tracker_preset_select");
-	presetSelect.empty();
-	for (const presetName in extensionSettings.presets) {
-		const option = $("<option>").val(presetName).text(presetName);
-		if (presetName === extensionSettings.selectedPreset) {
-			option.attr("selected", "selected");
-		}
-		presetSelect.append(option);
-	}
+  const presetSelect = $("#tracker_preset_select");
+
+  console.log('[TrackerRevamp] presetSelect length =', presetSelect.length);
+  console.log('[TrackerRevamp] presets keys =', Object.keys(extensionSettings.presets || {}));
+  console.log('[TrackerRevamp] selectedPreset =', extensionSettings.selectedPreset);
+
+  presetSelect.empty();
+  for (const presetName in (extensionSettings.presets || {})) {
+    const option = $("<option>").val(presetName).text(presetName);
+    if (presetName === extensionSettings.selectedPreset) {
+      option.attr("selected", "selected");
+    }
+    presetSelect.append(option);
+  }
 }
+
 
 /**
  * Event handler for changing the selected preset.
