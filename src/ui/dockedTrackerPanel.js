@@ -10,6 +10,8 @@ let lastKnownTrackerHTML = '';
 let retryTimer = null;
 let userClosedDock = false;
 let ogHijackInstalled = false;
+let autoHideOgOnce = true;
+
 
 
 export function installOgTrackerCloseHijack() {
@@ -51,7 +53,7 @@ export function installOgTrackerCloseHijack() {
     e.stopPropagation();
     e.stopImmediatePropagation();
 
-    tracker.style.display = 'none';
+    hideOgTracker();
     console.log('[TrackerRevamp] OG tracker hidden (not destroyed)');
 
   }, true); // <-- capture = true
@@ -74,6 +76,34 @@ function positionDockToggleButton() {
   dockToggleBtn.style.right = '20px';
   dockToggleBtn.style.bottom = '20px';
   dockToggleBtn.style.zIndex = '10001';
+}
+
+function hideOgTracker() {
+  const og = document.querySelector('#trackerInterface');
+  if (!og) return false;
+
+  // Store previous display so we can restore correctly
+  const computed = window.getComputedStyle(og).display;
+  if (computed && computed !== 'none') {
+    og.dataset.prevDisplay = computed;
+  }
+
+  og.style.display = 'none';
+  return true;
+}
+
+function showOgTracker() {
+  const og = document.querySelector('#trackerInterface');
+  if (!og) return false;
+
+  // Restore previous display or fall back to block
+  const prev = og.dataset.prevDisplay;
+  og.style.display = prev && prev !== 'none' ? prev : 'block';
+
+  // Make sure it’s not hiding behind your dock / UI
+  og.style.zIndex = '10002';
+
+  return true;
 }
 
 
@@ -173,8 +203,12 @@ export function ensureDock(side = 'right') {
     console.warn('[TrackerRevamp] OG tracker not found (can’t toggle)');
     return;
   }
-  og.style.display = (og.style.display === 'none') ? '' : 'none';
+
+  const isHidden = window.getComputedStyle(og).display === 'none';
+  if (isHidden) showOgTracker();
+  else hideOgTracker();
 });
+
 
 
   return dockEl;
@@ -226,6 +260,11 @@ if (!userClosedDock) {
   retryTimer = setTimeout(() => {
     startMirroringTrackerContents();
   }, 1000);
+}
+
+  if (autoHideOgOnce) {
+  hideOgTracker();
+  autoHideOgOnce = false;
 }
 
 
