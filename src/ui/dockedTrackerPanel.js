@@ -25,14 +25,26 @@ export function installOgTrackerCloseHijack() {
     if (!tracker.contains(e.target)) return;
 
     // Try to detect a "close" click
-    const closeBtn =
-      e.target.closest('#trackerInterface .close') ||
-      e.target.closest('#trackerInterface .fa-xmark') ||
-      e.target.closest('#trackerInterface .fa-times') ||
-      e.target.closest('#trackerInterface button[title*="Close"]') ||
-      e.target.closest('#trackerInterface button[aria-label*="Close"]');
+    const btn = e.target.closest('button, a, div, span');
+    if (!btn) return;
 
-    if (!closeBtn) return;
+    // Common cases: an X icon, × text, or anything labeled close
+    const t = (btn.textContent || '').trim();
+    const title = (btn.getAttribute('title') || '').toLowerCase();
+    const aria = (btn.getAttribute('aria-label') || '').toLowerCase();
+    const cls = (btn.className || '').toString().toLowerCase();
+
+    const looksLikeClose =
+    t === '×' ||
+    t === 'x' ||
+    title.includes('close') ||
+    aria.includes('close') ||
+    cls.includes('close') ||
+    cls.includes('xmark') ||
+    cls.includes('times');
+
+    if (!looksLikeClose) return;
+
 
     // Hijack: prevent default close behavior and hide instead
     e.preventDefault();
@@ -117,6 +129,7 @@ export function ensureDock(side = 'right') {
     <div class="trackerrevamp-dock-header">
       <span class="trackerrevamp-dock-title">Tracker</span>
       <div class="trackerrevamp-dock-actions">
+        <button id="trackerrevamp-og-toggle" class="menu_button" title="Show/Hide OG tracker">🛠</button>
         <button id="trackerrevamp-dock-pin" class="menu_button" title="Toggle side">⇄</button>
         <button id="trackerrevamp-dock-close" class="menu_button" title="Close">×</button>
       </div>
@@ -153,6 +166,16 @@ export function ensureDock(side = 'right') {
 
   // initial side
   dockEl.classList.add(side === 'left' ? 'is-left' : 'is-right');
+
+  dockEl.querySelector('#trackerrevamp-og-toggle')?.addEventListener('click', () => {
+  const og = document.querySelector('#trackerInterface');
+  if (!og) {
+    console.warn('[TrackerRevamp] OG tracker not found (can’t toggle)');
+    return;
+  }
+  og.style.display = (og.style.display === 'none') ? '' : 'none';
+});
+
 
   return dockEl;
 }
