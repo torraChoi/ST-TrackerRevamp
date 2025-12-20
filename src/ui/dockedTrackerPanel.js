@@ -4,8 +4,16 @@ let dockEl = null;
 let observer = null;
 let dockToggleBtn = null;
 
+let currentDockSide = 'right';
+
+
 function ensureDockToggleButton() {
-  if (dockToggleBtn) return dockToggleBtn;
+  if (dockToggleBtn) {
+  dockToggleBtn.style.display = 'block';
+  positionDockToggleButton();
+  return dockToggleBtn;
+}
+
 
   dockToggleBtn = document.createElement('button');
   dockToggleBtn.id = 'trackerrevamp-dock-toggle';
@@ -22,6 +30,8 @@ function ensureDockToggleButton() {
     border-radius: 999px;
   `;
 
+  positionDockToggleButton();
+
   dockToggleBtn.addEventListener('click', () => {
     if (!dockEl) {
       startMirroringTrackerContents();
@@ -34,6 +44,7 @@ function ensureDockToggleButton() {
 
 
 export function ensureDock(side = 'right') {
+    currentDockSide = side;
   if (dockEl) return dockEl;
 
   dockEl = document.createElement('div');
@@ -65,11 +76,33 @@ export function ensureDock(side = 'right') {
 
 
   dockEl.querySelector('#trackerrevamp-dock-pin')?.addEventListener('click', () => {
-    const next = dockEl.dataset.side === 'left' ? 'right' : 'left';
-    dockEl.dataset.side = next;
-    dockEl.classList.toggle('is-left', next === 'left');
-    dockEl.classList.toggle('is-right', next === 'right');
-  });
+  const next = dockEl.dataset.side === 'left' ? 'right' : 'left';
+  dockEl.dataset.side = next;
+  currentDockSide = next;
+
+  dockEl.classList.toggle('is-left', next === 'left');
+  dockEl.classList.toggle('is-right', next === 'right');
+
+  positionDockToggleButton(); // 👈 add this
+});
+
+function positionDockToggleButton() {
+  if (!dockToggleBtn) return;
+
+  dockToggleBtn.style.left = '';
+  dockToggleBtn.style.right = '';
+
+  if (currentDockSide === 'left') {
+    dockToggleBtn.style.right = '20px';
+  } else {
+    dockToggleBtn.style.left = '20px';
+  }
+
+  dockToggleBtn.style.bottom = '20px';
+  dockToggleBtn.style.zIndex = '10001';
+}
+
+
 
   // initial side
   dockEl.classList.add(side === 'left' ? 'is-left' : 'is-right');
