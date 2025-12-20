@@ -9,8 +9,13 @@ let currentDockSide = 'left';
 let lastKnownTrackerHTML = '';
 let retryTimer = null;
 let userClosedDock = false;
+let ogHijackInstalled = false;
 
-function installOgTrackerCloseHijack() {
+
+export function installOgTrackerCloseHijack() {
+    if (ogHijackInstalled) return;
+    ogHijackInstalled = true;
+
   // Capture-phase click handler so we can intercept before the original close handler runs
   document.addEventListener('click', (e) => {
     const tracker = document.querySelector('#trackerInterface');
