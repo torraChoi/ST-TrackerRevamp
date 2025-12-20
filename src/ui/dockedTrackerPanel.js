@@ -7,6 +7,15 @@ let dockToggleBtn = null;
 let currentDockSide = 'left';
 
 let lastKnownTrackerHTML = '';
+let retryTimer = null;
+let userClosedDock = false;
+
+function clearRetryTimer() {
+  if (retryTimer) {
+    clearTimeout(retryTimer);
+    retryTimer = null;
+  }
+}
 
 
 function positionDockToggleButton() {
@@ -46,10 +55,12 @@ function ensureDockToggleButton() {
   positionDockToggleButton();
 
   dockToggleBtn.addEventListener('click', () => {
-    if (!dockEl) {
-      startMirroringTrackerContents();
-    }
-  });
+  userClosedDock = false;   // 👈 user wants it back
+  clearRetryTimer();        // 👈 clear any stale retry loop
+  startMirroringTrackerContents();
+  dockToggleBtn.style.display = 'none';
+});
+
 
   document.body.appendChild(dockToggleBtn);
   return dockToggleBtn;
@@ -79,6 +90,8 @@ export function ensureDock(side = 'right') {
   document.body.appendChild(dockEl);
 
   dockEl.querySelector('#trackerrevamp-dock-close')?.addEventListener('click', () => {
+  userClosedDock = true;      // 👈 user explicitly closed it
+  clearRetryTimer();          // 👈 stop any pending auto-reopen
   stopMirroring();
 
   dockEl.remove();
@@ -86,6 +99,7 @@ export function ensureDock(side = 'right') {
 
   ensureDockToggleButton();
 });
+
 
 
   dockEl.querySelector('#trackerrevamp-dock-pin')?.addEventListener('click', () => {
@@ -146,9 +160,14 @@ export function startMirroringTrackerContents() {
   }
 
   // Try again later in case the tracker gets regenerated
-  setTimeout(() => {
+  clearRetryTimer();
+
+if (!userClosedDock) {
+  retryTimer = setTimeout(() => {
     startMirroringTrackerContents();
   }, 1000);
+}
+
 
   isMirroringActive = false;
   return;
