@@ -1,3 +1,5 @@
+let isMirroringActive = false;
+
 let dockEl = null;
 let observer = null;
 let dockToggleBtn = null;
@@ -53,13 +55,14 @@ export function ensureDock(side = 'right') {
   document.body.appendChild(dockEl);
 
   dockEl.querySelector('#trackerrevamp-dock-close')?.addEventListener('click', () => {
-    stopMirroring();
-    dockEl.remove();
-    dockEl = null;
+  stopMirroring();
 
-    ensureDockToggleButton(); // 👈 ADD THIS LINE
+  dockEl.remove();
+  dockEl = null;
 
-  });
+  ensureDockToggleButton();
+});
+
 
   dockEl.querySelector('#trackerrevamp-dock-pin')?.addEventListener('click', () => {
     const next = dockEl.dataset.side === 'left' ? 'right' : 'left';
@@ -80,42 +83,47 @@ function setDockHTML(html) {
 }
 
 export function startMirroringTrackerContents() {
-  ensureDock('right');
+  if (isMirroringActive) {
+    console.warn('[TrackerRevamp] mirroring already active, skipping');
+    return;
+  }
 
+  const source = document.querySelector('#trackerInterfaceContents');
+  const host = document.querySelector('#trackerInterface');
+
+  if (!source || !host) {
+    console.warn('[TrackerRevamp] tracker interface not ready yet');
+    return;
+  }
+
+  isMirroringActive = true;
+
+  ensureDock('right');
   if (dockToggleBtn) dockToggleBtn.style.display = 'none';
 
   stopMirroring();
 
-  const getSource = () => document.querySelector('#trackerInterfaceContents');
-
-  // Copy immediately if available
-  const first = getSource();
-  if (first) setDockHTML(first.innerHTML);
-
-  // Watch the whole tracker interface for re-renders / replacements
-  const host = document.querySelector('#trackerInterface') || document.body;
-
-  let lastSource = first || null;
+  // initial copy
+  setDockHTML(source.innerHTML);
 
   observer = new MutationObserver(() => {
-    const src = getSource();
+    if (!dockEl) return;
 
-    // If the contents element got replaced, update reference
-    if (src && src !== lastSource) {
-      lastSource = src;
-      setDockHTML(src.innerHTML);
-      return;
-    }
+    const current = document.querySelector('#trackerInterfaceContents');
+    if (!current) return;
 
-    // If same element, just mirror its current HTML
-    if (src) {
-      setDockHTML(src.innerHTML);
-    }
+    setDockHTML(current.innerHTML);
   });
 
-  observer.observe(host, { childList: true, subtree: true, characterData: true });
-  console.log('[TrackerRevamp] Dock is mirroring tracker (resilient)');
+  observer.observe(source, {
+    childList: true,
+    subtree: true,
+    characterData: true,
+  });
+
+  console.log('[TrackerRevamp] Dock mirroring started safely');
 }
+
 
 
 export function stopMirroring() {
@@ -123,4 +131,6 @@ export function stopMirroring() {
     observer.disconnect();
     observer = null;
   }
+  isMirroringActive = false;
 }
+
