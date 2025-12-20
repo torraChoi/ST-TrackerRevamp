@@ -41,6 +41,7 @@ function installOgTrackerCloseHijack() {
 }
 
 
+
 function clearRetryTimer() {
   if (retryTimer) {
     clearTimeout(retryTimer);
