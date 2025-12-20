@@ -6,6 +6,9 @@ let dockToggleBtn = null;
 
 let currentDockSide = 'left';
 
+let lastKnownTrackerHTML = '';
+
+
 function positionDockToggleButton() {
   if (!dockToggleBtn) return;
 
@@ -105,8 +108,16 @@ export function ensureDock(side = 'right') {
 
 function setDockHTML(html) {
   const body = dockEl?.querySelector('#trackerrevamp-dock-body');
-  if (body) body.innerHTML = html ?? '';
+  if (!body) return;
+
+  body.innerHTML = html ?? '';
+
+  // Cache last good content
+  if (html && String(html).trim().length > 0) {
+    lastKnownTrackerHTML = html;
+  }
 }
+
 
 export function startMirroringTrackerContents() {
   if (isMirroringActive) {
@@ -118,9 +129,32 @@ export function startMirroringTrackerContents() {
   const host = document.querySelector('#trackerInterface');
 
   if (!source || !host) {
-    console.warn('[TrackerRevamp] tracker interface not ready yet');
-    return;
+  // Still open the dock even if OG tracker is closed
+  ensureDock('left');
+
+  if (dockToggleBtn) dockToggleBtn.style.display = 'none';
+
+  if (lastKnownTrackerHTML) {
+    setDockHTML(lastKnownTrackerHTML);
+  } else {
+    setDockHTML(`
+      <div style="opacity:0.75; font-style:italic;">
+        Tracker window is closed.<br/>
+        Generate tracker again to display data here.
+      </div>
+    `);
   }
+
+  // Try again later in case the tracker gets regenerated
+  setTimeout(() => {
+    startMirroringTrackerContents();
+  }, 1000);
+
+  isMirroringActive = false;
+  return;
+}
+
+
 
   isMirroringActive = true;
 
