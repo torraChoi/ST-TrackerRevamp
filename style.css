@@ -332,3 +332,53 @@ label[for=tracker_reset_presets] {
   display: flex;
   align-items: center;
 }
+
+/********* Docked Tracker Styles ********/
+
+.trackerrevamp-dock {
+  position: fixed;
+  top: 60px;
+  width: 360px;
+  max-height: calc(100vh - 90px);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+
+  background: rgba(15, 15, 15, 0.75);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.trackerrevamp-dock.is-right { right: 10px; }
+.trackerrevamp-dock.is-left  { left: 10px; }
+
+.trackerrevamp-dock-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+
+  padding: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.trackerrevamp-dock-title {
+  font-weight: 700;
+}
+
+.trackerrevamp-dock-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.trackerrevamp-dock-body {
+  padding: 10px;
+  overflow: auto;
+}
+
+/* Optional: make copied tracker content fit better */
+.trackerrevamp-dock-body .tracker-view-container {
+  margin: 0;
+}

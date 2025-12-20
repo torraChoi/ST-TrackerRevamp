@@ -158,3 +158,28 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({
 	helpString: 'Get or set the tracker extension enabled/dissabled state.',
 	aliases: ['toggle-tracker'],
 }));
+
+// === Tracker Revamp: Docked Tracker Panel bootstrap ===
+import { startMirroringTrackerContents } from './src/ui/dockedTrackerPanel.js';
+
+(function waitForTrackerAndStartDock() {
+  let tries = 0;
+  const maxTries = 60;
+
+  const timer = setInterval(() => {
+    tries++;
+
+    const trackerContents = document.querySelector('#trackerInterfaceContents');
+    if (trackerContents) {
+      clearInterval(timer);
+      console.log('[TrackerRevamp] trackerInterfaceContents found, starting dock mirror');
+      startMirroringTrackerContents();
+      return;
+    }
+
+    if (tries >= maxTries) {
+      clearInterval(timer);
+      console.warn('[TrackerRevamp] trackerInterfaceContents not found after waiting');
+    }
+  }, 500);
+})();
