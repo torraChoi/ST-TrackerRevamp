@@ -6,6 +6,22 @@ let dockToggleBtn = null;
 
 let currentDockSide = 'right';
 
+function positionDockToggleButton() {
+  if (!dockToggleBtn) return;
+
+  dockToggleBtn.style.left = '';
+  dockToggleBtn.style.right = '';
+
+  if (currentDockSide === 'left') {
+    dockToggleBtn.style.right = '20px';
+  } else {
+    dockToggleBtn.style.left = '20px';
+  }
+
+  dockToggleBtn.style.bottom = '20px';
+  dockToggleBtn.style.zIndex = '10001';
+}
+
 
 function ensureDockToggleButton() {
   if (dockToggleBtn) {
@@ -85,23 +101,6 @@ export function ensureDock(side = 'right') {
 
   positionDockToggleButton(); // 👈 add this
 });
-
-function positionDockToggleButton() {
-  if (!dockToggleBtn) return;
-
-  dockToggleBtn.style.left = '';
-  dockToggleBtn.style.right = '';
-
-  if (currentDockSide === 'left') {
-    dockToggleBtn.style.right = '20px';
-  } else {
-    dockToggleBtn.style.left = '20px';
-  }
-
-  dockToggleBtn.style.bottom = '20px';
-  dockToggleBtn.style.zIndex = '10001';
-}
-
 
 
   // initial side
