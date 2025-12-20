@@ -10,6 +10,37 @@ let lastKnownTrackerHTML = '';
 let retryTimer = null;
 let userClosedDock = false;
 
+function installOgTrackerCloseHijack() {
+  // Capture-phase click handler so we can intercept before the original close handler runs
+  document.addEventListener('click', (e) => {
+    const tracker = document.querySelector('#trackerInterface');
+    if (!tracker) return;
+
+    // Only care about clicks inside the OG tracker window
+    if (!tracker.contains(e.target)) return;
+
+    // Try to detect a "close" click
+    const closeBtn =
+      e.target.closest('#trackerInterface .close') ||
+      e.target.closest('#trackerInterface .fa-xmark') ||
+      e.target.closest('#trackerInterface .fa-times') ||
+      e.target.closest('#trackerInterface button[title*="Close"]') ||
+      e.target.closest('#trackerInterface button[aria-label*="Close"]');
+
+    if (!closeBtn) return;
+
+    // Hijack: prevent default close behavior and hide instead
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+
+    tracker.style.display = 'none';
+    console.log('[TrackerRevamp] OG tracker hidden (not destroyed)');
+
+  }, true); // <-- capture = true
+}
+
+
 function clearRetryTimer() {
   if (retryTimer) {
     clearTimeout(retryTimer);

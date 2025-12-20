@@ -21,6 +21,7 @@ import { TrackerPreviewManager } from "./src/ui/trackerPreviewManager.js";
 import { generateTrackerCommand, getTrackerCommand, saveTrackerToMessageCommand, stateTrackerCommand, trackerOverrideCommand } from "./src/commands.js";
 import { FIELD_INCLUDE_OPTIONS } from "./src/trackerDataHandler.js";
 
+
 // ==============================
 // Tracker Revamp identity
 // ==============================
@@ -160,7 +161,9 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({
 }));
 
 // === Tracker Revamp: Docked Tracker Panel bootstrap ===
-import { startMirroringTrackerContents } from './src/ui/dockedTrackerPanel.js';
+import { startMirroringTrackerContents, installOgTrackerCloseHijack} from './src/ui/dockedTrackerPanel.js';
+
+installOgTrackerCloseHijack();
 
 (function waitForTrackerAndStartDock() {
   let tries = 0;
