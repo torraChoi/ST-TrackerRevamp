@@ -47,27 +47,41 @@ function setDockHTML(html) {
 }
 
 export function startMirroringTrackerContents() {
-  // Create the dock if needed
   ensureDock('right');
 
-  const source = document.querySelector('#trackerInterfaceContents');
-  if (!source) {
-    console.warn('[TrackerRevamp] #trackerInterfaceContents not found (yet)');
-    return;
-  }
-
-  // Copy once immediately
-  setDockHTML(source.innerHTML);
-
-  // Watch for changes and mirror
   stopMirroring();
+
+  const getSource = () => document.querySelector('#trackerInterfaceContents');
+
+  // Copy immediately if available
+  const first = getSource();
+  if (first) setDockHTML(first.innerHTML);
+
+  // Watch the whole tracker interface for re-renders / replacements
+  const host = document.querySelector('#trackerInterface') || document.body;
+
+  let lastSource = first || null;
+
   observer = new MutationObserver(() => {
-    setDockHTML(source.innerHTML);
+    const src = getSource();
+
+    // If the contents element got replaced, update reference
+    if (src && src !== lastSource) {
+      lastSource = src;
+      setDockHTML(src.innerHTML);
+      return;
+    }
+
+    // If same element, just mirror its current HTML
+    if (src) {
+      setDockHTML(src.innerHTML);
+    }
   });
 
-  observer.observe(source, { childList: true, subtree: true, characterData: true });
-  console.log('[TrackerRevamp] Dock is mirroring #trackerInterfaceContents');
+  observer.observe(host, { childList: true, subtree: true, characterData: true });
+  console.log('[TrackerRevamp] Dock is mirroring tracker (resilient)');
 }
+
 
 export function stopMirroring() {
   if (observer) {
