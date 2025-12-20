@@ -1,5 +1,35 @@
 let dockEl = null;
 let observer = null;
+let dockToggleBtn = null;
+
+function ensureDockToggleButton() {
+  if (dockToggleBtn) return dockToggleBtn;
+
+  dockToggleBtn = document.createElement('button');
+  dockToggleBtn.id = 'trackerrevamp-dock-toggle';
+  dockToggleBtn.className = 'menu_button';
+  dockToggleBtn.textContent = '📋 Tracker';
+  dockToggleBtn.title = 'Show Tracker Dock';
+
+  dockToggleBtn.style.cssText = `
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+    padding: 8px 12px;
+    border-radius: 999px;
+  `;
+
+  dockToggleBtn.addEventListener('click', () => {
+    if (!dockEl) {
+      startMirroringTrackerContents();
+    }
+  });
+
+  document.body.appendChild(dockToggleBtn);
+  return dockToggleBtn;
+}
+
 
 export function ensureDock(side = 'right') {
   if (dockEl) return dockEl;
@@ -26,6 +56,9 @@ export function ensureDock(side = 'right') {
     stopMirroring();
     dockEl.remove();
     dockEl = null;
+
+    ensureDockToggleButton(); // 👈 ADD THIS LINE
+
   });
 
   dockEl.querySelector('#trackerrevamp-dock-pin')?.addEventListener('click', () => {
@@ -48,6 +81,8 @@ function setDockHTML(html) {
 
 export function startMirroringTrackerContents() {
   ensureDock('right');
+
+  if (dockToggleBtn) dockToggleBtn.style.display = 'none';
 
   stopMirroring();
 
