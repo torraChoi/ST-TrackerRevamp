@@ -10,7 +10,30 @@ let lastKnownTrackerHTML = '';
 let retryTimer = null;
 let userClosedDock = false;
 let ogHijackInstalled = false;
+
 let autoHideOgOnce = true;
+let ogAppearObserver = null;
+
+export function startOgAutoHideWatcher() {
+  if (ogAppearObserver) return;
+
+  ogAppearObserver = new MutationObserver(() => {
+    if (!autoHideOgOnce) return;
+
+    const og = document.querySelector('#trackerInterface');
+    if (!og) return;
+
+    // If it's visible, hide it once
+    if (window.getComputedStyle(og).display !== 'none') {
+      hideOgTracker();
+      autoHideOgOnce = false;
+      console.log('[TrackerRevamp] OG auto-hidden once');
+    }
+  });
+
+  ogAppearObserver.observe(document.body, { childList: true, subtree: true });
+}
+
 
 
 
@@ -101,7 +124,7 @@ function showOgTracker() {
   og.style.display = prev && prev !== 'none' ? prev : 'block';
 
   // Make sure it’s not hiding behind your dock / UI
-  og.style.zIndex = '10002';
+  og.style.zIndex = '9998';
 
   return true;
 }
