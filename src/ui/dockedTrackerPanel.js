@@ -4,23 +4,17 @@ let dockEl = null;
 let observer = null;
 let dockToggleBtn = null;
 
-let currentDockSide = 'right';
+let currentDockSide = 'left';
 
 function positionDockToggleButton() {
   if (!dockToggleBtn) return;
 
   dockToggleBtn.style.left = '';
-  dockToggleBtn.style.right = '';
-
-  if (currentDockSide === 'left') {
-    dockToggleBtn.style.right = '20px';
-  } else {
-    dockToggleBtn.style.left = '20px';
-  }
-
+  dockToggleBtn.style.right = '20px';
   dockToggleBtn.style.bottom = '20px';
   dockToggleBtn.style.zIndex = '10001';
 }
+
 
 
 function ensureDockToggleButton() {
@@ -130,7 +124,7 @@ export function startMirroringTrackerContents() {
 
   isMirroringActive = true;
 
-  ensureDock('right');
+  ensureDock('left');
   if (dockToggleBtn) dockToggleBtn.style.display = 'none';
 
   stopMirroring();
