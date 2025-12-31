@@ -22,6 +22,9 @@ let isDockEditing = false;
 let activeEditor = null; // { editableEl, lineIndex, key, input, oldValue }
 let dockRefreshTimer = null;
 let lastTrackerFingerprint = "";
+let dockRefreshQueued = false;
+let dockRefreshSoonTimer = null;
+let dockRefreshPendingAfterEdit = false;
 
 
 
@@ -97,6 +100,33 @@ function refreshDock() {
 
   lastTrackerFingerprint = fp;
   setDockHTML(renderDockFromTracker(tracker, schema));
+}
+
+function scheduleDockRefresh(reason = "manual") {
+  if (!dockEl) return;
+
+  if (isDockEditing) {
+    // Defer until editing ends to avoid node detachment.
+    dockRefreshPendingAfterEdit = true;
+    return;
+  }
+
+  if (dockRefreshQueued) return;
+
+  dockRefreshQueued = true;
+  if (dockRefreshSoonTimer) clearTimeout(dockRefreshSoonTimer);
+
+  dockRefreshSoonTimer = setTimeout(() => {
+    dockRefreshQueued = false;
+    dockRefreshSoonTimer = null;
+    refreshDock();
+  }, 50);
+}
+
+function flushPendingDockRefresh() {
+  if (!dockRefreshPendingAfterEdit) return;
+  dockRefreshPendingAfterEdit = false;
+  scheduleDockRefresh("post-edit");
 }
 
 
@@ -633,6 +663,7 @@ function commitActiveEditor() {
 
   activeEditor = null;
   isDockEditing = false;
+  flushPendingDockRefresh();
 }
 
 function cancelActiveEditor() {
@@ -647,6 +678,7 @@ function cancelActiveEditor() {
 
   activeEditor = null;
   isDockEditing = false;
+  flushPendingDockRefresh();
 }
 
 
@@ -663,6 +695,7 @@ function applyEditToTrackerPath(path, type, key, newValue) {
 
   setValueAtPath(tracker, path, coerced);
   ti.onSave(tracker);
+  scheduleDockRefresh("save");
 
   // Optional: if OG tracker is open, you can refresh dock right after save
   // refreshDock();

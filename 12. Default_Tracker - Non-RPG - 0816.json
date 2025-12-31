@@ -1,0 +1,245 @@
+{
+  "Default_Tracker - Non-RPG - 0816": {
+    "generationMode": "single-stage",
+    "generateContextTemplate": "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\nInstruction: You MUST follow Tracker Template!\n\n{{trackerSystemPrompt}}\n\n<!-- Start of Context -->\n\n{{characterDescriptions}}\n\n### Example Trackers\n<!-- Start of Example Trackers -->\n{{trackerExamples}}\n<!-- End of Example Trackers -->\n\n### Recent Messages with Trackers\n{{recentMessages}}\n\n### Current Tracker\n<tracker>\n{{currentTracker}}\n</tracker>\n\nInstruction: Again, You MUST follow Tracker Template! or else everything will be broken!\n<!-- End of Context --><|eot_id|>",
+    "generateSystemPrompt": "You are a Scene Tracker Assistant, tasked with providing clear, consistent, and structured updates to a scene tracker for a roleplay. Use the latest message, previous tracker details, and context from recent messages to accurately update the tracker. Your response must follow the specified {{trackerFormat}} structure exactly, ensuring that each field is filled and complete. If specific information is not provided, make reasonable assumptions based on prior descriptions, logical inferences, or default character details.\n\n### Key Instructions:\n1. **Tracker Format**: Always respond with a complete tracker in {{trackerFormat}} format. Every field must be present in the response, even if unchanged. Do not omit fields or change the {{trackerFormat}} structure.\n2. **Default Assumptions for Missing Information**: \n   - **Character Details**: If no new details are provided for a character, assume reasonable defaults (e.g., hairstyle, posture, or attire based on previous entries or context).\n   - **Outfit**: Describe the complete outfit for each character, using specific details for color, fabric, and style (e.g., “fitted black leather jacket with silver studs on the collar”).\n   - **StateOfDress**: Describe how put-together or disheveled the character appears, including any removed clothing. If the character is undressed, indicate where discarded items are placed.\n3. **Incremental Time Progression**: \n   - Adjust time to reflect realistic scene progression. Avoid large jumps unless a significant time skip (e.g., \"the next week\", sleep, travel) is explicitly stated.\n   - Format the time as \"HH:MM:SS; MM/DD/YYYY (Day Name)\". Always vary the added time. Avoid repeating patterns. Use irregular intervals like: `42s`, `1m17s`, `6m51s`, `1h08m`, etc. Don't be robotic or formulaic.\n4. **Context-Appropriate Times**: \n   - Ensure that the time aligns with the setting. For example, if the scene takes place in a public venue (e.g., a mall), choose an appropriate time within standard operating hours.\n5. **Location Format**: Avoid unintended reuse of specific locations from previous examples or responses. Provide specific, relevant, and detailed locations based on the context, using the format:\n   - **Example**: “Food court, second floor near east wing entrance, Madison Square Mall, Los Angeles, CA” \n6. **Consistency**: Match field structures precisely, maintaining {{trackerFormat}} syntax. If no changes occur in a field, keep the most recent value.\n7. **Topics Format**: Ensure topics are one- or two-word keywords relevant to the scene to help trigger contextual information. Avoid long phrases.\n8. **Avoid Redundancies**: Use only details provided or logically inferred from context. Do not introduce speculative or unnecessary information.\n9. **Focus and Pause**: Treat each scene update as a standalone, complete entry. Respond with the full tracker every time, even if there are only minor updates.\n\n### Tracker Template\nReturn your response in the following {{trackerFormat}} structure, following this format precisely:\n\n```\n<tracker>\n{{defaultTracker}}\n</tracker>\n```\n\n### Important Reminders:\n1. **Recent Messages and Current Tracker**: Before updating, always consider the recent messages and the provided <Current Tracker> to ensure all changes are accurately represented.\n2. **Structured Response**: Do not add any extra information outside of the {{trackerFormat}} tracker structure.\n3. **Complete Entries**: Always provide the full tracker in {{trackerFormat}}, even if only minor updates are made.\n\nYour primary objective is to ensure clarity, consistency, and structured responses for scene tracking in {{trackerFormat}} format, providing complete details even when specifics are not explicitly stated.",
+    "generateRequestPrompt": "[Analyze the previous message along with the recent messages provided below and update the current scene tracker based on logical inferences and explicit details. Pause and ensure only the tracked data is provided, formatted in {{trackerFormat}}. Avoid adding, omitting, or rearranging fields unless specified. Respond with the full tracker every time.\n\n### Response Rules:\n{{trackerFieldPrompt}}\n\nEnsure the response remains consistent, strictly follows this structure in {{trackerFormat}}, and omits any extra data or deviations. You MUST enclose the tracker in <tracker></tracker> tags]",
+    "generateRecentMessagesTemplate": "{{#if tracker}}Tracker: <tracker>\n{{tracker}}\n</tracker>\n{{/if}}{{char}}: {{message}}",
+    "messageSummarizationContextTemplate": "",
+    "messageSummarizationSystemPrompt": "",
+    "messageSummarizationRequestPrompt": "",
+    "messageSummarizationRecentMessagesTemplate": "",
+    "inlineRequestPrompt": "",
+    "characterDescriptionTemplate": "### {{char}}'s Description\n{{charDescription}}",
+    "mesTrackerTemplate": "<!----------------------------  ------------------------------>\n    <!-- TRACKER CONTENT Start-->\n    <!----------------------------  ------------------------------>\n\n    <!-- TIME & CHARACTER PRESENT Section — START -->\n    <section id=\"time_char\" class=\"white b-bottom\">\n      <div class=\"time-char wid-1\">{{Time}}</div>\n      <div class=\"time-char wid-2 b-left char-list\">\n        {{#join \"; \" CharactersPresent}}\n      </div>\n    </section>\n\n    <!-- TIME & CHARACTER PRESENT Section — END -->\n\n    <!----------------------------  ------------------------------>\n\n    <!-- BLOCK 1 section (Inj - Tracker) — START -->\n    <!-- TRACKER Section — START -->\n    <details id=\"block-all-container\">\n      <summary class=\"block-all-header custom-sum-2\">\n        <strong>Info</strong>\n      </summary>\n      <section class=\"tracker b-top b-bottom\">\n        {{#foreach Characters character}}\n        <details class=\"tracker-container light-bg\">\n          <!-- TRACKER HEADER section — START -->\n          <summary class=\"tracker-header custom-sum-4\">\n            <p class=\"tracker-char gold\">{{character}}</p>\n\n            <!-- Tracker - Income -->\n            <div class=\"tracker-finance-left\">\n              <div class=\"tracker-income\">\n                <img src=\"https://img.icons8.com/?size=100&id=BsvN7v_QcY_R&format=png&color=FCB956\" class=\"icon\"/>\n                <span>{{character.Income}}</span>\n              </div>\n\n              <span class=\"custom-ib-status-divider\">|</span>\n\n              <!-- Tracker - Cash -->\n              <div class=\"tracker-cash\">\n                <img src=\"https://img.icons8.com/?size=100&id=lIn6nPLzeAHz&format=png&color=FCB956\" class=\"icon\"/>\n                <span>{{character.Cash}}</span>\n              </div>\n\n            </div>\n\n            <span class=\"custom-ib-status-divider\">|</span>\n\n            <!-- Tracker - Savings -->\n            <div class=\"tracker-savings\">\n              <img src=\"https://img.icons8.com/?size=100&id=ZiCX8adaI6ng&format=png&color=FCB956\" class=\"icon\"/>\n              <span class=\"light-grey\">{{character.Savings}}</span>\n            </div>\n                            \n            <!-- Items -->\n            <div class=\"tracker-stats-item tracker-items b-top\">\n              <img src=\"https://img.icons8.com/?size=100&id=8483&format=png&color=FCB956\" class=\"icon\"/>\n              <span class=\"tracker-content white\">{{character.Items}}</span>\n            </div>\n          </summary>\n          \n          <!-- TRACKER HEADER section — END -->\n          <div class=\"tracker-stats-container\">\n            <!-- TRACKER WEATHER/ LOCATION -->\n            <div class=\"tracker-place b-bottom b-top\">\n              <!-- Weather -->\n              <div class=\"tracker-stats-item track-weather\">\n                <img src=\"https://img.icons8.com/?size=100&id=9313&format=png&color=E98B05\" class=\"icon\"/>\n                <span class=\"white\">{{character.Weather}}</span>\n              </div>\n              <!-- Location -->\n              <div class=\"tracker-stats-item track-location b-left\">\n                <img src=\"https://img.icons8.com/?size=100&id=7880&format=png&color=E98B05\" class=\"icon\"/>\n                <span class=\"tracker-content white\">{{character.Location}}</span>\n              </div>\n            </div>\n            <!-- Posture -->\n            <div class=\"tracker-stats-item\">\n              <img src=\"https://img.icons8.com/?size=100&id=33794&format=png&color=FCB956\" class=\"icon\"/>\n              <span class=\"tracker-content white\">{{character.PostureAndInteraction}}</span>\n            </div>\n            <!-- Sensory -->\n            <div class=\"tracker-stats-item\">\n              <img src=\"https://img.icons8.com/?size=100&id=FX4GWbVxitZn&format=png&color=FCB956\" class=\"icon\"/>\n              <span class=\"tracker-content white\">{{character.Sensory}}</span>\n            </div>\n            <!-- Outfit -->\n            <div class=\"tracker-stats-item\">\n              <img src=\"https://img.icons8.com/?size=100&id=105820&format=png&color=FCB956\" class=\"icon\"/>\n              <span class=\"tracker-content white\">{{character.Outfit}}</span>\n            </div>\n            <!-- StateOfDress -->\n            <div class=\"tracker-stats-item\">\n              <img src=\"https://img.icons8.com/?size=100&id=CCZRWiCMhMBf&format=png&color=FCB956\" class=\"icon\"/>\n              <span class=\"tracker-content white\">{{character.StateOfDress}}</span>\n            </div>\n            <!-- Hair -->\n            <div class=\"tracker-stats-item\">\n              <img src=\"https://img.icons8.com/?size=100&id=10695&format=png&color=FCB956\" class=\"icon\"/>\n              <span class=\"tracker-content white\">{{character.Hair}}</span>\n            </div>\n          </div>\n        </details>\n        {{/foreach}}\n      </section>\n    </details>\n    <!-- TRACKER Section — End -->\n\n    <!-- INJURED CHARACTERS section -->\n    <details id=\"block-all-container\" class=\"block-bottom\">\n      <summary class=\"block-all-header custom-sum-2\">\n        <strong>Injury/ Ailment Status</strong>\n      </summary>\n      <section class=\"injured-container b-top b-bottom\">\n        {{#foreach InjuredCharacters character}}\n        <!-- Example 1 -->\n        <div class=\"injured-character light-bg\">\n          <p class=\"inj-name gold\">{{character}}:</p>\n          <p class=\"injury\">{{character.InjuryAilments}}</p>\n        </div>\n        {{/foreach}}\n      </section>\n    </details>\n    <!-- INJURED CHARACTERS section End-->\n\n    <!-- BLOCK 1 section (Inj - Tracker) — END -->",
+    "mesTrackerJavascript": "() => {\n\tconst renderBar = (el, color, glow = false) => {\n\t\tif (!el) return;\n         const match = el.textContent.match(/(\\d+)\\s*\\/\\s*(\\d+)/);\n         if (!match) return;\n\n\t\tconst current = parseInt(match[1]);\n\t\tconst max = parseInt(match[2]);\n\t\tconst percent = Math.min((current / max) * 100, 100).toFixed(2);\n\n\t\t// Create bar container\n\t\tconst bar = document.createElement('div');\n\t\tbar.style.cssText = `\n\t\t\twidth: 100%;\n\t\t\tbackground: #2424247a;\n\t\t\tborder-radius: 3px;\n\t\t\toverflow: hidden;\n\t\t\theight: 2px;\n\t\t\tmargin: 4px 0 10px 0;\n\t\t\tposition: relative;\n\t\t\t${glow ? `box-shadow: 0 0 3px ${color};` : ''}\n\t\t`;\n\n\t\t// Filled portion\n\t\tconst fill = document.createElement('div');\n\t\tfill.style.cssText = `\n\t\t\twidth: ${percent}%;\n\t\t\tbackground-color: ${color};\n\t\t\theight: 100%;\n\t\t\tposition: absolute;\n\t\t\ttop: 0;\n\t\t\tleft: 0;\n\t\t`;\n\n        const label = document.createElement(\"div\");\n\n\n\t\t// Inject and clean\n\t\tel.textContent = '';\n\t\tbar.appendChild(fill);\n\t\tbar.appendChild(label);\n\t\tel.appendChild(bar);\n\t};\n\n\tconst applyToAll = () => {\n\t\tdocument\n          .querySelectorAll(\".hp-line\")\n          .forEach((el) => renderBar(el, \"#07da66ff\", true));\n        document\n          .querySelectorAll(\".exp-line\")\n          .forEach((el) => renderBar(el, \"#f3ce53ff\", true));  // EXP = blue + glow\n\t};\n\n\tconst init = () => {\n\t\tconst ctx = SillyTavern.getContext();\n\t\tctx.eventSource.on('TRACKER_PREVIEW_ADDED', applyToAll);\n\t\tctx.eventSource.on('TRACKER_PREVIEW_UPDATED', applyToAll);\n\t};\n\n\tconst cleanup = () => {\n\t\tconst ctx = SillyTavern.getContext();\n\t\tctx.eventSource.off('TRACKER_PREVIEW_ADDED');\n\t\tctx.eventSource.off('TRACKER_PREVIEW_UPDATED');\n\t};\n\n\treturn { init, cleanup };\n}\n",
+    "trackerDef": {
+      "field-0": {
+        "name": "Time",
+        "type": "STRING",
+        "presence": "DYNAMIC",
+        "prompt": "Update the in-world time by realistically reflecting how long the latest message would take if it occurred in real life.\n\nUse this logic:\n- For **brief dialogue or short reactions** (1–2 lines, low impact): add **a few seconds** (between 1s–15s).\n- For **dense or emotional dialogue**, dramatic pauses, or multi-line exchanges: add **between 1–4 minutes**.\n- For **physical activity** (walking, getting dressed, working, traveling, etc.): add **between several minutes to an hour**, based on effort and complexity.\n- For **prolonged or multi-step actions** (e.g., showering, fighting, briefing, waiting, cleaning up): add **between 10 minutes to multiple hours** depending on what's implied.\n- If the message **implies or states a time transition** (e.g., \"later,\" \"the sun sets,\", \"a few minutes\", \"by the time evening rolls in\"): apply **a significant time jump** — even **several hours** if appropriate.\n\nRules:\n- **Stack the time realistically** — don’t choose just one category if multiple things happen. Dialogue + action + passage of time = cumulative duration.\n- **Use irregular intervals**. Avoid predictable jumps. Example: `38s`, `1m47s`, `6m09s`, `2h18m`.\n- If unsure, ask: “If I were watching this unfold in real time, how much would actually pass?”\n\nReturn only the updated time in this format:  \n`HH:MM:SS AM/PM | 🌄 Morning / ☀️ Afternoon / 🌇 Evening / 🌆 Night / 🌙 Late Night— MM/DD/YYYY (Day Name) `\nBase your calculation on `{{time}}` and `{{getvar::today}}`, unless the message clearly overrides it.",
+        "defaultValue": "<Updated time if changed>",
+        "exampleValues": [
+          "",
+          "",
+          "",
+          ""
+        ],
+        "nestedFields": {}
+      },
+      "field-1": {
+        "name": "CharactersPresent",
+        "type": "ARRAY",
+        "presence": "DYNAMIC",
+        "prompt": "List all characters currently present in an array format.",
+        "defaultValue": "<List of characters present if changed>",
+        "exampleValues": [
+          "[\"Emma Thompson\", \"James Miller\", \"Sophia Rodriguez\"]",
+          "[\"Daniel Lee\", \"Olivia Harris\"]",
+          "[\"Liam Johnson\", \"Emily Clark\"]",
+          ""
+        ],
+        "nestedFields": {}
+      },
+      "field-2": {
+        "name": "Characters",
+        "type": "FOR_EACH_OBJECT",
+        "presence": "DYNAMIC",
+        "prompt": "For each character on {{CharactersPresent}} list, update the following details:",
+        "defaultValue": "<Character Name>",
+        "exampleValues": [
+          "[\"Emma Thompson\", \"James Miller\", \"Sophia Rodriguez\"]",
+          "[\"Daniel Lee\", \"Olivia Harris\"]",
+          "[\"Liam Johnson\", \"Emily Clark\"]",
+          ""
+        ],
+        "nestedFields": {
+          "field-3": {
+            "name": "Hair",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "prompt": "Describe style only. Reflect natural changes over time, even if not mentioned. For example, wet hair after a shower should dry and become disheveled or styled over time. Account for sleep, wind, movement, or grooming between scenes. Be concise.",
+            "defaultValue": "<Updated hair description if changed>",
+            "exampleValues": [
+              "[\"Shoulder-length blonde hair, styled straight\", \"Short black hair, neatly combed\", \"Long curly brown hair, pulled back into a low bun\"]",
+              "[\"Short brown hair, damp with sweat\", \"Medium-length red hair, tied up in a high ponytail\"]",
+              "[\"Short sandy blonde hair, slightly tousled\", \"Long wavy brown hair, loose and flowing\"]",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-4": {
+            "name": "Outfit",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "prompt": "**IMPORTANT!** List the complete outfit. For on-screen characters, outfit should stay the same until changed for a new one. Reflect natural outfit changes over time for off-screen characters, even if not explicitly stated. Factor in time of day, location, activity, and weather. For example, if they are at home or in a private room, assume shoes have been removed and they are barefoot or in indoor wear. If they are preparing to leave or have entered a public space, assume appropriate shoes are worn. Update logically as time and context change, including shifts to sleepwear, casual wear, or professional attire as appropriate. Keep the description realistic and concise.",
+            "defaultValue": "<Full outfit description, even if removed including color, fabric, and style details; **always include underwear and accessories if present. If underwear is intentionally missing, specify clearly**>",
+            "exampleValues": [
+              "[\"Navy blue blazer over a white silk blouse; Gray pencil skirt; Black leather belt; Sheer black stockings; Black leather pumps; Pearl necklace; Silver wristwatch; White lace balconette bra; White lace hipster panties matching the bra\", \"Dark gray suit; Light blue dress shirt; Navy tie with silver stripes; Black leather belt; Black dress shoes; Black socks; White cotton crew-neck undershirt; Black cotton boxer briefs\", \"Cream-colored blouse with ruffled collar; Black slacks; Brown leather belt; Brown ankle boots; Gold hoop earrings; Beige satin push-up bra; Beige satin bikini panties matching the bra\"]",
+              "[\"Gray moisture-wicking t-shirt; Black athletic shorts; White ankle socks; Gray running shoes; Black sports watch; Blue compression boxer briefs\", \"Black sports tank top; Purple athletic leggings; Black athletic sneakers; White ankle socks; Fitness tracker bracelet; Black racerback sports bra; Black seamless athletic bikini briefs matching the bra\"]",
+              "[\"Light blue short-sleeve shirt; Khaki shorts; Brown leather sandals; Silver wristwatch; Blue plaid cotton boxer shorts\", \"White sundress over a red halter bikini; Straw hat; Brown flip-flops; Gold anklet; Red halter bikini top; Red tie-side bikini bottoms matching the top\"]",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-5": {
+            "name": "StateOfDress",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "prompt": "Describe how put-together, disheveled, or casual the character currently appears. Reflect natural changes over time or scene context, even if not explicitly mentioned. For example, after hours of activity, clothes may appear rumpled or loosened. If the character is at home or relaxing, assume some layers like jackets, shoes, or accessories have been removed. Mention discarded clothing and where it was placed if relevant. Keep the tone appropriate to the setting, and concise.",
+            "defaultValue": "<Current state of dress if no update is needed. Note location where discarded outfit items are placed if character is undressed>",
+            "exampleValues": [
+              "[\"Professionally dressed, neat appearance\", \"Professionally dressed, attentive\", \"Professionally dressed, organized\"]",
+              "[\"Workout attire, lightly perspiring\", \"Workout attire, energized\"]",
+              "[\"Shirt and sandals removed, placed on beach towel\", \"Sundress and hat removed, placed on beach chair\"]",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-6": {
+            "name": "PostureAndInteraction",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "prompt": "Describe physical posture, position relative to others or objects, and interactions. Reflect natural changes over time or scene context, even if not explicitly mentioned. Exclude sensory input.\nIf the character is off-screen, infer a realistic and current state based on location (e.g., resting, sitting, walking). Keep it clean and simple.",
+            "defaultValue": "<Current posture and interaction if no update is needed>",
+            "exampleValues": [
+              "Sitting upright at the conference table, arms crossed.",
+              "Leaning against the doorway, scanning the room.",
+              "Lying in bed, blanket pulled up to chest.",
+              "Resting on the infirmary cot, glancing at the monitor."
+            ],
+            "nestedFields": {}
+          },
+          "field-7": {
+            "name": "Location",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "prompt": "Provide the character’s current, specific location in the format: \"Specific Place, Building, City, State\". Include details like rooms, landmarks, or areas when relevant. Even if not explicitly stated, update the location logically based on the scene, time progression, and character status. For example, if the character is no longer required to stay in a temporary area like an infirmary or hallway, assume they have moved to a more reasonable location such as their room, the cafeteria, or another relevant area. Reflect realistic movement even when the character is off-screen.",
+            "defaultValue": "<Updated location if changed>",
+            "exampleValues": [
+              "The Whispering Gallery, Grand Central Terminal, New York, NY",
+              "The British Library Reading Room, British Library, London, England",
+              "Fushimi Inari Shrine's Thousand Torii Gates, Fushimi Inari Taisha, Kyoto, Japan",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-8": {
+            "name": "Weather",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "prompt": "Describe the current weather or conditions concisely. Reflect natural changes over time such as shifts in cloud cover, temperature, precipitation, or lighting (e.g., sunset glow, fog rolling in). If the character moves to a new city or region, or a significant amount of time passes, update the weather accordingly. Assume realistic progression based on prior conditions even if not explicitly stated in the scene. Keep it brief and atmospheric.",
+            "defaultValue": "<Updated weather if changed>",
+            "exampleValues": [
+              "Heavy rain, distant thunder",
+              "Light drizzle, grey overcast sky",
+              "Golden sunset, scattered clouds",
+              "Hot and humid, buzzing with cicadas"
+            ],
+            "nestedFields": {}
+          },
+          "field-9": {
+            "name": "Cash",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "prompt": "List the current amount of physical cash the character is carrying, including the currency type and where it's stored (e.g., wallet, pocket, bag). Adjust the amount automatically based on contextual spending (e.g., food, transport, minor purchases) or unexpected loss. Ensure the pricing is realistic — e.g., a coffee costs around $3, lunch $10–$20, a cab ride $20–$40. Also reflect realistic behavior: people rarely carry large sums casually (e.g., $10–$50 is common in pockets, $100–$200 in wallets or bags). If the character withdraws money from a bank/ ATM, or receives money, increase their cash accordingly. Always update the location of the cash if their outfit or bag changes.",
+            "defaultValue": "<Updated cash if changed>",
+            "exampleValues": [
+              "$240 (wallet)",
+              "£35 (small bills, tucked inside backpack)",
+              "$15 (jeans pocket)",
+              "$0 (lost wallet during escape)"
+            ],
+            "nestedFields": {}
+          },
+          "field-10": {
+            "name": "Sensory",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "prompt": "Describe what the character is currently seeing, hearing, smelling, and physically feeling in a single, compact sentence. Focus only on real-time physical sensations related to the environment (e.g., touch, temperature, sounds, sights) while speaking or interacting. Avoid emotional states or inner thoughts. Keep it simple and factual.\nIf the character is off-screen, infer likely ambient sensations based on their location (e.g., “dim lights, muffled hallway sounds, stiff pillow under head”).\nStick to **factual, real-time input**. No storytelling.",
+            "defaultValue": "<Updated sensory if changed>",
+            "exampleValues": [
+              "Hearing muffled hallway chatter, feeling chair’s firm back under shoulders.",
+              "Smelling faint disinfectant, seeing white ceiling tiles, feeling blanket’s warmth.",
+              "Watching Feldman speak, hearing rustle of paper, feeling tension in chest.",
+              "Smelling coffee, hearing distant typing, feeling cool air on arms."
+            ],
+            "nestedFields": {}
+          },
+          "field-11": {
+            "name": "Items",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "prompt": "List all non-weapon items the character is currently carrying, including objects in pockets, bags, or hands. These can include phones, wallets, keys, gadgets, documents, trinkets, etc.\n\nUpdate naturally based on context:\n- Remove items that are dropped, lost, or stashed away.\n- Add items the character picks up, even if it's implied (e.g., grabbing gear before leaving a room).\n- Relocate items logically if the outfit changes (e.g., jacket removed, bag set down).\n- Remove irrelevant or outdated items.\n\nAvoid duplicate items. Focus only on what’s actively carried or used. Be concise but specific.",
+            "defaultValue": "<Updated other items if changed>",
+            "exampleValues": [
+              "Phone in left thigh pocket, wallet in jacket, BTF-issued ID clipped to belt, notepad in hand",
+              "Map case in backpack, tactical goggles on forehead, ration pack in utility pouch",
+              "None",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-12": {
+            "name": "Income",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "prompt": "List the character’s monthly income with currency and source. Base the amount on their role or occupation, and include additional sources of income if applicable (e.g., freelance work, bonuses). Income should remain stable unless the character changes jobs, receives a promotion/demotion, or loses a role. Express in the format: [$X / month — [role/occupation] (+ other sources)]",
+            "defaultValue": "<Current income if no update is needed>",
+            "exampleValues": [
+              "$7,000 / month — BTF Captain",
+              "$5,500 / month — Analyst + $1,000 freelance work",
+              "$0 / month — Unemployed",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-13": {
+            "name": "Savings",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "prompt": "Track the character's bank balances, including both personal and joint accounts if applicable. \nFor the joint account, also track the balances of its sub-accounts (Expenses, Emergency/House Savings, Baby Savings) using emojis for clarity.\n\nUpdate dynamically based on deposits, withdrawals, transfers, or payments:\n- If cash is withdrawn, decrease the relevant bank account and increase carried cash by the same amount. \n- If money is transferred between accounts or sub-accounts, deduct from the source and add to the destination. \n- If it's implied payments are made directly from the bank (e.g., bills, rent, large purchases), subtract the realistic amount from the correct account/sub-account.\n- On the 1st day of the month (salary day), add each character's income into the correct accounts once (with the agreed percentage split).\n\nExpress in the format:\n[Personal: $X | Joint: $Y (💸: $A | 🏠: $B | 🍼: $C)]\n\nWhere:\n- 💸 = Expenses sub-account\n- 🏠 = Emergency/House savings sub-account\n- 🍼 = Baby savings sub-account",
+            "defaultValue": "",
+            "exampleValues": [
+              "Personal: $32,000 | Joint: $55,000 (💸: $15,500 | 🏠: $10,000 | 🍼: $30,000)",
+              "Personal: $12,500",
+              "Personal: $0 | Joint: $100,000 (💸: $20,000 | 🏠: $40,000 | 🍼: $40,000)",
+              ""
+            ],
+            "nestedFields": {}
+          }
+        }
+      },
+      "field-14": {
+        "name": "InjuredCharacters",
+        "type": "FOR_EACH_OBJECT",
+        "presence": "DYNAMIC",
+        "prompt": "List all characters with physical injuries/ ailments, including those who leaves the screen.\nWhen said character has left the screen, put (off-screen) behind their name. \nOnly include {{char}}, {{user}}, and other characters who currently have at least one unresolved or healing injury/ ailment.  \nRemove other characters that is not {{user}} or {{char}} once all injuries/ ailments are marked as (fully healed).  \n\nCreate one entry per injured character.",
+        "defaultValue": "<Injured character name>",
+        "exampleValues": [
+          "[\"Emma Thompson\", \"James Miller\", \"Sophia Rodriguez\"]",
+          "[\"Daniel Lee\", \"Olivia Harris (off-screen)\", \"Emma Thompson\"]",
+          "[\"Liam Johnson (off-screen)\", \"Emily Clark\"]",
+          ""
+        ],
+        "nestedFields": {
+          "field-15": {
+            "name": "InjuryAilments",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "prompt": "Describe the character's current injuries or physical ailments. Always include:\n- Type of wound or condition\n- Affected body part(s) if relevant\n- **Age of injury or condition**, updated based on how much time has passed since its onset (in days or hours)\n- Healing or recovery status (e.g., fresh, improving, scabbing, healing steadily, nearly recovered)\n\nThis applies to: wounds (e.g., cuts, gunshots, bruises), ailments/ illnesses (e.g., fever, chills, pain, nausea), chronic issues, surgery recovery, pregnancy symptoms, or other physical health complaints.\n\nTrack time progression:\n- If an injury was listed previously as \"1 day old\" and **a day has passed**, update it to \"2 days old\"\n- Use approximate hours **only** for new or recent injuries (<24h)\n- Add or resolve ailments based on recent events or implied scenes\n\nIf multiple conditions are present, combine them in one natural sentence.\n\nOnce a wound or condition is **fully healed**, mark it as **(fully healed)** once, then remove it on the next update.\nIf {{char}} or {{user}} is currently healthy, return:  \n**None (healthy)**",
+            "defaultValue": "<Current injury/ ailments status if no update is needed>",
+            "exampleValues": [
+              "Gunshot wound on right thigh (4 days old, wound closing), sore throat (1 day old, mild)",
+              "Knife wound on left ribs (2 days old, scabbing), fever (new, likely from infection), dizziness after overexertion",
+              "Bruised knuckles (1 day old, tender), pregnancy nausea (occasional), muscle aches from prior fight",
+              "Knife wound on left side (10 days old, closed up and healing steadily), bruises on back (fully healed)"
+            ],
+            "nestedFields": {}
+          }
+        }
+      }
+    }
+  }
+}
