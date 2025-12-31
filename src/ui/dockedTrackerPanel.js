@@ -74,8 +74,8 @@ function splitKeyValue(line) {
 function getLeafTrackerFields(sourceEl) {
   const all = [...sourceEl.querySelectorAll(".tracker-view-field")];
 
-  // Include all fields, including headers and nested containers
-  return all;
+  // Keep only "leaf" fields (fields that DON'T contain other .tracker-view-field inside)
+  return all.filter((el) => !el.querySelector(".tracker-view-field"));
 }
 
 function extractKeyFromField(fieldEl) {
@@ -131,41 +131,85 @@ function extractValueFromField(fieldEl) {
 }
 
 function renderEditableDockFromOg(sourceEl) {
-  const leafFields = getLeafTrackerFields(sourceEl);
+  // IMPORTANT:
+  // lineIndex must keep matching getLeafTrackerFields() order.
+  // So we only increment leafIndex for editable leaf fields.
+  let leafIndex = 0;
 
-  return leafFields
-    .map((fieldEl, i) => {
-      const key = extractKeyFromField(fieldEl);
-      const value = extractValueFromField(fieldEl);
+  const root =
+    sourceEl.querySelector(".tracker-view-container") ||
+    sourceEl;
 
-      // If we couldn’t detect key:value style, show as plain
-      // Also treat "headers" (like MainCharacters:) as non-editable if value is empty or equals key
-      if (!key) {
-        return `<div class="tr-line tr-plain" data-line-index="${i}">${escapeHtml(
-          value
-        )}</div>`;
-      }
+  const isField = (el) => el?.classList?.contains("tracker-view-field");
+  const isNested = (el) => el?.classList?.contains("tracker-view-nested");
+  const isContainer = (el) => el?.classList?.contains("tracker-view-container");
 
-      // If it's a header (no input value) render as plain line "Key:"
-      const hasInput = !!fieldEl.querySelector("input, textarea");
-      if (!hasInput && (!value || value === key || value === `${key}:`)) {
-        return `<div class="tr-line tr-plain" data-line-index="${i}">${escapeHtml(
-          key
-        )}:</div>`;
-      }
+  function directNested(fieldEl) {
+    return fieldEl.querySelector(":scope > .tracker-view-nested");
+  }
 
-      // Editable
-      return `
-      <div class="tr-line" data-line-index="${i}" data-key="${escapeHtml(key)}">
-        <span class="tr-key">${escapeHtml(key)}:</span>
-        <span class="tr-editable" data-key="${escapeHtml(key)}">${escapeHtml(
-        value
-      )}</span>
+  function renderGroup(title, depth) {
+    return `
+      <div class="tr-line tr-group" data-depth="${depth}">
+        <div class="tr-group-title">${escapeHtml(title)}</div>
       </div>
     `;
-    })
-    .join("");
+  }
+
+  function renderEditableLeaf(fieldEl, depth) {
+    const key = extractKeyFromField(fieldEl);
+    const value = extractValueFromField(fieldEl);
+
+    // If key detection fails, show it as plain text
+    if (!key) {
+      const t = (fieldEl.textContent || "").trim();
+      return `<div class="tr-line tr-plain" data-depth="${depth}">${escapeHtml(t)}</div>`;
+    }
+
+    const i = leafIndex++; // ONLY leaf editable fields increment
+
+    return `
+      <div class="tr-line" data-line-index="${i}" data-depth="${depth}">
+        <span class="tr-key">${escapeHtml(key)}:</span>
+        <span class="tr-editable" data-key="${escapeHtml(key)}">${escapeHtml(value)}</span>
+      </div>
+    `;
+  }
+
+  function walk(node, depth = 0) {
+    let html = "";
+
+    // Container-ish nodes: walk their children
+    if (node === root || isContainer(node) || isNested(node)) {
+      for (const child of [...node.children]) {
+        html += walk(child, depth);
+      }
+      return html;
+    }
+
+    // Only care about tracker fields
+    if (!isField(node)) return "";
+
+    const nested = directNested(node);
+
+    // If it has nested children => render as a GROUP header (MainCharacters / Leon test / etc.)
+    if (nested) {
+      const key = extractKeyFromField(node);
+      const title = key ? `${key}:` : (node.textContent || "").trim();
+      if (title) html += renderGroup(title, depth);
+
+      html += walk(nested, depth + 1);
+      return html;
+    }
+
+    // Leaf field => editable line
+    html += renderEditableLeaf(node, depth);
+    return html;
+  }
+
+  return walk(root, 0);
 }
+
 
 export function startOgAutoHideWatcher() {
   if (ogAppearObserver) return;
