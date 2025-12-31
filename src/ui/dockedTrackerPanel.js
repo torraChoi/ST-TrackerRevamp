@@ -26,6 +26,7 @@ let dockRefreshQueued = false;
 let dockRefreshSoonTimer = null;
 let dockRefreshPendingAfterEdit = false;
 let isDockRegenerating = false;
+let groupToggleInstalled = false;
 
 
 
@@ -181,6 +182,104 @@ function waitForOgRegenerationDone(timeoutMs = 30000) {
   });
 }
 
+const defaultCollapsedGroupNames = new Set([
+  "othercharacters",
+  "smallenemies",
+  "bigenemies",
+]);
+
+function normalizeGroupName(name) {
+  return String(name ?? "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+}
+
+function getPathTail(path) {
+  if (!path) return "";
+  const idx = path.lastIndexOf(".");
+  return idx === -1 ? path : path.slice(idx + 1);
+}
+
+function getParentPath(path) {
+  if (!path) return "";
+  const idx = path.lastIndexOf(".");
+  return idx === -1 ? "" : path.slice(0, idx);
+}
+
+function getGroupStorageKey(path) {
+  return `trackerrevamp:groupCollapsed:${path}`;
+}
+
+function safeLocalStorageGet(key) {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function safeLocalStorageSet(key, value) {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // ignore
+  }
+}
+
+function getDefaultGroupCollapsed(path, name) {
+  const normalized = normalizeGroupName(name);
+  if (normalized === "maincharacters") return false;
+
+  if (defaultCollapsedGroupNames.has(normalized)) return true;
+
+  const parentName = normalizeGroupName(getPathTail(getParentPath(path)));
+  if (parentName === "maincharacters") return true;
+
+  return false;
+}
+
+function getStoredGroupCollapsed(path, name) {
+  const stored = safeLocalStorageGet(getGroupStorageKey(path));
+  if (stored === "1") return true;
+  if (stored === "0") return false;
+  return getDefaultGroupCollapsed(path, name);
+}
+
+function setStoredGroupCollapsed(path, collapsed) {
+  safeLocalStorageSet(getGroupStorageKey(path), collapsed ? "1" : "0");
+}
+
+function applyGroupCollapseVisibility() {
+  const body = dockEl?.querySelector("#trackerrevamp-dock-body");
+  if (!body) return;
+
+  const lines = [...body.querySelectorAll(".tr-line")];
+  const collapsedDepths = [];
+
+  for (const line of lines) {
+    const depth = Number(line.dataset.depth || 0);
+
+    while (collapsedDepths.length && depth <= collapsedDepths[collapsedDepths.length - 1]) {
+      collapsedDepths.pop();
+    }
+
+    const hidden = collapsedDepths.length > 0;
+    line.classList.toggle("is-hidden", hidden);
+
+    if (!hidden && line.classList.contains("tr-group")) {
+      const path = line.dataset.groupPath || "";
+      const name = line.dataset.groupName || "";
+      const collapsed = getStoredGroupCollapsed(path, name);
+      line.dataset.collapsed = collapsed ? "1" : "0";
+      line.classList.toggle("is-collapsed", collapsed);
+
+      if (collapsed) {
+        collapsedDepths.push(depth);
+      }
+    }
+  }
+}
+
 
 
 /**
@@ -284,9 +383,9 @@ function renderDockFromTracker(tracker, schema) {
     return `<div style="opacity:.75; font-style:italic;">No tracker data yet.</div>`;
   }
 
-  function renderGroup(title, depth) {
+  function renderGroup({ title, name, path, depth }) {
     return `
-      <div class="tr-line tr-group" data-depth="${depth}">
+      <div class="tr-line tr-group" data-depth="${depth}" data-group-path="${escapeHtml(path)}" data-group-name="${escapeHtml(name)}" style="padding-left:${depth * 12}px">
         <div class="tr-group-title">${escapeHtml(title)}</div>
       </div>
     `;
@@ -298,7 +397,7 @@ function renderDockFromTracker(tracker, schema) {
       (value ?? "").toString();
 
     return `
-      <div class="tr-line" data-path="${escapeHtml(path)}" data-type="${escapeHtml(type ?? "")}" data-depth="${depth}">
+      <div class="tr-line" data-path="${escapeHtml(path)}" data-type="${escapeHtml(type ?? "")}" data-depth="${depth}" style="padding-left:${depth * 12}px">
         <span class="tr-key">${escapeHtml(key)}:</span>
         <span class="tr-editable" data-key="${escapeHtml(key)}">${escapeHtml(display)}</span>
       </div>
@@ -321,28 +420,28 @@ function renderDockFromTracker(tracker, schema) {
 
       // GROUP TYPES
       if (T === "OBJECT" && nested) {
-        html += renderGroup(`${name}:`, depth);
+        html += renderGroup({ title: `${name}:`, name, path, depth });
         html += walkSchema(value || {}, nested, path, depth + 1);
         continue;
       }
 
       if (T === "FOR_EACH_OBJECT" && nested) {
-        html += renderGroup(`${name}:`, depth);
+        html += renderGroup({ title: `${name}:`, name, path, depth });
 
         const entries = value && typeof value === "object" ? Object.entries(value) : [];
         for (const [k, v] of entries) {
-          html += renderGroup(`${k}:`, depth + 1);
+          html += renderGroup({ title: `${k}:`, name: k, path: `${path}.${k}`, depth: depth + 1 });
           html += walkSchema(v || {}, nested, `${path}.${k}`, depth + 2);
         }
         continue;
       }
 
       if (T === "FOR_EACH_ARRAY" && nested) {
-        html += renderGroup(`${name}:`, depth);
+        html += renderGroup({ title: `${name}:`, name, path, depth });
 
         const entries = value && typeof value === "object" ? Object.entries(value) : [];
         for (const [k, arr] of entries) {
-          html += renderGroup(`${k}:`, depth + 1);
+          html += renderGroup({ title: `${k}:`, name: k, path: `${path}.${k}`, depth: depth + 1 });
 
           // If schema says “single string field array”, treat as leaf array
           const nestedFields = Object.values(nested);
@@ -361,7 +460,13 @@ function renderDockFromTracker(tracker, schema) {
             // Array of objects: render each index as subgroup
             const safeArr = Array.isArray(arr) ? arr : [];
             safeArr.forEach((item, idx) => {
-              html += renderGroup(`[${idx}]:`, depth + 2);
+              const indexName = `[${idx}]`;
+              html += renderGroup({
+                title: `${indexName}:`,
+                name: indexName,
+                path: `${path}.${k}.${indexName}`,
+                depth: depth + 2,
+              });
               html += walkSchema(item || {}, nested, `${path}.${k}.[${idx}]`, depth + 3);
             });
           }
@@ -720,6 +825,25 @@ function installDockEditing() {
   }, true);
 }
 
+function installDockGroupToggles() {
+  if (groupToggleInstalled) return;
+  groupToggleInstalled = true;
+
+  document.addEventListener("click", (e) => {
+    if (isDockRegenerating) return;
+
+    const groupEl = e.target.closest(".tr-group");
+    if (!groupEl) return;
+    if (!dockEl || !dockEl.contains(groupEl)) return;
+
+    const path = groupEl.dataset.groupPath;
+    if (!path) return;
+
+    const collapsed = groupEl.dataset.collapsed === "1";
+    setStoredGroupCollapsed(path, !collapsed);
+    applyGroupCollapseVisibility();
+  }, true);
+}
 
 function commitActiveEditor() {
   if (!activeEditor) return;
@@ -787,12 +911,14 @@ function applyEditToTrackerPath(path, type, key, newValue) {
 
 
 installDockEditing();
+installDockGroupToggles();
 
 function setDockHTML(html) {
   const body = dockEl?.querySelector("#trackerrevamp-dock-body");
   if (!body) return;
 
   body.innerHTML = html ?? "";
+  applyGroupCollapseVisibility();
 
   // Cache last good content
   if (html && String(html).trim().length > 0) {

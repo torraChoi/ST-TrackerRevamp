@@ -401,3 +401,10 @@ label[for=tracker_reset_presets] {
 .tr-editable { cursor: text; padding: 1px 4px; border-radius: 4px; display: block; flex: 1; min-width: 0; }
 .tr-editable:hover { background: rgba(255,255,255,0.06); }
 .tr-input { width: 70%; }
+
+.tr-line.is-hidden { display: none; }
+
+.tr-group { cursor: pointer; user-select: none; }
+.tr-group-title { font-weight: 600; flex: 1; }
+.tr-group-title::before { content: "[-] "; opacity: 0.6; }
+.tr-group.is-collapsed .tr-group-title::before { content: "[+] "; }
