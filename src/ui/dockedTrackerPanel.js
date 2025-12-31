@@ -182,11 +182,6 @@ function waitForOgRegenerationDone(timeoutMs = 30000) {
   });
 }
 
-const defaultCollapsedGroupNames = new Set([
-  "othercharacters",
-  "smallenemies",
-  "bigenemies",
-]);
 const hideEmptyGroupNames = new Set([
   "othercharacters",
   "smallenemies",
@@ -235,12 +230,10 @@ function getDefaultGroupCollapsed(path, name) {
   const normalized = normalizeGroupName(name);
   if (normalized === "maincharacters") return false;
 
-  if (defaultCollapsedGroupNames.has(normalized)) return true;
-
   const parentName = normalizeGroupName(getPathTail(getParentPath(path)));
   if (parentName === "maincharacters") return true;
 
-  return false;
+  return true;
 }
 
 function isPlaceholderEntryName(name) {
