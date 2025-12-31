@@ -14,6 +14,56 @@ let ogHijackInstalled = false;
 let autoHideOgOnce = true;
 let ogAppearObserver = null;
 
+
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
+function splitKeyValue(line) {
+  const idx = line.indexOf(':');
+  if (idx === -1) return null;
+
+  const key = line.slice(0, idx).trim();
+  const value = line.slice(idx + 1).trim();
+
+  if (!key) return null;
+  if (!value) return null; // treat "MainCharacters:" as non-editable header
+
+  return { key, value };
+}
+
+/**
+ * Render an editable dock view from the OG tracker DOM.
+ * Adds data-line-index so we can write back edits into OG.
+ */
+function renderEditableDockFromOg(sourceEl) {
+  const fields = [...sourceEl.querySelectorAll('.tracker-view-field')];
+
+  return fields.map((el, i) => {
+    const raw = el.textContent.trim();
+    const kv = splitKeyValue(raw);
+
+    // Non key:value (or header) -> render as plain line
+    if (!kv) {
+      return `<div class="tr-line tr-plain" data-line-index="${i}">${escapeHtml(raw)}</div>`;
+    }
+
+    return `
+      <div class="tr-line" data-line-index="${i}">
+        <span class="tr-key">${escapeHtml(kv.key)}:</span>
+        <span class="tr-editable" data-key="${escapeHtml(kv.key)}">${escapeHtml(kv.value)}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+
+
 export function startOgAutoHideWatcher() {
   if (ogAppearObserver) return;
 
@@ -249,6 +299,82 @@ export function ensureDock(side = 'right') {
   return dockEl;
 }
 
+function installDockEditing() {
+  document.addEventListener('click', (e) => {
+    const editable = e.target.closest('.tr-editable');
+    if (!editable) return;
+
+    // Prevent re-enter if already editing
+    if (editable.dataset.editing === '1') return;
+    editable.dataset.editing = '1';
+
+    const lineEl = editable.closest('.tr-line');
+    const lineIndex = Number(lineEl?.dataset?.lineIndex);
+    const key = editable.dataset.key;
+    const oldValue = editable.textContent;
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'tr-input';
+    input.value = oldValue;
+
+    editable.textContent = '';
+    editable.appendChild(input);
+    input.focus();
+    input.select();
+
+    const commit = () => {
+      const newValue = input.value.trim();
+
+      // restore display
+      editable.dataset.editing = '0';
+      editable.innerHTML = escapeHtml(newValue);
+
+      // ✅ write back into OG tracker UI so it stays consistent
+      applyEditToOgTrackerLine(lineIndex, key, newValue);
+
+      // (Optional) log
+      console.log('[TrackerRevamp] Edited:', { lineIndex, key, newValue });
+    };
+
+    const cancel = () => {
+      editable.dataset.editing = '0';
+      editable.innerHTML = escapeHtml(oldValue);
+    };
+
+    input.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter') commit();
+      if (ev.key === 'Escape') cancel();
+    });
+
+    input.addEventListener('blur', commit);
+  }, true);
+}
+
+/**
+ * Updates the OG tracker line text like "HP: 160/160".
+ * We update by line index + key to be safe.
+ */
+function applyEditToOgTrackerLine(lineIndex, key, newValue) {
+  const og = document.querySelector('#trackerInterfaceContents');
+  if (!og) return;
+
+  const fields = [...og.querySelectorAll('.tracker-view-field')];
+  const el = fields[lineIndex];
+  if (!el) return;
+
+  const raw = el.textContent.trim();
+  const kv = splitKeyValue(raw);
+
+  // Only overwrite if the key matches what we edited
+  if (!kv || kv.key !== key) return;
+
+  el.textContent = `${key}: ${newValue}`;
+}
+
+installDockEditing();
+
+
 function setDockHTML(html) {
   const body = dockEl?.querySelector('#trackerrevamp-dock-body');
   if (!body) return;
@@ -317,7 +443,7 @@ if (!userClosedDock) {
   stopMirroring();
 
   // initial copy
-  setDockHTML(source.innerHTML);
+  setDockHTML(renderEditableDockFromOg(source));
 
   observer = new MutationObserver(() => {
     if (!dockEl) return;
@@ -325,7 +451,7 @@ if (!userClosedDock) {
     const current = document.querySelector('#trackerInterfaceContents');
     if (!current) return;
 
-    setDockHTML(current.innerHTML);
+    setDockHTML(renderEditableDockFromOg(current));
   });
 
   observer.observe(source, {
@@ -336,8 +462,6 @@ if (!userClosedDock) {
 
   console.log('[TrackerRevamp] Dock mirroring started safely');
 }
-
-
 
 
 export function stopMirroring() {
