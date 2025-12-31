@@ -543,7 +543,7 @@ function installDockEditing() {
     const editable = lineEl.querySelector(".tr-editable");
     if (!editable) return;
 
-    // If another editor is open, commit it first (or you can cancel it)
+    // If another editor is open, commit it first
     if (activeEditor && activeEditor.editableEl !== editable) {
       commitActiveEditor();
     }
@@ -556,15 +556,33 @@ function installDockEditing() {
     const key = editable.dataset.key;
     const oldValue = editable.textContent;
 
-    activeEditor = {
-      editableEl: editable,
-      path,
-      type,
-      key,
-      input,
-      oldValue,
-    };
+    // ✅ create the input (textarea) again
+    const input = document.createElement("textarea");
+    input.className = "tr-input";
+    input.value = oldValue;
 
+    // make it visually seamless
+    input.style.width = editable.offsetWidth + "px";
+    input.style.height = editable.offsetHeight + "px";
+    input.style.resize = "none";
+    input.style.border = "none";
+    input.style.outline = "none";
+    input.style.padding = "0";
+    input.style.margin = "0";
+    input.style.background = "transparent";
+
+    const cs = window.getComputedStyle(editable);
+    input.style.fontSize = cs.fontSize;
+    input.style.lineHeight = cs.lineHeight;
+    input.style.fontFamily = cs.fontFamily;
+
+    // mount it
+    editable.dataset.editing = "1";
+    editable.textContent = "";
+    editable.appendChild(input);
+
+    isDockEditing = true;
+    activeEditor = { editableEl: editable, path, type, key, input, oldValue };
 
     input.focus();
     input.select();
@@ -579,16 +597,17 @@ function installDockEditing() {
       }
     });
 
-    // IMPORTANT: no blur commit. Blur is what caused your crash.
+    // no blur commit (good)
   }, true);
 
-  // click outside commits (optional)
+  // click outside commits
   document.addEventListener("mousedown", (e) => {
     if (!activeEditor) return;
-    if (activeEditor.editableEl.contains(e.target)) return; // click inside editor
+    if (activeEditor.editableEl.contains(e.target)) return;
     commitActiveEditor();
   }, true);
 }
+
 
 function commitActiveEditor() {
   if (!activeEditor) return;
@@ -610,7 +629,7 @@ function commitActiveEditor() {
   // Write back to OG
   applyEditToTrackerPath(path, type, key, cleaned);
 
-  console.log("[TrackerRevamp] Edited:", { lineIndex, key, newValue: cleaned });
+  console.log("[TrackerRevamp] Edited:", { path, key, newValue: cleaned });
 
   activeEditor = null;
   isDockEditing = false;
