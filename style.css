@@ -351,8 +351,8 @@ label[for=tracker_reset_presets] {
   overflow: hidden;
 }
 
-.trackerrevamp-dock.is-right { right: 10px; }
-.trackerrevamp-dock.is-left  { left: 10px; }
+.trackerrevamp-dock.is-right { right: 0px; }
+.trackerrevamp-dock.is-left  { left: 0px; }
 
 .trackerrevamp-dock-header {
   display: flex;
