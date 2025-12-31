@@ -27,6 +27,20 @@ function escapeHtml(str) {
     .replaceAll("'", "&#039;");
 }
 
+function normalizeEditedValue(key, raw) {
+  if (raw == null) return '';
+  let v = String(raw).trim();
+
+  const k = String(key ?? '').trim();
+  if (k) {
+    const escaped = k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    v = v.replace(new RegExp(`^\\s*${escaped}\\s*:\\s*`, 'i'), '');
+  }
+
+  return v.trim();
+}
+
+
 function splitKeyValue(line) {
   const idx = line.indexOf(":");
   if (idx === -1) return null;
@@ -361,67 +375,107 @@ export function ensureDock(side = "right") {
 }
 
 function installDockEditing() {
-  document.addEventListener(
-    "click",
-    (e) => {
-      const editable = e.target.closest(".tr-editable");
-      if (!editable) return;
+  // click to start editing
+  document.addEventListener("click", (e) => {
+    const editable = e.target.closest(".tr-editable");
+    if (!editable) return;
 
-      // Prevent re-enter if already editing
-      if (editable.dataset.editing === "1") return;
-      editable.dataset.editing = "1";
+    // If another editor is open, commit it first (or you can cancel it)
+    if (activeEditor && activeEditor.editableEl !== editable) {
+      commitActiveEditor();
+    }
 
-      const lineEl = editable.closest(".tr-line");
-      const lineIndex = Number(lineEl?.dataset?.lineIndex);
-      const key = editable.dataset.key;
-      const oldValue = editable.textContent;
+    // Already editing this one
+    if (editable.dataset.editing === "1") return;
 
-      const input = document.createElement("input");
-      input.type = "text";
-      input.className = "tr-input";
-      input.value = oldValue;
+    const lineEl = editable.closest(".tr-line");
+    const lineIndex = Number(lineEl?.dataset?.lineIndex);
+    const key = editable.dataset.key;
+    const oldValue = editable.textContent;
 
-      editable.textContent = "";
-      editable.appendChild(input);
-      input.focus();
-      input.select();
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = "tr-input";
+    input.value = oldValue;
 
-      const commit = () => {
-        const newValue = input.value.trim();
+    editable.dataset.editing = "1";
+    editable.textContent = "";
+    editable.appendChild(input);
 
-        // restore display
-        editable.dataset.editing = "0";
-        editable.innerHTML = escapeHtml(newValue);
+    isDockEditing = true;
+    activeEditor = { editableEl: editable, lineIndex, key, input, oldValue };
 
-        // ✅ write back into OG tracker UI so it stays consistent
-        applyEditToOgTrackerLine(lineIndex, key, newValue);
+    input.focus();
+    input.select();
 
-        // (Optional) log
-        console.log("[TrackerRevamp] Edited:", { lineIndex, key, newValue });
-      };
+    input.addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter") {
+        ev.preventDefault();
+        commitActiveEditor();
+      } else if (ev.key === "Escape") {
+        ev.preventDefault();
+        cancelActiveEditor();
+      }
+    });
 
-      const cancel = () => {
-        editable.dataset.editing = "0";
-        editable.innerHTML = escapeHtml(oldValue);
-      };
+    // IMPORTANT: no blur commit. Blur is what caused your crash.
+  }, true);
 
-      input.addEventListener("keydown", (ev) => {
-        if (ev.key === "Enter") commit();
-        if (ev.key === "Escape") cancel();
-      });
-
-      input.addEventListener("blur", commit);
-    },
-    true
-  );
+  // click outside commits (optional)
+  document.addEventListener("mousedown", (e) => {
+    if (!activeEditor) return;
+    if (activeEditor.editableEl.contains(e.target)) return; // click inside editor
+    commitActiveEditor();
+  }, true);
 }
+
+function commitActiveEditor() {
+  if (!activeEditor) return;
+
+  const { editableEl, lineIndex, key, input, oldValue } = activeEditor;
+
+  // If the dock got rerendered, editableEl might be detached. Bail safely.
+  if (!editableEl.isConnected) {
+    activeEditor = null;
+    isDockEditing = false;
+    return;
+  }
+
+  const cleaned = normalizeEditedValue(key, input.value);
+
+  editableEl.dataset.editing = "0";
+  editableEl.innerHTML = escapeHtml(cleaned);
+
+  // Write back to OG
+  applyEditToOgTrackerLine(lineIndex, key, cleaned);
+
+  console.log("[TrackerRevamp] Edited:", { lineIndex, key, newValue: cleaned });
+
+  activeEditor = null;
+  isDockEditing = false;
+}
+
+function cancelActiveEditor() {
+  if (!activeEditor) return;
+
+  const { editableEl, oldValue } = activeEditor;
+
+  if (editableEl.isConnected) {
+    editableEl.dataset.editing = "0";
+    editableEl.innerHTML = escapeHtml(oldValue);
+  }
+
+  activeEditor = null;
+  isDockEditing = false;
+}
+
 
 /**
  * Updates the OG tracker line text like "HP: 160/160".
  * We update by line index + key to be safe.
  */
 function applyEditToOgTrackerLine(lineIndex, key, newValue) {
-  const og = document.querySelector('#trackerInterfaceContents');
+  const og = document.querySelector("#trackerInterfaceContents");
   if (!og) return;
 
   const leafFields = getLeafTrackerFields(og);
@@ -431,19 +485,19 @@ function applyEditToOgTrackerLine(lineIndex, key, newValue) {
   const actualKey = extractKeyFromField(fieldEl);
   if (!actualKey || actualKey !== key) return;
 
-  const input = fieldEl.querySelector('input, textarea');
-  if (input) {
-    input.value = newValue;
+  const cleaned = normalizeEditedValue(key, newValue);
 
-    // Trigger change/input so anything listening updates
-    input.dispatchEvent(new Event('input', { bubbles: true }));
-    input.dispatchEvent(new Event('change', { bubbles: true }));
+  const input = fieldEl.querySelector("input, textarea");
+  if (input) {
+    input.value = cleaned;
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.dispatchEvent(new Event("change", { bubbles: true }));
     return;
   }
 
-  // Fallback: if no input exists, just rewrite text
-  fieldEl.textContent = `${key}: ${newValue}`;
+  fieldEl.textContent = `${key}: ${cleaned}`;
 }
+
 
 
 installDockEditing();
@@ -515,13 +569,17 @@ export function startMirroringTrackerContents() {
   setDockHTML(renderEditableDockFromOg(source));
 
   observer = new MutationObserver(() => {
-    if (!dockEl) return;
+  if (!dockEl) return;
 
-    const current = document.querySelector("#trackerInterfaceContents");
-    if (!current) return;
+  // Don’t nuke the DOM while user is editing
+  if (isDockEditing) return;
 
-    setDockHTML(renderEditableDockFromOg(current));
-  });
+  const current = document.querySelector("#trackerInterfaceContents");
+  if (!current) return;
+
+  setDockHTML(renderEditableDockFromOg(current));
+});
+
 
   observer.observe(source, {
     childList: true,
