@@ -14,6 +14,10 @@ let ogHijackInstalled = false;
 let autoHideOgOnce = true;
 let ogAppearObserver = null;
 
+let isDockEditing = false;
+let activeEditor = null; // { editableEl, lineIndex, key, input, oldValue }
+
+
 function escapeHtml(str) {
   return String(str)
     .replaceAll("&", "&amp;")
