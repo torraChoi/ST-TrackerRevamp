@@ -383,9 +383,9 @@ label[for=tracker_reset_presets] {
   margin: 0;
 }
 
-.tr-line { padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.tr-line { padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; gap: 6px; }
 .tr-plain { opacity: 0.95; }
-.tr-key { opacity: 0.75; margin-right: 6px; }
-.tr-editable { cursor: text; padding: 1px 4px; border-radius: 4px; display: inline-block; }
+.tr-key { opacity: 0.75; margin-right: 0; }
+.tr-editable { cursor: text; padding: 1px 4px; border-radius: 4px; display: block; flex: 1; min-width: 0; }
 .tr-editable:hover { background: rgba(255,255,255,0.06); }
 .tr-input { width: 70%; }

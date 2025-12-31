@@ -505,6 +505,7 @@ export function ensureDock(side = "right") {
     <div class="trackerrevamp-dock-header">
       <span class="trackerrevamp-dock-title">Tracker</span>
       <div class="trackerrevamp-dock-actions">
+        <button id="trackerrevamp-dock-regenerate" class="menu_button" title="Regenerate tracker">RG</button>
         <button id="trackerrevamp-og-toggle" class="menu_button" title="Show/Hide OG tracker">🛠</button>
         <button id="trackerrevamp-dock-pin" class="menu_button" title="Toggle side">⇄</button>
         <button id="trackerrevamp-dock-close" class="menu_button" title="Close">×</button>
@@ -556,6 +557,24 @@ export function ensureDock(side = "right") {
       const isHidden = window.getComputedStyle(og).display === "none";
       if (isHidden) showOgTracker();
       else hideOgTracker();
+    });
+
+  dockEl
+    .querySelector("#trackerrevamp-dock-regenerate")
+    ?.addEventListener("click", () => {
+      const ti = TrackerInterface?.instance;
+      if (ti?.regenerateTracker) {
+        ti.regenerateTracker();
+        return;
+      }
+
+      const regenBtn = document.querySelector("#trackerInterfaceRegenerateTracker");
+      if (regenBtn) {
+        regenBtn.click();
+        return;
+      }
+
+      console.warn("[TrackerRevamp] Regenerate action not available");
     });
 
   return dockEl;
