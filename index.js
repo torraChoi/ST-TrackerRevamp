@@ -162,6 +162,32 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({
 	aliases: ['toggle-tracker'],
 }));
 
+
+function openOgTrackerIfExists() {
+  // Try common button selectors (depends on your TrackerInterface)
+  const btn =
+    document.querySelector('#tracker_button') ||
+    document.querySelector('[data-extension="TrackerRevamp"]') ||
+    document.querySelector('.fa-chart-line') || // fallback if that’s the icon used
+    null;
+
+  if (btn) {
+    btn.click();
+    return true;
+  }
+
+  // If the interface already exists but hidden, show it
+  const tracker = document.querySelector('#trackerInterface');
+  if (tracker) {
+    tracker.style.display = '';
+    return true;
+  }
+
+  return false;
+}
+
+
+
 // === Tracker Revamp: Docked Tracker Panel bootstrap ===
 
 installOgTrackerCloseHijack();

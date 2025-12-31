@@ -35,6 +35,18 @@ export function startOgAutoHideWatcher() {
 }
 
 
+export function autoStartDockOnChat() {
+  // Don’t spam open if user explicitly closed dock
+  if (typeof userClosedDock !== 'undefined' && userClosedDock) return;
+
+  // Ensure dock toggle button exists (optional)
+  ensureDockToggleButton?.();
+
+  // Make sure dock is open
+  startMirroringTrackerContents();
+}
+
+
 
 
 export function installOgTrackerCloseHijack() {
@@ -324,6 +336,7 @@ if (!userClosedDock) {
 
   console.log('[TrackerRevamp] Dock mirroring started safely');
 }
+
 
 
 
