@@ -4,9 +4,9 @@ let dockEl = null;
 let observer = null;
 let dockToggleBtn = null;
 
-let currentDockSide = 'left';
+let currentDockSide = "left";
 
-let lastKnownTrackerHTML = '';
+let lastKnownTrackerHTML = "";
 let retryTimer = null;
 let userClosedDock = false;
 let ogHijackInstalled = false;
@@ -14,18 +14,17 @@ let ogHijackInstalled = false;
 let autoHideOgOnce = true;
 let ogAppearObserver = null;
 
-
 function escapeHtml(str) {
   return String(str)
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
 function splitKeyValue(line) {
-  const idx = line.indexOf(':');
+  const idx = line.indexOf(":");
   if (idx === -1) return null;
 
   const key = line.slice(0, idx).trim();
@@ -41,28 +40,95 @@ function splitKeyValue(line) {
  * Render an editable dock view from the OG tracker DOM.
  * Adds data-line-index so we can write back edits into OG.
  */
-function renderEditableDockFromOg(sourceEl) {
-  const fields = [...sourceEl.querySelectorAll('.tracker-view-field')];
+function getLeafTrackerFields(sourceEl) {
+  const all = [...sourceEl.querySelectorAll(".tracker-view-field")];
 
-  return fields.map((el, i) => {
-    const raw = el.textContent.trim();
-    const kv = splitKeyValue(raw);
-
-    // Non key:value (or header) -> render as plain line
-    if (!kv) {
-      return `<div class="tr-line tr-plain" data-line-index="${i}">${escapeHtml(raw)}</div>`;
-    }
-
-    return `
-      <div class="tr-line" data-line-index="${i}">
-        <span class="tr-key">${escapeHtml(kv.key)}:</span>
-        <span class="tr-editable" data-key="${escapeHtml(kv.key)}">${escapeHtml(kv.value)}</span>
-      </div>
-    `;
-  }).join('');
+  // Keep only "leaf" fields (fields that DON'T contain other .tracker-view-field inside)
+  return all.filter((el) => !el.querySelector(".tracker-view-field"));
 }
 
+function extractKeyFromField(fieldEl) {
+  // Try common label patterns first
+  const labelEl =
+    fieldEl.querySelector("label") ||
+    fieldEl.querySelector(".tracker-view-label") ||
+    fieldEl.querySelector(".tracker-view-key") ||
+    fieldEl.querySelector(".tracker-label") ||
+    fieldEl.querySelector("b, strong");
 
+  if (labelEl) {
+    const t = labelEl.textContent.trim();
+    return t.endsWith(":") ? t.slice(0, -1).trim() : t;
+  }
+
+  // Fallback: scan child text nodes for something ending with :
+  for (const n of fieldEl.childNodes) {
+    if (n.nodeType === Node.TEXT_NODE) {
+      const t = n.textContent.trim();
+      if (t.endsWith(":")) return t.slice(0, -1).trim();
+    }
+  }
+
+  // Last fallback: try splitting the full text
+  const t = fieldEl.textContent.trim();
+  const idx = t.indexOf(":");
+  if (idx !== -1) return t.slice(0, idx).trim();
+
+  return null;
+}
+
+function extractValueFromField(fieldEl) {
+  // Prefer input/textarea values (this is your case)
+  const input = fieldEl.querySelector("input, textarea");
+  if (input) return (input.value ?? "").trim();
+
+  // Else try a value span
+  const valEl =
+    fieldEl.querySelector(".tracker-view-value") ||
+    fieldEl.querySelector(".tracker-value");
+
+  if (valEl) return valEl.textContent.trim();
+
+  // Fallback: if it’s just plain text (headers like MainCharacters:)
+  return fieldEl.textContent.trim();
+}
+
+function renderEditableDockFromOg(sourceEl) {
+  const leafFields = getLeafTrackerFields(sourceEl);
+
+  return leafFields
+    .map((fieldEl, i) => {
+      const key = extractKeyFromField(fieldEl);
+      const value = extractValueFromField(fieldEl);
+
+      // If we couldn’t detect key:value style, show as plain
+      // Also treat "headers" (like MainCharacters:) as non-editable if value is empty or equals key
+      if (!key) {
+        return `<div class="tr-line tr-plain" data-line-index="${i}">${escapeHtml(
+          value
+        )}</div>`;
+      }
+
+      // If it's a header (no input value) render as plain line "Key:"
+      const hasInput = !!fieldEl.querySelector("input, textarea");
+      if (!hasInput && (!value || value === key || value === `${key}:`)) {
+        return `<div class="tr-line tr-plain" data-line-index="${i}">${escapeHtml(
+          key
+        )}:</div>`;
+      }
+
+      // Editable
+      return `
+      <div class="tr-line" data-line-index="${i}" data-key="${escapeHtml(key)}">
+        <span class="tr-key">${escapeHtml(key)}:</span>
+        <span class="tr-editable" data-key="${escapeHtml(key)}">${escapeHtml(
+        value
+      )}</span>
+      </div>
+    `;
+    })
+    .join("");
+}
 
 export function startOgAutoHideWatcher() {
   if (ogAppearObserver) return;
@@ -70,24 +136,23 @@ export function startOgAutoHideWatcher() {
   ogAppearObserver = new MutationObserver(() => {
     if (!autoHideOgOnce) return;
 
-    const og = document.querySelector('#trackerInterface');
+    const og = document.querySelector("#trackerInterface");
     if (!og) return;
 
     // If it's visible, hide it once
-    if (window.getComputedStyle(og).display !== 'none') {
+    if (window.getComputedStyle(og).display !== "none") {
       hideOgTracker();
       autoHideOgOnce = false;
-      console.log('[TrackerRevamp] OG auto-hidden once');
+      console.log("[TrackerRevamp] OG auto-hidden once");
     }
   });
 
   ogAppearObserver.observe(document.body, { childList: true, subtree: true });
 }
 
-
 export function autoStartDockOnChat() {
   // Don’t spam open if user explicitly closed dock
-  if (typeof userClosedDock !== 'undefined' && userClosedDock) return;
+  if (typeof userClosedDock !== "undefined" && userClosedDock) return;
 
   // Ensure dock toggle button exists (optional)
   ensureDockToggleButton?.();
@@ -96,55 +161,52 @@ export function autoStartDockOnChat() {
   startMirroringTrackerContents();
 }
 
-
-
-
 export function installOgTrackerCloseHijack() {
-    if (ogHijackInstalled) return;
-    ogHijackInstalled = true;
+  if (ogHijackInstalled) return;
+  ogHijackInstalled = true;
 
   // Capture-phase click handler so we can intercept before the original close handler runs
-  document.addEventListener('click', (e) => {
-    const tracker = document.querySelector('#trackerInterface');
-    if (!tracker) return;
+  document.addEventListener(
+    "click",
+    (e) => {
+      const tracker = document.querySelector("#trackerInterface");
+      if (!tracker) return;
 
-    // Only care about clicks inside the OG tracker window
-    if (!tracker.contains(e.target)) return;
+      // Only care about clicks inside the OG tracker window
+      if (!tracker.contains(e.target)) return;
 
-    // Try to detect a "close" click
-    const btn = e.target.closest('button, a, div, span');
-    if (!btn) return;
+      // Try to detect a "close" click
+      const btn = e.target.closest("button, a, div, span");
+      if (!btn) return;
 
-    // Common cases: an X icon, × text, or anything labeled close
-    const t = (btn.textContent || '').trim();
-    const title = (btn.getAttribute('title') || '').toLowerCase();
-    const aria = (btn.getAttribute('aria-label') || '').toLowerCase();
-    const cls = (btn.className || '').toString().toLowerCase();
+      // Common cases: an X icon, × text, or anything labeled close
+      const t = (btn.textContent || "").trim();
+      const title = (btn.getAttribute("title") || "").toLowerCase();
+      const aria = (btn.getAttribute("aria-label") || "").toLowerCase();
+      const cls = (btn.className || "").toString().toLowerCase();
 
-    const looksLikeClose =
-    t === '×' ||
-    t === 'x' ||
-    title.includes('close') ||
-    aria.includes('close') ||
-    cls.includes('close') ||
-    cls.includes('xmark') ||
-    cls.includes('times');
+      const looksLikeClose =
+        t === "×" ||
+        t === "x" ||
+        title.includes("close") ||
+        aria.includes("close") ||
+        cls.includes("close") ||
+        cls.includes("xmark") ||
+        cls.includes("times");
 
-    if (!looksLikeClose) return;
+      if (!looksLikeClose) return;
 
+      // Hijack: prevent default close behavior and hide instead
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
 
-    // Hijack: prevent default close behavior and hide instead
-    e.preventDefault();
-    e.stopPropagation();
-    e.stopImmediatePropagation();
-
-    hideOgTracker();
-    console.log('[TrackerRevamp] OG tracker hidden (not destroyed)');
-
-  }, true); // <-- capture = true
+      hideOgTracker();
+      console.log("[TrackerRevamp] OG tracker hidden (not destroyed)");
+    },
+    true
+  ); // <-- capture = true
 }
-
-
 
 function clearRetryTimer() {
   if (retryTimer) {
@@ -153,59 +215,55 @@ function clearRetryTimer() {
   }
 }
 
-
 function positionDockToggleButton() {
   if (!dockToggleBtn) return;
 
-  dockToggleBtn.style.left = '';
-  dockToggleBtn.style.right = '20px';
-  dockToggleBtn.style.bottom = '20px';
-  dockToggleBtn.style.zIndex = '10001';
+  dockToggleBtn.style.left = "";
+  dockToggleBtn.style.right = "20px";
+  dockToggleBtn.style.bottom = "20px";
+  dockToggleBtn.style.zIndex = "10001";
 }
 
 function hideOgTracker() {
-  const og = document.querySelector('#trackerInterface');
+  const og = document.querySelector("#trackerInterface");
   if (!og) return false;
 
   // Store previous display so we can restore correctly
   const computed = window.getComputedStyle(og).display;
-  if (computed && computed !== 'none') {
+  if (computed && computed !== "none") {
     og.dataset.prevDisplay = computed;
   }
 
-  og.style.display = 'none';
+  og.style.display = "none";
   return true;
 }
 
 function showOgTracker() {
-  const og = document.querySelector('#trackerInterface');
+  const og = document.querySelector("#trackerInterface");
   if (!og) return false;
 
   // Restore previous display or fall back to block
   const prev = og.dataset.prevDisplay;
-  og.style.display = prev && prev !== 'none' ? prev : 'block';
+  og.style.display = prev && prev !== "none" ? prev : "block";
 
   // Make sure it’s not hiding behind your dock / UI
-  og.style.zIndex = '9998';
+  og.style.zIndex = "9998";
 
   return true;
 }
 
-
-
 function ensureDockToggleButton() {
   if (dockToggleBtn) {
-  dockToggleBtn.style.display = 'block';
-  positionDockToggleButton();
-  return dockToggleBtn;
-}
+    dockToggleBtn.style.display = "block";
+    positionDockToggleButton();
+    return dockToggleBtn;
+  }
 
-
-  dockToggleBtn = document.createElement('button');
-  dockToggleBtn.id = 'trackerrevamp-dock-toggle';
-  dockToggleBtn.className = 'menu_button';
-  dockToggleBtn.textContent = '📋 Tracker';
-  dockToggleBtn.title = 'Show Tracker Dock';
+  dockToggleBtn = document.createElement("button");
+  dockToggleBtn.id = "trackerrevamp-dock-toggle";
+  dockToggleBtn.className = "menu_button";
+  dockToggleBtn.textContent = "📋 Tracker";
+  dockToggleBtn.title = "Show Tracker Dock";
 
   dockToggleBtn.style.cssText = `
     position: fixed;
@@ -218,26 +276,24 @@ function ensureDockToggleButton() {
 
   positionDockToggleButton();
 
-  dockToggleBtn.addEventListener('click', () => {
-  userClosedDock = false;   // 👈 user wants it back
-  clearRetryTimer();        // 👈 clear any stale retry loop
-  startMirroringTrackerContents();
-  dockToggleBtn.style.display = 'none';
-});
-
+  dockToggleBtn.addEventListener("click", () => {
+    userClosedDock = false; // 👈 user wants it back
+    clearRetryTimer(); // 👈 clear any stale retry loop
+    startMirroringTrackerContents();
+    dockToggleBtn.style.display = "none";
+  });
 
   document.body.appendChild(dockToggleBtn);
   return dockToggleBtn;
 }
 
-
-export function ensureDock(side = 'right') {
-    currentDockSide = side;
+export function ensureDock(side = "right") {
+  currentDockSide = side;
   if (dockEl) return dockEl;
 
-  dockEl = document.createElement('div');
-  dockEl.id = 'trackerrevamp-dock';
-  dockEl.className = 'trackerrevamp-dock';
+  dockEl = document.createElement("div");
+  dockEl.id = "trackerrevamp-dock";
+  dockEl.className = "trackerrevamp-dock";
   dockEl.dataset.side = side;
 
   dockEl.innerHTML = `
@@ -254,101 +310,106 @@ export function ensureDock(side = 'right') {
 
   document.body.appendChild(dockEl);
 
-  dockEl.querySelector('#trackerrevamp-dock-close')?.addEventListener('click', () => {
-  userClosedDock = true;      // 👈 user explicitly closed it
-  clearRetryTimer();          // 👈 stop any pending auto-reopen
-  stopMirroring();
+  dockEl
+    .querySelector("#trackerrevamp-dock-close")
+    ?.addEventListener("click", () => {
+      userClosedDock = true; // 👈 user explicitly closed it
+      clearRetryTimer(); // 👈 stop any pending auto-reopen
+      stopMirroring();
 
-  dockEl.remove();
-  dockEl = null;
+      dockEl.remove();
+      dockEl = null;
 
-  ensureDockToggleButton();
-});
+      ensureDockToggleButton();
+    });
 
+  dockEl
+    .querySelector("#trackerrevamp-dock-pin")
+    ?.addEventListener("click", () => {
+      const next = dockEl.dataset.side === "left" ? "right" : "left";
+      dockEl.dataset.side = next;
+      currentDockSide = next;
 
+      dockEl.classList.toggle("is-left", next === "left");
+      dockEl.classList.toggle("is-right", next === "right");
 
-  dockEl.querySelector('#trackerrevamp-dock-pin')?.addEventListener('click', () => {
-  const next = dockEl.dataset.side === 'left' ? 'right' : 'left';
-  dockEl.dataset.side = next;
-  currentDockSide = next;
-
-  dockEl.classList.toggle('is-left', next === 'left');
-  dockEl.classList.toggle('is-right', next === 'right');
-
-  positionDockToggleButton(); // 👈 add this
-});
-
+      positionDockToggleButton(); // 👈 add this
+    });
 
   // initial side
-  dockEl.classList.add(side === 'left' ? 'is-left' : 'is-right');
+  dockEl.classList.add(side === "left" ? "is-left" : "is-right");
 
-  dockEl.querySelector('#trackerrevamp-og-toggle')?.addEventListener('click', () => {
-  const og = document.querySelector('#trackerInterface');
-  if (!og) {
-    console.warn('[TrackerRevamp] OG tracker not found (can’t toggle)');
-    return;
-  }
+  dockEl
+    .querySelector("#trackerrevamp-og-toggle")
+    ?.addEventListener("click", () => {
+      const og = document.querySelector("#trackerInterface");
+      if (!og) {
+        console.warn("[TrackerRevamp] OG tracker not found (can’t toggle)");
+        return;
+      }
 
-  const isHidden = window.getComputedStyle(og).display === 'none';
-  if (isHidden) showOgTracker();
-  else hideOgTracker();
-});
-
-
+      const isHidden = window.getComputedStyle(og).display === "none";
+      if (isHidden) showOgTracker();
+      else hideOgTracker();
+    });
 
   return dockEl;
 }
 
 function installDockEditing() {
-  document.addEventListener('click', (e) => {
-    const editable = e.target.closest('.tr-editable');
-    if (!editable) return;
+  document.addEventListener(
+    "click",
+    (e) => {
+      const editable = e.target.closest(".tr-editable");
+      if (!editable) return;
 
-    // Prevent re-enter if already editing
-    if (editable.dataset.editing === '1') return;
-    editable.dataset.editing = '1';
+      // Prevent re-enter if already editing
+      if (editable.dataset.editing === "1") return;
+      editable.dataset.editing = "1";
 
-    const lineEl = editable.closest('.tr-line');
-    const lineIndex = Number(lineEl?.dataset?.lineIndex);
-    const key = editable.dataset.key;
-    const oldValue = editable.textContent;
+      const lineEl = editable.closest(".tr-line");
+      const lineIndex = Number(lineEl?.dataset?.lineIndex);
+      const key = editable.dataset.key;
+      const oldValue = editable.textContent;
 
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.className = 'tr-input';
-    input.value = oldValue;
+      const input = document.createElement("input");
+      input.type = "text";
+      input.className = "tr-input";
+      input.value = oldValue;
 
-    editable.textContent = '';
-    editable.appendChild(input);
-    input.focus();
-    input.select();
+      editable.textContent = "";
+      editable.appendChild(input);
+      input.focus();
+      input.select();
 
-    const commit = () => {
-      const newValue = input.value.trim();
+      const commit = () => {
+        const newValue = input.value.trim();
 
-      // restore display
-      editable.dataset.editing = '0';
-      editable.innerHTML = escapeHtml(newValue);
+        // restore display
+        editable.dataset.editing = "0";
+        editable.innerHTML = escapeHtml(newValue);
 
-      // ✅ write back into OG tracker UI so it stays consistent
-      applyEditToOgTrackerLine(lineIndex, key, newValue);
+        // ✅ write back into OG tracker UI so it stays consistent
+        applyEditToOgTrackerLine(lineIndex, key, newValue);
 
-      // (Optional) log
-      console.log('[TrackerRevamp] Edited:', { lineIndex, key, newValue });
-    };
+        // (Optional) log
+        console.log("[TrackerRevamp] Edited:", { lineIndex, key, newValue });
+      };
 
-    const cancel = () => {
-      editable.dataset.editing = '0';
-      editable.innerHTML = escapeHtml(oldValue);
-    };
+      const cancel = () => {
+        editable.dataset.editing = "0";
+        editable.innerHTML = escapeHtml(oldValue);
+      };
 
-    input.addEventListener('keydown', (ev) => {
-      if (ev.key === 'Enter') commit();
-      if (ev.key === 'Escape') cancel();
-    });
+      input.addEventListener("keydown", (ev) => {
+        if (ev.key === "Enter") commit();
+        if (ev.key === "Escape") cancel();
+      });
 
-    input.addEventListener('blur', commit);
-  }, true);
+      input.addEventListener("blur", commit);
+    },
+    true
+  );
 }
 
 /**
@@ -359,27 +420,35 @@ function applyEditToOgTrackerLine(lineIndex, key, newValue) {
   const og = document.querySelector('#trackerInterfaceContents');
   if (!og) return;
 
-  const fields = [...og.querySelectorAll('.tracker-view-field')];
-  const el = fields[lineIndex];
-  if (!el) return;
+  const leafFields = getLeafTrackerFields(og);
+  const fieldEl = leafFields[lineIndex];
+  if (!fieldEl) return;
 
-  const raw = el.textContent.trim();
-  const kv = splitKeyValue(raw);
+  const actualKey = extractKeyFromField(fieldEl);
+  if (!actualKey || actualKey !== key) return;
 
-  // Only overwrite if the key matches what we edited
-  if (!kv || kv.key !== key) return;
+  const input = fieldEl.querySelector('input, textarea');
+  if (input) {
+    input.value = newValue;
 
-  el.textContent = `${key}: ${newValue}`;
+    // Trigger change/input so anything listening updates
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+    return;
+  }
+
+  // Fallback: if no input exists, just rewrite text
+  fieldEl.textContent = `${key}: ${newValue}`;
 }
+
 
 installDockEditing();
 
-
 function setDockHTML(html) {
-  const body = dockEl?.querySelector('#trackerrevamp-dock-body');
+  const body = dockEl?.querySelector("#trackerrevamp-dock-body");
   if (!body) return;
 
-  body.innerHTML = html ?? '';
+  body.innerHTML = html ?? "";
 
   // Cache last good content
   if (html && String(html).trim().length > 0) {
@@ -387,58 +456,54 @@ function setDockHTML(html) {
   }
 }
 
-
 export function startMirroringTrackerContents() {
   if (isMirroringActive) {
-    console.warn('[TrackerRevamp] mirroring already active, skipping');
+    console.warn("[TrackerRevamp] mirroring already active, skipping");
     return;
   }
 
-  const source = document.querySelector('#trackerInterfaceContents');
-  const host = document.querySelector('#trackerInterface');
+  const source = document.querySelector("#trackerInterfaceContents");
+  const host = document.querySelector("#trackerInterface");
 
   if (!source || !host) {
-  // Still open the dock even if OG tracker is closed
-  ensureDock('left');
+    // Still open the dock even if OG tracker is closed
+    ensureDock("left");
 
-  if (dockToggleBtn) dockToggleBtn.style.display = 'none';
+    if (dockToggleBtn) dockToggleBtn.style.display = "none";
 
-  if (lastKnownTrackerHTML) {
-    setDockHTML(lastKnownTrackerHTML);
-  } else {
-    setDockHTML(`
+    if (lastKnownTrackerHTML) {
+      setDockHTML(lastKnownTrackerHTML);
+    } else {
+      setDockHTML(`
       <div style="opacity:0.75; font-style:italic;">
         Tracker window is closed.<br/>
         Generate tracker again to display data here.
       </div>
     `);
+    }
+
+    // Try again later in case the tracker gets regenerated
+    clearRetryTimer();
+
+    if (!userClosedDock) {
+      retryTimer = setTimeout(() => {
+        startMirroringTrackerContents();
+      }, 1000);
+    }
+
+    if (autoHideOgOnce) {
+      hideOgTracker();
+      autoHideOgOnce = false;
+    }
+
+    isMirroringActive = false;
+    return;
   }
-
-  // Try again later in case the tracker gets regenerated
-  clearRetryTimer();
-
-if (!userClosedDock) {
-  retryTimer = setTimeout(() => {
-    startMirroringTrackerContents();
-  }, 1000);
-}
-
-  if (autoHideOgOnce) {
-  hideOgTracker();
-  autoHideOgOnce = false;
-}
-
-
-  isMirroringActive = false;
-  return;
-}
-
-
 
   isMirroringActive = true;
 
-  ensureDock('left');
-  if (dockToggleBtn) dockToggleBtn.style.display = 'none';
+  ensureDock("left");
+  if (dockToggleBtn) dockToggleBtn.style.display = "none";
 
   stopMirroring();
 
@@ -448,7 +513,7 @@ if (!userClosedDock) {
   observer = new MutationObserver(() => {
     if (!dockEl) return;
 
-    const current = document.querySelector('#trackerInterfaceContents');
+    const current = document.querySelector("#trackerInterfaceContents");
     if (!current) return;
 
     setDockHTML(renderEditableDockFromOg(current));
@@ -460,9 +525,8 @@ if (!userClosedDock) {
     characterData: true,
   });
 
-  console.log('[TrackerRevamp] Dock mirroring started safely');
+  console.log("[TrackerRevamp] Dock mirroring started safely");
 }
-
 
 export function stopMirroring() {
   if (observer) {
@@ -471,4 +535,3 @@ export function stopMirroring() {
   }
   isMirroringActive = false;
 }
-
