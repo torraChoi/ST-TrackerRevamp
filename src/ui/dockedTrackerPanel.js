@@ -456,10 +456,19 @@ function installDockEditing() {
     const key = editable.dataset.key;
     const oldValue = editable.textContent;
 
-    const input = document.createElement("input");
-    input.type = "text";
+    const input = document.createElement("textarea");
     input.className = "tr-input";
     input.value = oldValue;
+    input.style.width = editable.offsetWidth + 'px';
+    input.style.height = editable.offsetHeight + 'px';
+    input.style.resize = 'none';
+    input.style.border = 'none';
+    input.style.outline = 'none';
+    input.style.padding = '0';
+    input.style.margin = '0';
+    input.style.fontSize = window.getComputedStyle(editable).fontSize;
+    input.style.lineHeight = window.getComputedStyle(editable).lineHeight;
+    input.style.fontFamily = window.getComputedStyle(editable).fontFamily;
 
     editable.dataset.editing = "1";
     editable.textContent = "";
