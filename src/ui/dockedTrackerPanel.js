@@ -1,4 +1,6 @@
 import { TrackerInterface } from './trackerInterface.js';
+import { extensionSettings } from "../../index.js";
+
 
 let isMirroringActive = false;
 
@@ -18,6 +20,9 @@ let ogAppearObserver = null;
 
 let isDockEditing = false;
 let activeEditor = null; // { editableEl, lineIndex, key, input, oldValue }
+let dockRefreshTimer = null;
+let lastTrackerFingerprint = "";
+
 
 
 function escapeHtml(str) {
@@ -66,6 +71,35 @@ function splitKeyValue(line) {
 
   return { key, value };
 }
+
+function fingerprintTracker(tracker) {
+  try {
+    // Keep it cheap: stringify only once per tick
+    return JSON.stringify(tracker);
+  } catch {
+    return String(Date.now());
+  }
+}
+
+function refreshDock() {
+  if (!dockEl) return;
+  if (isDockEditing) return;
+
+  const { tracker, schema } = getTrackerAndSchema();
+
+  if (!tracker || !schema) {
+    setDockHTML(`<div style="opacity:.75; font-style:italic;">No tracker data yet.</div>`);
+    return;
+  }
+
+  const fp = fingerprintTracker(tracker);
+  if (fp === lastTrackerFingerprint) return; // no change
+
+  lastTrackerFingerprint = fp;
+  setDockHTML(renderDockFromTracker(tracker, schema));
+}
+
+
 
 /**
  * Render an editable dock view from the OG tracker DOM.
@@ -130,22 +164,42 @@ function extractValueFromField(fieldEl) {
   return t;
 }
 
-function renderEditableDockFromOg(sourceEl) {
-  // IMPORTANT:
-  // lineIndex must keep matching getLeafTrackerFields() order.
-  // So we only increment leafIndex for editable leaf fields.
-  let leafIndex = 0;
+function getTrackerAndSchema() {
+  const ti = TrackerInterface?.instance;
+  const tracker = ti?.tracker;
+  const schema = extensionSettings?.trackerDef;
+  return { ti, tracker, schema };
+}
 
-  const root =
-    sourceEl.querySelector(".tracker-view-container") ||
-    sourceEl;
+function getAtPath(obj, path) {
+  if (!obj || !path) return undefined;
+  return path.split(".").reduce((acc, k) => (acc && acc[k] !== undefined ? acc[k] : undefined), obj);
+}
 
-  const isField = (el) => el?.classList?.contains("tracker-view-field");
-  const isNested = (el) => el?.classList?.contains("tracker-view-nested");
-  const isContainer = (el) => el?.classList?.contains("tracker-view-container");
+function coerceValueByType(type, raw) {
+  const v = (raw ?? "").toString().trim();
 
-  function directNested(fieldEl) {
-    return fieldEl.querySelector(":scope > .tracker-view-nested");
+  // Keep most things as string because Kaldigo tracker is string-heavy.
+  // Only coerce ARRAY because it’s super common for your Items/Enemies lists.
+  if (!type) return v;
+
+  const t = String(type).toUpperCase();
+
+  if (t === "ARRAY") {
+    if (!v) return [];
+    return v
+      .split(";")
+      .map(s => s.trim())
+      .filter(Boolean);
+  }
+
+  return v;
+}
+
+
+function renderDockFromTracker(tracker, schema) {
+  if (!tracker || !schema) {
+    return `<div style="opacity:.75; font-style:italic;">No tracker data yet.</div>`;
   }
 
   function renderGroup(title, depth) {
@@ -156,59 +210,99 @@ function renderEditableDockFromOg(sourceEl) {
     `;
   }
 
-  function renderEditableLeaf(fieldEl, depth) {
-    const key = extractKeyFromField(fieldEl);
-    const value = extractValueFromField(fieldEl);
-
-    // If key detection fails, show it as plain text
-    if (!key) {
-      const t = (fieldEl.textContent || "").trim();
-      return `<div class="tr-line tr-plain" data-depth="${depth}">${escapeHtml(t)}</div>`;
-    }
-
-    const i = leafIndex++; // ONLY leaf editable fields increment
+  function renderLeaf({ key, value, path, type, depth }) {
+    const display =
+      Array.isArray(value) ? value.join("; ") :
+      (value ?? "").toString();
 
     return `
-      <div class="tr-line" data-line-index="${i}" data-depth="${depth}">
+      <div class="tr-line" data-path="${escapeHtml(path)}" data-type="${escapeHtml(type ?? "")}" data-depth="${depth}">
         <span class="tr-key">${escapeHtml(key)}:</span>
-        <span class="tr-editable" data-key="${escapeHtml(key)}">${escapeHtml(value)}</span>
+        <span class="tr-editable" data-key="${escapeHtml(key)}">${escapeHtml(display)}</span>
       </div>
     `;
   }
 
-  function walk(node, depth = 0) {
+  // Walk schema and tracker together
+  function walkSchema(obj, schemaNode, basePath = "", depth = 0) {
     let html = "";
 
-    // Container-ish nodes: walk their children
-    if (node === root || isContainer(node) || isNested(node)) {
-      for (const child of [...node.children]) {
-        html += walk(child, depth);
+    for (const fieldSchema of Object.values(schemaNode)) {
+      const name = fieldSchema.name;
+      const type = fieldSchema.type;
+      const nested = fieldSchema.nestedFields;
+
+      const path = basePath ? `${basePath}.${name}` : name;
+      const value = obj?.[name];
+
+      const T = String(type || "").toUpperCase();
+
+      // GROUP TYPES
+      if (T === "OBJECT" && nested) {
+        html += renderGroup(`${name}:`, depth);
+        html += walkSchema(value || {}, nested, path, depth + 1);
+        continue;
       }
-      return html;
+
+      if (T === "FOR_EACH_OBJECT" && nested) {
+        html += renderGroup(`${name}:`, depth);
+
+        const entries = value && typeof value === "object" ? Object.entries(value) : [];
+        for (const [k, v] of entries) {
+          html += renderGroup(`${k}:`, depth + 1);
+          html += walkSchema(v || {}, nested, `${path}.${k}`, depth + 2);
+        }
+        continue;
+      }
+
+      if (T === "FOR_EACH_ARRAY" && nested) {
+        html += renderGroup(`${name}:`, depth);
+
+        const entries = value && typeof value === "object" ? Object.entries(value) : [];
+        for (const [k, arr] of entries) {
+          html += renderGroup(`${k}:`, depth + 1);
+
+          // If schema says “single string field array”, treat as leaf array
+          const nestedFields = Object.values(nested);
+          const isSingleString =
+            nestedFields.length === 1 && String(nestedFields[0].type || "").toUpperCase() === "STRING";
+
+          if (isSingleString) {
+            html += renderLeaf({
+              key: k,
+              value: Array.isArray(arr) ? arr : [],
+              path: `${path}.${k}`,
+              type: "ARRAY",
+              depth: depth + 2,
+            });
+          } else {
+            // Array of objects: render each index as subgroup
+            const safeArr = Array.isArray(arr) ? arr : [];
+            safeArr.forEach((item, idx) => {
+              html += renderGroup(`[${idx}]:`, depth + 2);
+              html += walkSchema(item || {}, nested, `${path}.${k}.[${idx}]`, depth + 3);
+            });
+          }
+        }
+        continue;
+      }
+
+      // LEAF TYPES (STRING/ARRAY/etc)
+      html += renderLeaf({
+        key: name,
+        value,
+        path,
+        type,
+        depth,
+      });
     }
 
-    // Only care about tracker fields
-    if (!isField(node)) return "";
-
-    const nested = directNested(node);
-
-    // If it has nested children => render as a GROUP header (MainCharacters / Leon test / etc.)
-    if (nested) {
-      const key = extractKeyFromField(node);
-      const title = key ? `${key}:` : (node.textContent || "").trim();
-      if (title) html += renderGroup(title, depth);
-
-      html += walk(nested, depth + 1);
-      return html;
-    }
-
-    // Leaf field => editable line
-    html += renderEditableLeaf(node, depth);
     return html;
   }
 
-  return walk(root, 0);
+  return walkSchema(tracker, schema, "", 0);
 }
+
 
 
 export function startOgAutoHideWatcher() {
@@ -457,30 +551,20 @@ function installDockEditing() {
     // Already editing this one
     if (editable.dataset.editing === "1") return;
 
-    const lineIndex = Number(lineEl?.dataset?.lineIndex);
+    const path = lineEl.dataset.path;
+    const type = lineEl.dataset.type;
     const key = editable.dataset.key;
     const oldValue = editable.textContent;
 
-    const input = document.createElement("textarea");
-    input.className = "tr-input";
-    input.value = oldValue;
-    input.style.width = editable.offsetWidth + 'px';
-    input.style.height = editable.offsetHeight + 'px';
-    input.style.resize = 'none';
-    input.style.border = 'none';
-    input.style.outline = 'none';
-    input.style.padding = '0';
-    input.style.margin = '0';
-    input.style.fontSize = window.getComputedStyle(editable).fontSize;
-    input.style.lineHeight = window.getComputedStyle(editable).lineHeight;
-    input.style.fontFamily = window.getComputedStyle(editable).fontFamily;
+    activeEditor = {
+      editableEl: editable,
+      path,
+      type,
+      key,
+      input,
+      oldValue,
+    };
 
-    editable.dataset.editing = "1";
-    editable.textContent = "";
-    editable.appendChild(input);
-
-    isDockEditing = true;
-    activeEditor = { editableEl: editable, lineIndex, key, input, oldValue };
 
     input.focus();
     input.select();
@@ -509,7 +593,7 @@ function installDockEditing() {
 function commitActiveEditor() {
   if (!activeEditor) return;
 
-  const { editableEl, lineIndex, key, input, oldValue } = activeEditor;
+  const { editableEl, path, type, key, input } = activeEditor;
 
   // If the dock got rerendered, editableEl might be detached. Bail safely.
   if (!editableEl.isConnected) {
@@ -524,7 +608,7 @@ function commitActiveEditor() {
   editableEl.innerHTML = escapeHtml(cleaned);
 
   // Write back to OG
-  applyEditToOgTrackerLine(lineIndex, key, cleaned);
+  applyEditToTrackerPath(path, type, key, cleaned);
 
   console.log("[TrackerRevamp] Edited:", { lineIndex, key, newValue: cleaned });
 
@@ -551,35 +635,20 @@ function cancelActiveEditor() {
  * Updates the OG tracker line text like "HP: 160/160".
  * We update by line index + key to be safe.
  */
-function applyEditToOgTrackerLine(lineIndex, key, newValue) {
-  const og = document.querySelector("#trackerInterfaceContents");
-  if (!og) return;
-
-  const leafFields = getLeafTrackerFields(og);
-  const fieldEl = leafFields[lineIndex];
-  if (!fieldEl) return;
-
-  const actualKey = extractKeyFromField(fieldEl);
-  if (!actualKey || actualKey !== key) return;
-
+function applyEditToTrackerPath(path, type, key, newValue) {
   const cleaned = normalizeEditedValue(key, newValue);
+  const { ti, tracker } = getTrackerAndSchema();
+  if (!ti || !tracker || !path) return;
 
-  const input = fieldEl.querySelector("input, textarea");
-  if (input) {
-    input.value = cleaned;
-    input.dispatchEvent(new Event("input", { bubbles: true }));
-    input.dispatchEvent(new Event("change", { bubbles: true }));
-  } else {
-    fieldEl.textContent = `${key}: ${cleaned}`;
-  }
+  const coerced = coerceValueByType(type, cleaned);
 
-  // Persist to tracker data
-  const path = fieldEl.dataset.path;
-  if (path && TrackerInterface.instance) {
-    setValueAtPath(TrackerInterface.instance.tracker, path, cleaned);
-    TrackerInterface.instance.onSave(TrackerInterface.instance.tracker);
-  }
+  setValueAtPath(tracker, path, coerced);
+  ti.onSave(tracker);
+
+  // Optional: if OG tracker is open, you can refresh dock right after save
+  // refreshDock();
 }
+
 
 
 
@@ -598,85 +667,28 @@ function setDockHTML(html) {
 }
 
 export function startMirroringTrackerContents() {
-  if (isMirroringActive) {
-    console.warn("[TrackerRevamp] mirroring already active, skipping");
-    return;
-  }
-
-  const source = document.querySelector("#trackerInterfaceContents");
-  const host = document.querySelector("#trackerInterface");
-
-  if (!source || !host) {
-    // Still open the dock even if OG tracker is closed
-    ensureDock("left");
-
-    if (dockToggleBtn) dockToggleBtn.style.display = "none";
-
-    if (lastKnownTrackerHTML) {
-      setDockHTML(lastKnownTrackerHTML);
-    } else {
-      setDockHTML(`
-      <div style="opacity:0.75; font-style:italic;">
-        Tracker window is closed.<br/>
-        Generate tracker again to display data here.
-      </div>
-    `);
-    }
-
-    // Try again later in case the tracker gets regenerated
-    clearRetryTimer();
-
-    if (!userClosedDock) {
-      retryTimer = setTimeout(() => {
-        startMirroringTrackerContents();
-      }, 1000);
-    }
-
-    if (autoHideOgOnce) {
-      hideOgTracker();
-      autoHideOgOnce = false;
-    }
-
-    isMirroringActive = false;
-    return;
-  }
-
-  isMirroringActive = true;
-
   ensureDock("left");
   if (dockToggleBtn) dockToggleBtn.style.display = "none";
 
-  stopMirroring();
+  // immediate render
+  refreshDock();
 
-  // initial copy
-  setDockHTML(renderEditableDockFromOg(source));
+  // refresh loop (updates when tracker changes)
+  if (dockRefreshTimer) clearInterval(dockRefreshTimer);
+  dockRefreshTimer = setInterval(() => {
+    if (!dockEl) return;
+    if (userClosedDock) return;
+    refreshDock();
+  }, 400);
 
-  observer = new MutationObserver(() => {
-  if (!dockEl) return;
-
-  // Don’t nuke the DOM while user is editing
-  if (isDockEditing) return;
-
-  const current = document.querySelector("#trackerInterfaceContents");
-  if (!current) return;
-
-  setDockHTML(renderEditableDockFromOg(current));
-});
-
-
-  observer.observe(source, {
-    childList: true,
-    subtree: true,
-    characterData: true,
-  });
-
-  console.log("[TrackerRevamp] Dock mirroring started safely");
+  console.log("[TrackerRevamp] Dock data rendering started");
 }
 
+
 export function stopMirroring() {
-  if (observer) {
-    observer.disconnect();
-    observer = null;
+  if (dockRefreshTimer) {
+    clearInterval(dockRefreshTimer);
+    dockRefreshTimer = null;
   }
   isMirroringActive = false;
 }
