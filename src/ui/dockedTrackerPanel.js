@@ -107,8 +107,14 @@ function extractValueFromField(fieldEl) {
 
   if (valEl) return valEl.textContent.trim();
 
-  // Fallback: if it’s just plain text (headers like MainCharacters:)
-  return fieldEl.textContent.trim();
+  // Fallback: if it's just plain text (headers like MainCharacters:)
+  const t = fieldEl.textContent.trim();
+  const idx = t.indexOf(":");
+  if (idx !== -1) {
+    const val = t.slice(idx + 1).trim();
+    if (val) return val;
+  }
+  return t;
 }
 
 function renderEditableDockFromOg(sourceEl) {
