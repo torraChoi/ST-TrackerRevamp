@@ -558,7 +558,7 @@ export function ensureDock(side = "right") {
       <span class="trackerrevamp-dock-title">Tracker</span>
       <div class="trackerrevamp-dock-actions">
         <span id="trackerrevamp-dock-regen-indicator" class="trackerrevamp-dock-regen-indicator"></span>
-        <button id="trackerrevamp-dock-regenerate" class="menu_button" title="Regenerate tracker">🔄️</button>
+        <button id="trackerrevamp-dock-regenerate" class="menu_button" title="Regenerate tracker">⟳</button>
         <button id="trackerrevamp-og-toggle" class="menu_button" title="Show/Hide OG tracker">🛠</button>
         <button id="trackerrevamp-dock-pin" class="menu_button" title="Toggle side">⇄</button>
         <button id="trackerrevamp-dock-close" class="menu_button" title="Close">×</button>
