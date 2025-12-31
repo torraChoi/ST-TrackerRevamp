@@ -24,10 +24,12 @@ export class TrackerContentRenderer {
 		const root = document.createElement("div");
 		root.className = "tracker-view-container";
 
-		const createFields = (object, schema, parentElement) => {
+		const createFields = (object, schema, parentElement, path = "") => {
 			for (const fieldSchema of Object.values(schema)) {
 				const value = object[fieldSchema.name];
 				const fieldType = fieldSchema.type;
+				const fieldName = fieldSchema.name;
+				const fieldPath = path ? `${path}.${fieldName}` : fieldName;
 
 				const wrapper = document.createElement("div");
 				wrapper.className = "tracker-view-field";
@@ -47,12 +49,13 @@ export class TrackerContentRenderer {
 						valueSpan.className = "tracker-view-value";
 						valueSpan.textContent = arrayString;
 						wrapper.appendChild(valueSpan);
+						wrapper.dataset.path = fieldPath;
 						break;
 					}
 					case this.FIELD_TYPES.OBJECT: {
 						const nestedFields = document.createElement("div");
 						nestedFields.className = "tracker-view-nested";
-						createFields(value, fieldSchema.nestedFields, nestedFields);
+						createFields(value, fieldSchema.nestedFields, nestedFields, fieldPath);
 						wrapper.appendChild(nestedFields);
 						break;
 					}
@@ -70,7 +73,7 @@ export class TrackerContentRenderer {
 
 							const forEachFields = document.createElement("div");
 							forEachFields.className = "tracker-view-nested";
-							createFields(nestedValue, fieldSchema.nestedFields, forEachFields);
+							createFields(nestedValue, fieldSchema.nestedFields, forEachFields, `${fieldPath}.${nestedKey}`);
 							forEachWrapper.appendChild(forEachFields);
 							nestedFields.appendChild(forEachWrapper);
 						});
@@ -105,6 +108,7 @@ export class TrackerContentRenderer {
 								valueSpan.className = "tracker-view-value";
 								valueSpan.textContent = arrayString;
 								forEachFields.appendChild(valueSpan);
+								forEachWrapper.dataset.path = `${fieldPath}.${nestedKey}`;
 							} else {
 								// Arrays of objects
 								if (Array.isArray(nestedValue)) {
@@ -119,7 +123,7 @@ export class TrackerContentRenderer {
 
 										const arrItemFields = document.createElement("div");
 										arrItemFields.className = "tracker-view-nested";
-										createFields(arrItem, fieldSchema.nestedFields, arrItemFields);
+										createFields(arrItem, fieldSchema.nestedFields, arrItemFields, `${fieldPath}.${nestedKey}.[${arrIndex}]`);
 
 										arrItemWrapper.appendChild(arrItemFields);
 										forEachFields.appendChild(arrItemWrapper);
@@ -139,6 +143,7 @@ export class TrackerContentRenderer {
 						valueSpan.className = "tracker-view-value";
 						valueSpan.textContent = value || "";
 						wrapper.appendChild(valueSpan);
+						wrapper.dataset.path = fieldPath;
 						break;
 					}
 				}

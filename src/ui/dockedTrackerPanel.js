@@ -1,3 +1,5 @@
+import { TrackerInterface } from './trackerInterface.js';
+
 let isMirroringActive = false;
 
 let dockEl = null;
@@ -38,6 +40,17 @@ function normalizeEditedValue(key, raw) {
   }
 
   return v.trim();
+}
+
+function setValueAtPath(obj, path, value) {
+  const parts = path.split('.');
+  let current = obj;
+  for (let i = 0; i < parts.length - 1; i++) {
+    const part = parts[i];
+    if (!current[part]) current[part] = {};
+    current = current[part];
+  }
+  current[parts[parts.length - 1]] = value;
 }
 
 
@@ -498,10 +511,16 @@ function applyEditToOgTrackerLine(lineIndex, key, newValue) {
     input.value = cleaned;
     input.dispatchEvent(new Event("input", { bubbles: true }));
     input.dispatchEvent(new Event("change", { bubbles: true }));
-    return;
+  } else {
+    fieldEl.textContent = `${key}: ${cleaned}`;
   }
 
-  fieldEl.textContent = `${key}: ${cleaned}`;
+  // Persist to tracker data
+  const path = fieldEl.dataset.path;
+  if (path && TrackerInterface.instance) {
+    setValueAtPath(TrackerInterface.instance.tracker, path, cleaned);
+    TrackerInterface.instance.onSave(TrackerInterface.instance.tracker);
+  }
 }
 
 
