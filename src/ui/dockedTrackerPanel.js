@@ -243,6 +243,44 @@ function getDefaultGroupCollapsed(path, name) {
   return false;
 }
 
+function isPlaceholderEntryName(name) {
+  const trimmed = String(name ?? "").trim();
+  if (!trimmed) return true;
+  if (trimmed.startsWith("<") && trimmed.endsWith(">")) return true;
+  if (trimmed.includes("{{") && trimmed.includes("}}")) return true;
+  return false;
+}
+
+function isPlaceholderValue(value) {
+  if (value == null) return true;
+
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed) return true;
+    if (trimmed.startsWith("<") && trimmed.endsWith(">")) return true;
+    if (trimmed.includes("{{") && trimmed.includes("}}")) return true;
+    return false;
+  }
+
+  if (Array.isArray(value)) {
+    if (!value.length) return true;
+    return value.every(isPlaceholderValue);
+  }
+
+  if (typeof value === "object") {
+    const vals = Object.values(value);
+    if (!vals.length) return true;
+    return vals.every(isPlaceholderValue);
+  }
+
+  return false;
+}
+
+function isPlaceholderGroupEntry(name, value) {
+  if (isPlaceholderEntryName(name)) return true;
+  return isPlaceholderValue(value);
+}
+
 function getStoredGroupCollapsed(path, name) {
   const stored = safeLocalStorageGet(getGroupStorageKey(path));
   if (stored === "1") return true;
@@ -432,13 +470,23 @@ function renderDockFromTracker(tracker, schema) {
 
       if (T === "FOR_EACH_OBJECT" && nested) {
         const entries = value && typeof value === "object" ? Object.entries(value) : [];
-        if (!entries.length && hideEmptyGroupNames.has(normalizeGroupName(name))) {
+        const normalized = normalizeGroupName(name);
+        const filteredEntries = hideEmptyGroupNames.has(normalized)
+          ? entries.filter(([k, v]) => !isPlaceholderGroupEntry(k, v))
+          : entries;
+        if (!filteredEntries.length && hideEmptyGroupNames.has(normalized)) {
           continue;
         }
 
-        html += renderGroup({ title: `${name}:`, name, path, depth, hasChildren: entries.length > 0 });
+        html += renderGroup({
+          title: `${name}:`,
+          name,
+          path,
+          depth,
+          hasChildren: filteredEntries.length > 0,
+        });
 
-        for (const [k, v] of entries) {
+        for (const [k, v] of filteredEntries) {
           html += renderGroup({ title: `${k}:`, name: k, path: `${path}.${k}`, depth: depth + 1 });
           html += walkSchema(v || {}, nested, `${path}.${k}`, depth + 2);
         }
@@ -447,13 +495,23 @@ function renderDockFromTracker(tracker, schema) {
 
       if (T === "FOR_EACH_ARRAY" && nested) {
         const entries = value && typeof value === "object" ? Object.entries(value) : [];
-        if (!entries.length && hideEmptyGroupNames.has(normalizeGroupName(name))) {
+        const normalized = normalizeGroupName(name);
+        const filteredEntries = hideEmptyGroupNames.has(normalized)
+          ? entries.filter(([k, v]) => !isPlaceholderGroupEntry(k, v))
+          : entries;
+        if (!filteredEntries.length && hideEmptyGroupNames.has(normalized)) {
           continue;
         }
 
-        html += renderGroup({ title: `${name}:`, name, path, depth, hasChildren: entries.length > 0 });
+        html += renderGroup({
+          title: `${name}:`,
+          name,
+          path,
+          depth,
+          hasChildren: filteredEntries.length > 0,
+        });
 
-        for (const [k, arr] of entries) {
+        for (const [k, arr] of filteredEntries) {
           html += renderGroup({ title: `${k}:`, name: k, path: `${path}.${k}`, depth: depth + 1 });
 
           // If schema says “single string field array”, treat as leaf array
