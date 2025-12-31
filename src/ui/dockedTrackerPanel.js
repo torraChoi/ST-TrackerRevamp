@@ -275,9 +275,6 @@ function isPlaceholderGroupEntry(name, value) {
 }
 
 function getStoredGroupCollapsed(path, name) {
-  const stored = safeLocalStorageGet(getGroupStorageKey(path));
-  if (stored === "1") return true;
-  if (stored === "0") return false;
   return getDefaultGroupCollapsed(path, name);
 }
 
