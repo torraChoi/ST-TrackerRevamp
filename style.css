@@ -338,7 +338,7 @@ label[for=tracker_reset_presets] {
 .trackerrevamp-dock {
   position: fixed;
   top: 60px;
-  width: 360px;
+  width: calc((100vw - var(--sheldWidth)) /2);
   max-height: calc(100vh - 90px);
   z-index: 9999;
   display: flex;
