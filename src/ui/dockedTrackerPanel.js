@@ -187,6 +187,11 @@ const defaultCollapsedGroupNames = new Set([
   "smallenemies",
   "bigenemies",
 ]);
+const hideEmptyGroupNames = new Set([
+  "othercharacters",
+  "smallenemies",
+  "bigenemies",
+]);
 
 function normalizeGroupName(name) {
   return String(name ?? "")
@@ -383,9 +388,9 @@ function renderDockFromTracker(tracker, schema) {
     return `<div style="opacity:.75; font-style:italic;">No tracker data yet.</div>`;
   }
 
-  function renderGroup({ title, name, path, depth }) {
+  function renderGroup({ title, name, path, depth, hasChildren = true }) {
     return `
-      <div class="tr-line tr-group" data-depth="${depth}" data-group-path="${escapeHtml(path)}" data-group-name="${escapeHtml(name)}" style="padding-left:${depth * 12}px">
+      <div class="tr-line tr-group" data-depth="${depth}" data-group-path="${escapeHtml(path)}" data-group-name="${escapeHtml(name)}" data-has-children="${hasChildren ? "1" : "0"}" style="padding-left:${depth * 12}px">
         <div class="tr-group-title">${escapeHtml(title)}</div>
       </div>
     `;
@@ -426,9 +431,13 @@ function renderDockFromTracker(tracker, schema) {
       }
 
       if (T === "FOR_EACH_OBJECT" && nested) {
-        html += renderGroup({ title: `${name}:`, name, path, depth });
-
         const entries = value && typeof value === "object" ? Object.entries(value) : [];
+        if (!entries.length && hideEmptyGroupNames.has(normalizeGroupName(name))) {
+          continue;
+        }
+
+        html += renderGroup({ title: `${name}:`, name, path, depth, hasChildren: entries.length > 0 });
+
         for (const [k, v] of entries) {
           html += renderGroup({ title: `${k}:`, name: k, path: `${path}.${k}`, depth: depth + 1 });
           html += walkSchema(v || {}, nested, `${path}.${k}`, depth + 2);
@@ -437,9 +446,13 @@ function renderDockFromTracker(tracker, schema) {
       }
 
       if (T === "FOR_EACH_ARRAY" && nested) {
-        html += renderGroup({ title: `${name}:`, name, path, depth });
-
         const entries = value && typeof value === "object" ? Object.entries(value) : [];
+        if (!entries.length && hideEmptyGroupNames.has(normalizeGroupName(name))) {
+          continue;
+        }
+
+        html += renderGroup({ title: `${name}:`, name, path, depth, hasChildren: entries.length > 0 });
+
         for (const [k, arr] of entries) {
           html += renderGroup({ title: `${k}:`, name: k, path: `${path}.${k}`, depth: depth + 1 });
 
