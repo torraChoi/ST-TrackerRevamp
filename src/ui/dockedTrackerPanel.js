@@ -74,8 +74,8 @@ function splitKeyValue(line) {
 function getLeafTrackerFields(sourceEl) {
   const all = [...sourceEl.querySelectorAll(".tracker-view-field")];
 
-  // Keep only "leaf" fields (fields that DON'T contain other .tracker-view-field inside)
-  return all.filter((el) => !el.querySelector(".tracker-view-field"));
+  // Include all fields, including headers and nested containers
+  return all;
 }
 
 function extractKeyFromField(fieldEl) {
