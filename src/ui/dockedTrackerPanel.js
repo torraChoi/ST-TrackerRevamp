@@ -27,6 +27,7 @@ let dockRefreshSoonTimer = null;
 let dockRefreshPendingAfterEdit = false;
 let isDockRegenerating = false;
 let groupToggleInstalled = false;
+let groupToggleOverrides = new Map();
 
 
 
@@ -275,11 +276,14 @@ function isPlaceholderGroupEntry(name, value) {
 }
 
 function getStoredGroupCollapsed(path, name) {
+  if (groupToggleOverrides.has(path)) {
+    return groupToggleOverrides.get(path);
+  }
   return getDefaultGroupCollapsed(path, name);
 }
 
 function setStoredGroupCollapsed(path, collapsed) {
-  safeLocalStorageSet(getGroupStorageKey(path), collapsed ? "1" : "0");
+  groupToggleOverrides.set(path, collapsed);
 }
 
 function applyGroupCollapseVisibility() {
