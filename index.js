@@ -214,3 +214,11 @@ startOgAutoHideWatcher();
     }
   }, 500);
 })();
+
+
+eventSource.on(event_types.CHAT_CHANGED, () => {
+	setTimeout(() => {
+		openOgTrackerIfExists();
+		startMirroringTrackerContents();
+	}, 50);
+});

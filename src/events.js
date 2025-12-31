@@ -20,12 +20,6 @@ async function onChatChanged(args) {
 	updateTrackerInterface();
 	//TrackerPreviewManager.init();
 	releaseGeneration();
-
-	// Auto-open tracker + dock on chat entry
-  	setTimeout(() => {
-    openOgTrackerIfExists();
-    startMirroringTrackerContents();
-  }, 50);
 }
 
 /**
