@@ -25,6 +25,7 @@ let lastTrackerFingerprint = "";
 let dockRefreshQueued = false;
 let dockRefreshSoonTimer = null;
 let dockRefreshPendingAfterEdit = false;
+let isDockRegenerating = false;
 
 
 
@@ -127,6 +128,57 @@ function flushPendingDockRefresh() {
   if (!dockRefreshPendingAfterEdit) return;
   dockRefreshPendingAfterEdit = false;
   scheduleDockRefresh("post-edit");
+}
+
+function setDockRegenerating(state) {
+  isDockRegenerating = state;
+  if (!dockEl) return;
+
+  dockEl.classList.toggle("is-regenerating", state);
+
+  const regenBtn = dockEl.querySelector("#trackerrevamp-dock-regenerate");
+  if (regenBtn) regenBtn.disabled = state;
+
+  const indicator = dockEl.querySelector("#trackerrevamp-dock-regen-indicator");
+  if (indicator) indicator.textContent = state ? "Regenerating..." : "";
+
+  if (state && activeEditor) {
+    cancelActiveEditor();
+  }
+}
+
+function waitForOgRegenerationDone(timeoutMs = 30000) {
+  return new Promise((resolve) => {
+    const og = document.querySelector("#trackerInterface");
+    if (!og) return resolve();
+
+    let done = false;
+    let sawLoading = !!og.querySelector(".tracker-loading");
+
+    const finish = () => {
+      if (done) return;
+      done = true;
+      observer.disconnect();
+      clearTimeout(timeout);
+      resolve();
+    };
+
+    const observer = new MutationObserver(() => {
+      const hasLoading = !!og.querySelector(".tracker-loading");
+      if (hasLoading) sawLoading = true;
+      if (sawLoading && !hasLoading) finish();
+    });
+
+    observer.observe(og, { childList: true, subtree: true });
+
+    const timeout = setTimeout(finish, timeoutMs);
+
+    if (!sawLoading) {
+      setTimeout(() => {
+        if (!sawLoading) finish();
+      }, 1000);
+    }
+  });
 }
 
 
@@ -505,7 +557,8 @@ export function ensureDock(side = "right") {
     <div class="trackerrevamp-dock-header">
       <span class="trackerrevamp-dock-title">Tracker</span>
       <div class="trackerrevamp-dock-actions">
-        <button id="trackerrevamp-dock-regenerate" class="menu_button" title="Regenerate tracker">RG</button>
+        <span id="trackerrevamp-dock-regen-indicator" class="trackerrevamp-dock-regen-indicator"></span>
+        <button id="trackerrevamp-dock-regenerate" class="menu_button" title="Regenerate tracker">🔄️</button>
         <button id="trackerrevamp-og-toggle" class="menu_button" title="Show/Hide OG tracker">🛠</button>
         <button id="trackerrevamp-dock-pin" class="menu_button" title="Toggle side">⇄</button>
         <button id="trackerrevamp-dock-close" class="menu_button" title="Close">×</button>
@@ -561,20 +614,28 @@ export function ensureDock(side = "right") {
 
   dockEl
     .querySelector("#trackerrevamp-dock-regenerate")
-    ?.addEventListener("click", () => {
-      const ti = TrackerInterface?.instance;
-      if (ti?.regenerateTracker) {
-        ti.regenerateTracker();
-        return;
-      }
+    ?.addEventListener("click", async () => {
+      if (isDockRegenerating) return;
 
-      const regenBtn = document.querySelector("#trackerInterfaceRegenerateTracker");
-      if (regenBtn) {
-        regenBtn.click();
-        return;
-      }
+      setDockRegenerating(true);
+      try {
+        const ti = TrackerInterface?.instance;
+        if (ti?.regenerateTracker) {
+          await Promise.resolve(ti.regenerateTracker());
+          return;
+        }
 
-      console.warn("[TrackerRevamp] Regenerate action not available");
+        const regenBtn = document.querySelector("#trackerInterfaceRegenerateTracker");
+        if (regenBtn) {
+          regenBtn.click();
+          await waitForOgRegenerationDone();
+          return;
+        }
+
+        console.warn("[TrackerRevamp] Regenerate action not available");
+      } finally {
+        setDockRegenerating(false);
+      }
     });
 
   return dockEl;
@@ -583,6 +644,8 @@ export function ensureDock(side = "right") {
 function installDockEditing() {
   // click to start editing
   document.addEventListener("click", (e) => {
+    if (isDockRegenerating) return;
+
     const lineEl = e.target.closest(".tr-line");
     if (!lineEl) return;
 

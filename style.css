@@ -373,6 +373,18 @@ label[for=tracker_reset_presets] {
   gap: 6px;
 }
 
+.trackerrevamp-dock-regen-indicator {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-right: 4px;
+}
+
+.trackerrevamp-dock.is-regenerating .tr-editable {
+  pointer-events: none;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 .trackerrevamp-dock-body {
   padding: 10px;
   overflow: auto;
