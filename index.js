@@ -68,6 +68,60 @@ eventSource.on(event_types.GENERATION_AFTER_COMMANDS, eventHandlers.onGenerateAf
 eventSource.on(event_types.GENERATE_AFTER_COMBINE_PROMPTS, eventHandlers.generateAfterCombinePrompts);
 
 
+function openOgTrackerViaQuickButton() {
+  // This is the exact element from your screenshot
+  const btn = document.querySelector('.mes_tracker_button[title="Show Message Tracker"]')
+           || document.querySelector('.mes_tracker_button')
+           || document.querySelector('.mes_button.mes_tracker_button');
+
+  if (!btn) {
+    console.warn('[TrackerRevamp] mes_tracker_button not found yet');
+    return false;
+  }
+
+  btn.click();
+  console.log('[TrackerRevamp] Clicked OG tracker quick button');
+  return true;
+}
+
+eventSource.on(event_types.CHAT_CHANGED, () => {
+  // Don’t fight the user if they explicitly closed the dock
+  // (optional – if you want always-on, delete this if-block)
+  // if (window.TrackerRevamp?.userClosedDock) return;
+
+  let tries = 0;
+  const maxTries = 30;
+
+  const timer = setInterval(() => {
+    tries++;
+
+    const opened = openOgTrackerViaQuickButton();
+    if (opened) {
+      clearInterval(timer);
+
+      // Start dock after OG exists
+      setTimeout(() => {
+        startMirroringTrackerContents();
+      }, 50);
+
+      // Optional: auto-hide OG immediately after first open
+      setTimeout(() => {
+        const tracker = document.querySelector('#trackerInterface');
+        if (tracker) tracker.style.display = 'none';
+      }, 100);
+
+      return;
+    }
+
+    if (tries >= maxTries) {
+      clearInterval(timer);
+      console.warn('[TrackerRevamp] Failed to auto-open tracker after CHAT_CHANGED');
+    }
+  }, 200);
+});
+
+
+
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({
 	name: 'generate-tracker',
 	callback: generateTrackerCommand,
@@ -214,6 +268,9 @@ startOgAutoHideWatcher();
     }
   }, 500);
 })();
+
+
+console.log('[TrackerRevamp] CHAT_CHANGED fired');
 
 
 eventSource.on(event_types.CHAT_CHANGED, () => {
