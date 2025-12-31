@@ -24,6 +24,9 @@ export async function toggleExtension(enable = true) {
 	saveSettingsDebounced();
 }
 
+window.TrackerRevamp = window.TrackerRevamp || {};
+window.TrackerRevamp.getContext = getContext;
+
 // #region Settings Initialization
 
 /**

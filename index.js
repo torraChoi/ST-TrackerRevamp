@@ -167,6 +167,10 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({
 installOgTrackerCloseHijack();
 startOgAutoHideWatcher();
 
+window.TrackerRevamp = window.TrackerRevamp || {};
+window.TrackerRevamp.extensionSettings = extensionSettings;
+
+
 (function waitForTrackerAndStartDock() {
   let tries = 0;
   const maxTries = 60;
