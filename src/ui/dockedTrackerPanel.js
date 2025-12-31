@@ -440,7 +440,13 @@ export function ensureDock(side = "right") {
 function installDockEditing() {
   // click to start editing
   document.addEventListener("click", (e) => {
-    const editable = e.target.closest(".tr-editable");
+    const lineEl = e.target.closest(".tr-line");
+    if (!lineEl) return;
+
+    // Skip groups and plain lines
+    if (lineEl.classList.contains("tr-group") || lineEl.classList.contains("tr-plain")) return;
+
+    const editable = lineEl.querySelector(".tr-editable");
     if (!editable) return;
 
     // If another editor is open, commit it first (or you can cancel it)
@@ -451,7 +457,6 @@ function installDockEditing() {
     // Already editing this one
     if (editable.dataset.editing === "1") return;
 
-    const lineEl = editable.closest(".tr-line");
     const lineIndex = Number(lineEl?.dataset?.lineIndex);
     const key = editable.dataset.key;
     const oldValue = editable.textContent;
