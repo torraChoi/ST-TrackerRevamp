@@ -962,6 +962,30 @@ function onDockTemplateImportFilesChange(event) {
 	const files = Array.from(event.target.files || []);
 	if (!files.length) return;
 
+	const jsonFile = files.find((f) => f.name.toLowerCase().endsWith(".json"));
+	if (jsonFile) {
+		const reader = new FileReader();
+		reader.onload = function (e) {
+			try {
+				const payload = JSON.parse(e.target.result ?? "{}");
+				if (payload && typeof payload === "object") {
+					if (payload.html != null) $("#tracker_dock_template_html").val(String(payload.html));
+					if (payload.css != null) $("#tracker_dock_template_css").val(String(payload.css));
+					if (payload.js != null) $("#tracker_dock_template_js").val(String(payload.js));
+					if (payload.enabled != null) {
+						$("#tracker_dock_template_enabled").prop("checked", Boolean(payload.enabled));
+					}
+					applyDockTemplatePreviewFromUI();
+				}
+			} catch (err) {
+				alert("Failed to import dock template bundle: " + err.message);
+			}
+		};
+		reader.readAsText(jsonFile);
+		event.target.value = "";
+		return;
+	}
+
 	const byExt = {
 		html: files.find((f) => f.name.toLowerCase().endsWith(".html")),
 		css: files.find((f) => f.name.toLowerCase().endsWith(".css")),
@@ -1015,9 +1039,23 @@ function onDockTemplateExportClick(type) {
 }
 
 function exportDockTemplateFiles() {
-	onDockTemplateExportClick("html");
-	onDockTemplateExportClick("css");
-	onDockTemplateExportClick("js");
+	const presetName = extensionSettings.selectedDockTemplatePreset || "dock-template";
+	const payload = {
+		name: presetName,
+		enabled: Boolean($("#tracker_dock_template_enabled").prop("checked")),
+		html: $("#tracker_dock_template_html").val() ?? "",
+		css: $("#tracker_dock_template_css").val() ?? "",
+		js: $("#tracker_dock_template_js").val() ?? "",
+	};
+	const dataStr = JSON.stringify(payload, null, 2);
+	const blob = new Blob([dataStr], { type: "application/json" });
+	const url = URL.createObjectURL(blob);
+
+	const a = $("<a>").attr("href", url).attr("download", `${presetName}-dock-template.json`);
+	$("body").append(a);
+	a[0].click();
+	a.remove();
+	URL.revokeObjectURL(url);
 }
 
 function runDockTemplateEditorCommand(textareaId, command) {
