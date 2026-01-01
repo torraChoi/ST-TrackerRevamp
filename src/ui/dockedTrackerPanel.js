@@ -643,15 +643,6 @@ function renderDockFromTracker(tracker, schema) {
   let html = "";
   const used = new Set();
 
-  for (const cat of categoryOrder) {
-    const fieldSchema = schemaByName.get(cat.name);
-    const section = renderCategorySection(cat.title, fieldSchema);
-    if (section) {
-      html += section;
-      used.add(cat.name);
-    }
-  }
-
   const generalFields = schemaFields.filter((field) => !used.has(field.name));
   if (generalFields.length) {
     const generalNode = {};
@@ -660,6 +651,15 @@ function renderDockFromTracker(tracker, schema) {
     });
     html += renderSectionHeader("General");
     html += walkSchema(tracker, generalNode, "", 0);
+  }
+
+  for (const cat of categoryOrder) {
+    const fieldSchema = schemaByName.get(cat.name);
+    const section = renderCategorySection(cat.title, fieldSchema);
+    if (section) {
+      html += section;
+      used.add(cat.name);
+    }
   }
 
   return html;
