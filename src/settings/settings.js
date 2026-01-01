@@ -879,10 +879,8 @@ function openDockTemplateEditor() {
 		modal.data("original-parent", modal.parent());
 	}
 
-	if (!document.body.contains(modal[0])) {
-		modal.detach();
-		$("body").append(modal);
-	}
+	modal.detach();
+	$("body").append(modal);
 	modal.show();
 }
 
@@ -1016,6 +1014,12 @@ function startDockTemplateImportSequence() {
 function continueDockTemplateImportSequence() {
 	const next = dockTemplateImportQueue.shift();
 	if (!next) return;
+	const label = next.toUpperCase();
+	const ok = confirm(`Select ${label} file (Cancel to stop)`);
+	if (!ok) {
+		dockTemplateImportQueue = [];
+		return;
+	}
 	if (next === "html") $("#tracker_dock_template_import_html").click();
 	if (next === "css") $("#tracker_dock_template_import_css").click();
 	if (next === "js") $("#tracker_dock_template_import_js").click();

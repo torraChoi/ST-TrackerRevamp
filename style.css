@@ -347,7 +347,7 @@
 }
 
 .tracker-modal-overlay {
-  position: fixed;
+  position: fixed !important;
   top: 0;
   left: 0;
   width: 100vw;
@@ -360,7 +360,7 @@
 }
 
 .tracker-modal {
-  width: min(1100px, 92vw);
+  width: min(520px, 92vw);
   max-height: 90vh;
   overflow: auto;
   background: #111;

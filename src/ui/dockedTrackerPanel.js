@@ -105,7 +105,7 @@ function refreshDock() {
   }
 
   const template = getDockTemplateConfig();
-  applyDockTemplateAssets(template);
+  applyDockTemplateStyles(template);
 
   const renderKey = template ? `${template.html ?? ""}|${template.css ?? ""}|${template.js ?? ""}` : "";
   const fp = `${fingerprintTracker(tracker)}|${renderKey}`;
@@ -122,6 +122,9 @@ function refreshDock() {
   }
 
   setDockHTML(html);
+  if (template?.html) {
+    applyDockTemplateScript(template);
+  }
 }
 
 function scheduleDockRefresh(reason = "manual") {
@@ -222,7 +225,7 @@ function getDockTemplateConfig() {
   };
 }
 
-function applyDockTemplateAssets(template) {
+function applyDockTemplateStyles(template) {
   const css = template?.css ?? "";
   const js = template?.js ?? "";
   const assetsKey = `${css}\n/*js*/\n${js}`;
@@ -249,23 +252,6 @@ function applyDockTemplateAssets(template) {
     }
   }
   dockTemplateScript = null;
-
-  if (js.trim()) {
-    try {
-      const parsedFunction = new Function(`return (${js})`)();
-      let parsedObject = parsedFunction;
-      if (typeof parsedFunction === "function") parsedObject = parsedFunction();
-
-      if (typeof parsedObject === "object" && parsedObject !== null) {
-        dockTemplateScript = parsedObject;
-        if (typeof dockTemplateScript.init === "function") {
-          dockTemplateScript.init();
-        }
-      }
-    } catch (e) {
-      console.warn("[TrackerRevamp] Dock template JS failed to load", e);
-    }
-  }
 }
 
 function renderDockFromTemplate(tracker, template) {
@@ -278,6 +264,26 @@ function renderDockFromTemplate(tracker, template) {
   } catch (e) {
     console.warn("[TrackerRevamp] Dock template render failed, using default renderer", e);
     return "";
+  }
+}
+
+function applyDockTemplateScript(template) {
+  const js = template?.js ?? "";
+  if (!js.trim()) return;
+
+  try {
+    const parsedFunction = new Function(`return (${js})`)();
+    let parsedObject = parsedFunction;
+    if (typeof parsedFunction === "function") parsedObject = parsedFunction();
+
+    if (typeof parsedObject === "object" && parsedObject !== null) {
+      dockTemplateScript = parsedObject;
+      if (typeof dockTemplateScript.init === "function") {
+        dockTemplateScript.init();
+      }
+    }
+  } catch (e) {
+    console.warn("[TrackerRevamp] Dock template JS failed to load", e);
   }
 }
 
