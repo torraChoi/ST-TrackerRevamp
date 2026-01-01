@@ -1031,7 +1031,15 @@ export function ensureDock(side = "right") {
   document.body.appendChild(dockEl);
 
   dockEl.addEventListener("click", (event) => {
-    const actionBtn = event.target.closest("[data-dock-action]");
+    let actionBtn = null;
+    let node = event.target;
+    while (node && node !== dockEl) {
+      if (node.dataset && node.dataset.dockAction) {
+        actionBtn = node;
+        break;
+      }
+      node = node.parentElement;
+    }
     if (!actionBtn) return;
     const action = actionBtn.dataset.dockAction;
     if (action === "toggle-side") {

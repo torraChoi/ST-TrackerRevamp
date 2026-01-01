@@ -34,6 +34,19 @@
     const smallPanel = scope.querySelector('[data-enemy-panel="small"]');
     const bigPanel = scope.querySelector('[data-enemy-panel="big"]');
 
+    const applyInitial = (button) => {
+      const label = button.getAttribute("title")
+        || button.dataset.mainTarget
+        || button.dataset.otherTarget
+        || "";
+      const trimmed = String(label).trim();
+      if (!trimmed) return;
+      button.textContent = trimmed[0].toUpperCase();
+    };
+
+    mainButtons.forEach(applyInitial);
+    otherButtons.forEach(applyInitial);
+
     const otherBlock = otherToggle ? otherToggle.closest(".dock-rail-block") : null;
     const smallBlock = smallToggle ? smallToggle.closest(".dock-rail-block") : null;
     const bigBlock = bigToggle ? bigToggle.closest(".dock-rail-block") : null;
