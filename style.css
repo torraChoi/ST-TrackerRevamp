@@ -390,6 +390,15 @@ label[for=tracker_reset_presets] {
   overflow: auto;
 }
 
+.tr-section {
+  margin-top: 10px;
+  padding: 6px 8px;
+  font-weight: 700;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.04);
+}
+
 /* Optional: make copied tracker content fit better */
 .trackerrevamp-dock-body .tracker-view-container {
   margin: 0;

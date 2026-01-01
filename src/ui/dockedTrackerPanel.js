@@ -420,6 +420,10 @@ function renderDockFromTracker(tracker, schema) {
     return `<div style="opacity:.75; font-style:italic;">No tracker data yet.</div>`;
   }
 
+  function renderSectionHeader(title) {
+    return `<div class="tr-section">${escapeHtml(title)}</div>`;
+  }
+
   function renderGroup({ title, name, path, depth, hasChildren = true }) {
     return `
       <div class="tr-line tr-group" data-depth="${depth}" data-group-path="${escapeHtml(path)}" data-group-name="${escapeHtml(name)}" data-has-children="${hasChildren ? "1" : "0"}" style="padding-left:${depth * 12}px">
@@ -439,6 +443,81 @@ function renderDockFromTracker(tracker, schema) {
         <span class="tr-editable" data-key="${escapeHtml(key)}">${escapeHtml(display)}</span>
       </div>
     `;
+  }
+
+  function renderCategorySection(title, fieldSchema) {
+    if (!fieldSchema) return "";
+
+    const name = fieldSchema.name;
+    const type = fieldSchema.type;
+    const nested = fieldSchema.nestedFields;
+    const path = name;
+    const value = tracker?.[name];
+    const T = String(type || "").toUpperCase();
+
+    let html = "";
+
+    if (T === "OBJECT" && nested) {
+      html += walkSchema(value || {}, nested, path, 0);
+    } else if (T === "FOR_EACH_OBJECT" && nested) {
+      const entries = value && typeof value === "object" ? Object.entries(value) : [];
+      const normalized = normalizeGroupName(name);
+      const filteredEntries = hideEmptyGroupNames.has(normalized)
+        ? entries.filter(([k, v]) => !isPlaceholderGroupEntry(k, v))
+        : entries;
+      if (!filteredEntries.length && hideEmptyGroupNames.has(normalized)) {
+        return "";
+      }
+
+      for (const [k, v] of filteredEntries) {
+        html += renderGroup({ title: `${k}:`, name: k, path: `${path}.${k}`, depth: 0 });
+        html += walkSchema(v || {}, nested, `${path}.${k}`, 1);
+      }
+    } else if (T === "FOR_EACH_ARRAY" && nested) {
+      const entries = value && typeof value === "object" ? Object.entries(value) : [];
+      const normalized = normalizeGroupName(name);
+      const filteredEntries = hideEmptyGroupNames.has(normalized)
+        ? entries.filter(([k, v]) => !isPlaceholderGroupEntry(k, v))
+        : entries;
+      if (!filteredEntries.length && hideEmptyGroupNames.has(normalized)) {
+        return "";
+      }
+
+      for (const [k, arr] of filteredEntries) {
+        html += renderGroup({ title: `${k}:`, name: k, path: `${path}.${k}`, depth: 0 });
+
+        const nestedFields = Object.values(nested);
+        const isSingleString =
+          nestedFields.length === 1 && String(nestedFields[0].type || "").toUpperCase() === "STRING";
+
+        if (isSingleString) {
+          html += renderLeaf({
+            key: k,
+            value: Array.isArray(arr) ? arr : [],
+            path: `${path}.${k}`,
+            type: "ARRAY",
+            depth: 1,
+          });
+        } else {
+          const safeArr = Array.isArray(arr) ? arr : [];
+          safeArr.forEach((item, idx) => {
+            const indexName = `[${idx}]`;
+            html += renderGroup({
+              title: `${indexName}:`,
+              name: indexName,
+              path: `${path}.${k}.${indexName}`,
+              depth: 1,
+            });
+            html += walkSchema(item || {}, nested, `${path}.${k}.[${idx}]`, 2);
+          });
+        }
+      }
+    } else {
+      html += renderLeaf({ key: name, value, path, type, depth: 0 });
+    }
+
+    if (!html) return "";
+    return renderSectionHeader(title) + html;
   }
 
   // Walk schema and tracker together
@@ -552,7 +631,38 @@ function renderDockFromTracker(tracker, schema) {
     return html;
   }
 
-  return walkSchema(tracker, schema, "", 0);
+  const schemaFields = Object.values(schema);
+  const schemaByName = new Map(schemaFields.map((field) => [field.name, field]));
+  const categoryOrder = [
+    { name: "MainCharacters", title: "Main Characters" },
+    { name: "OtherCharacters", title: "Other Characters" },
+    { name: "SmallEnemies", title: "Small Enemies" },
+    { name: "BigEnemies", title: "Big Enemies" },
+  ];
+
+  let html = "";
+  const used = new Set();
+
+  for (const cat of categoryOrder) {
+    const fieldSchema = schemaByName.get(cat.name);
+    const section = renderCategorySection(cat.title, fieldSchema);
+    if (section) {
+      html += section;
+      used.add(cat.name);
+    }
+  }
+
+  const generalFields = schemaFields.filter((field) => !used.has(field.name));
+  if (generalFields.length) {
+    const generalNode = {};
+    generalFields.forEach((field, idx) => {
+      generalNode[`field-${idx}`] = field;
+    });
+    html += renderSectionHeader("General");
+    html += walkSchema(tracker, generalNode, "", 0);
+  }
+
+  return html;
 }
 
 
