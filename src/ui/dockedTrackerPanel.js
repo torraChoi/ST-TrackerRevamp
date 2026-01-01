@@ -269,7 +269,10 @@ function renderDockFromTemplate(tracker, template) {
 
 function applyDockTemplateScript(template) {
   const js = template?.js ?? "";
-  if (!js.trim()) return;
+  if (!js.trim()) {
+    console.log("[TrackerRevamp] Dock template JS empty");
+    return;
+  }
 
   try {
     if (dockTemplateScript && typeof dockTemplateScript.cleanup === "function") {
@@ -280,6 +283,7 @@ function applyDockTemplateScript(template) {
       }
     }
 
+    console.log("[TrackerRevamp] Dock template JS eval");
     const parsedFunction = new Function(`return (${js})`)();
     let parsedObject = parsedFunction;
     if (typeof parsedFunction === "function") parsedObject = parsedFunction();
@@ -290,6 +294,7 @@ function applyDockTemplateScript(template) {
         requestAnimationFrame(() => {
           const body = dockEl?.querySelector("#trackerrevamp-dock-body");
           const templateRoot = body?.querySelector(".dock-sample") || body || dockEl;
+          console.log("[TrackerRevamp] Dock template JS init", { templateRoot, dockEl });
           try {
             dockTemplateScript.init({ root: templateRoot, dockEl });
           } catch {
