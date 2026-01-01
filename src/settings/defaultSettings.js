@@ -359,6 +359,11 @@ const mesTrackerJavascript = `() => {
     };
 }`;
 
+const dockTemplateEnabled = false;
+const dockTemplateHtml = "";
+const dockTemplateCss = "";
+const dockTemplateJs = "";
+
 const trackerDef = {
 	"field-0": {
 		name: "Time",
@@ -531,6 +536,10 @@ export const defaultSettings = {
 
 	mesTrackerTemplate: mesTrackerTemplate,
 	mesTrackerJavascript: mesTrackerJavascript,
+	dockTemplateEnabled: dockTemplateEnabled,
+	dockTemplateHtml: dockTemplateHtml,
+	dockTemplateCss: dockTemplateCss,
+	dockTemplateJs: dockTemplateJs,
 	trackerDef: trackerDef,
 
 	trackerPreviewSelector: trackerPreviewSelector,
@@ -561,6 +570,10 @@ export const defaultSettings = {
 
 			mesTrackerTemplate: mesTrackerTemplate,
 			mesTrackerJavascript: mesTrackerJavascript,
+			dockTemplateEnabled: dockTemplateEnabled,
+			dockTemplateHtml: dockTemplateHtml,
+			dockTemplateCss: dockTemplateCss,
+			dockTemplateJs: dockTemplateJs,
 			trackerDef: trackerDef,
 		},
 		"Default-TwoStage": {
@@ -582,6 +595,10 @@ export const defaultSettings = {
 
 			mesTrackerTemplate: mesTrackerTemplate,
 			mesTrackerJavascript: mesTrackerJavascript,
+			dockTemplateEnabled: dockTemplateEnabled,
+			dockTemplateHtml: dockTemplateHtml,
+			dockTemplateCss: dockTemplateCss,
+			dockTemplateJs: dockTemplateJs,
 			trackerDef: trackerDef,
 		},
 		"Default-Inline": {
@@ -603,6 +620,10 @@ export const defaultSettings = {
 
 			mesTrackerTemplate: mesTrackerTemplate,
 			mesTrackerJavascript: mesTrackerJavascript,
+			dockTemplateEnabled: dockTemplateEnabled,
+			dockTemplateHtml: dockTemplateHtml,
+			dockTemplateCss: dockTemplateCss,
+			dockTemplateJs: dockTemplateJs,
 			trackerDef: trackerDef,
 		},
 	},

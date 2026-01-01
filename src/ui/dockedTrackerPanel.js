@@ -1,5 +1,6 @@
 import { TrackerInterface } from './trackerInterface.js';
 import { extensionSettings } from "../../index.js";
+import { TrackerContentRenderer } from "./components/trackerContentRenderer.js";
 
 
 let isMirroringActive = false;
@@ -21,13 +22,18 @@ let ogAppearObserver = null;
 let isDockEditing = false;
 let activeEditor = null; // { editableEl, lineIndex, key, input, oldValue }
 let dockRefreshTimer = null;
-let lastTrackerFingerprint = "";
+let lastDockRenderFingerprint = "";
 let dockRefreshQueued = false;
 let dockRefreshSoonTimer = null;
 let dockRefreshPendingAfterEdit = false;
 let isDockRegenerating = false;
 let groupToggleInstalled = false;
 let groupToggleOverrides = new Map();
+let dockTemplatePreview = null;
+let dockTemplateStyleEl = null;
+let dockTemplateScript = null;
+let dockTemplateLastAssetsKey = "";
+const dockTemplateRenderer = new TrackerContentRenderer();
 
 
 
@@ -98,11 +104,24 @@ function refreshDock() {
     return;
   }
 
-  const fp = fingerprintTracker(tracker);
-  if (fp === lastTrackerFingerprint) return; // no change
+  const template = getDockTemplateConfig();
+  applyDockTemplateAssets(template);
 
-  lastTrackerFingerprint = fp;
-  setDockHTML(renderDockFromTracker(tracker, schema));
+  const renderKey = template ? `${template.html ?? ""}|${template.css ?? ""}|${template.js ?? ""}` : "";
+  const fp = `${fingerprintTracker(tracker)}|${renderKey}`;
+  if (fp === lastDockRenderFingerprint) return; // no change
+
+  lastDockRenderFingerprint = fp;
+
+  let html = "";
+  if (template?.html) {
+    html = renderDockFromTemplate(tracker, template);
+  }
+  if (!html) {
+    html = renderDockFromTracker(tracker, schema);
+  }
+
+  setDockHTML(html);
 }
 
 function scheduleDockRefresh(reason = "manual") {
@@ -181,6 +200,92 @@ function waitForOgRegenerationDone(timeoutMs = 30000) {
       }, 1000);
     }
   });
+}
+
+function getDockTemplateConfig() {
+  if (dockTemplatePreview) {
+    return {
+      enabled: true,
+      html: dockTemplatePreview.html ?? "",
+      css: dockTemplatePreview.css ?? "",
+      js: dockTemplatePreview.js ?? "",
+    };
+  }
+
+  if (!extensionSettings?.dockTemplateEnabled) return null;
+
+  return {
+    enabled: true,
+    html: extensionSettings.dockTemplateHtml ?? "",
+    css: extensionSettings.dockTemplateCss ?? "",
+    js: extensionSettings.dockTemplateJs ?? "",
+  };
+}
+
+function applyDockTemplateAssets(template) {
+  const css = template?.css ?? "";
+  const js = template?.js ?? "";
+  const assetsKey = `${css}\n/*js*/\n${js}`;
+
+  if (assetsKey === dockTemplateLastAssetsKey) return;
+  dockTemplateLastAssetsKey = assetsKey;
+
+  if (dockTemplateStyleEl) {
+    dockTemplateStyleEl.remove();
+    dockTemplateStyleEl = null;
+  }
+  if (css.trim()) {
+    dockTemplateStyleEl = document.createElement("style");
+    dockTemplateStyleEl.id = "trackerrevamp-dock-template-style";
+    dockTemplateStyleEl.textContent = css;
+    document.head.appendChild(dockTemplateStyleEl);
+  }
+
+  if (dockTemplateScript && typeof dockTemplateScript.cleanup === "function") {
+    try {
+      dockTemplateScript.cleanup();
+    } catch (e) {
+      console.warn("[TrackerRevamp] Dock template cleanup failed", e);
+    }
+  }
+  dockTemplateScript = null;
+
+  if (js.trim()) {
+    try {
+      const parsedFunction = new Function(`return (${js})`)();
+      let parsedObject = parsedFunction;
+      if (typeof parsedFunction === "function") parsedObject = parsedFunction();
+
+      if (typeof parsedObject === "object" && parsedObject !== null) {
+        dockTemplateScript = parsedObject;
+        if (typeof dockTemplateScript.init === "function") {
+          dockTemplateScript.init();
+        }
+      }
+    } catch (e) {
+      console.warn("[TrackerRevamp] Dock template JS failed to load", e);
+    }
+  }
+}
+
+function renderDockFromTemplate(tracker, template) {
+  if (!template?.html || !String(template.html).trim()) return "";
+  try {
+    return dockTemplateRenderer.renderFromTemplate(tracker, template.html);
+  } catch (e) {
+    console.warn("[TrackerRevamp] Dock template render failed, using default renderer", e);
+    return "";
+  }
+}
+
+export function setDockTemplatePreview(preview) {
+  dockTemplatePreview = preview;
+  scheduleDockRefresh("dock-template-preview");
+}
+
+export function clearDockTemplatePreview() {
+  dockTemplatePreview = null;
+  scheduleDockRefresh("dock-template-preview-clear");
 }
 
 const hideEmptyGroupNames = new Set([

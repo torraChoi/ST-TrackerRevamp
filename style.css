@@ -324,6 +324,18 @@
   display: flex;
 }
 
+.tracker-macro-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.tracker-macro-list .menu_button {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
 #tracker_reset_presets:hover {
   background-color: #a90000;
 }
