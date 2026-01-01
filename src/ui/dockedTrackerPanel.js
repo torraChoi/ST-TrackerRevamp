@@ -122,6 +122,7 @@ function refreshDock() {
   }
 
   setDockHTML(html);
+  wireDockActionProxies();
   if (template?.html) {
     applyDockTemplateScript(template);
   }
@@ -160,15 +161,51 @@ function setDockRegenerating(state) {
 
   dockEl.classList.toggle("is-regenerating", state);
 
-  const regenBtn = dockEl.querySelector("#trackerrevamp-dock-regenerate");
-  if (regenBtn) regenBtn.disabled = state;
+  const regenButtons = dockEl.querySelectorAll(
+    "#trackerrevamp-dock-regenerate, [data-dock-action='regenerate']"
+  );
+  regenButtons.forEach((btn) => {
+    btn.disabled = state;
+  });
 
-  const indicator = dockEl.querySelector("#trackerrevamp-dock-regen-indicator");
-  if (indicator) indicator.textContent = state ? "Regenerating..." : "";
+  const indicators = dockEl.querySelectorAll(
+    "#trackerrevamp-dock-regen-indicator, [data-dock-indicator='regen']"
+  );
+  indicators.forEach((indicator) => {
+    indicator.textContent = state ? "Regenerating..." : "";
+  });
 
   if (state && activeEditor) {
     cancelActiveEditor();
   }
+}
+
+function wireDockActionProxies() {
+  if (!dockEl) return;
+  const header = dockEl.querySelector(".trackerrevamp-dock-header");
+  const headerButtons = {
+    regenerate: header?.querySelector("#trackerrevamp-dock-regenerate"),
+    close: header?.querySelector("#trackerrevamp-dock-close"),
+    "toggle-side": header?.querySelector("#trackerrevamp-dock-pin"),
+    "toggle-og": header?.querySelector("#trackerrevamp-og-toggle"),
+  };
+  const actionHandlers = dockEl.__dockActions || {};
+
+  dockEl.querySelectorAll("[data-dock-action]").forEach((button) => {
+    if (button.dataset.dockActionBound === "1") return;
+    const action = button.dataset.dockAction;
+    const target = headerButtons[action];
+    const handler = actionHandlers[action];
+    if (!target && !handler) return;
+    button.addEventListener("click", () => {
+      if (typeof handler === "function") {
+        handler();
+      } else {
+        target.click();
+      }
+    });
+    button.dataset.dockActionBound = "1";
+  });
 }
 
 function waitForOgRegenerationDone(timeoutMs = 30000) {
@@ -991,6 +1028,22 @@ export function ensureDock(side = "right") {
   `;
 
   document.body.appendChild(dockEl);
+
+  dockEl.addEventListener("click", (event) => {
+    const actionBtn = event.target.closest("[data-dock-action]");
+    if (!actionBtn) return;
+    const map = {
+      regenerate: "#trackerrevamp-dock-regenerate",
+      "toggle-og": "#trackerrevamp-og-toggle",
+      "toggle-side": "#trackerrevamp-dock-pin",
+      close: "#trackerrevamp-dock-close",
+    };
+    const selector = map[actionBtn.dataset.dockAction];
+    const target = selector ? dockEl.querySelector(selector) : null;
+    if (!target) return;
+    event.preventDefault();
+    target.click();
+  });
 
   dockEl
     .querySelector("#trackerrevamp-dock-close")
