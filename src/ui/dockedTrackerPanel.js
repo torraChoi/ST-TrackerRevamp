@@ -279,7 +279,11 @@ function applyDockTemplateScript(template) {
     if (typeof parsedObject === "object" && parsedObject !== null) {
       dockTemplateScript = parsedObject;
       if (typeof dockTemplateScript.init === "function") {
-        dockTemplateScript.init();
+        try {
+          dockTemplateScript.init({ root: dockEl });
+        } catch {
+          dockTemplateScript.init();
+        }
       }
     }
   } catch (e) {

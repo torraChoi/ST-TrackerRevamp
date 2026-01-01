@@ -1,0 +1,132 @@
+.dock-sample {
+  font-family: "Georgia", "Times New Roman", serif;
+  color: #eaeaea;
+}
+
+.dock-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.dock-title {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.dock-time {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.dock-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 8px 10px;
+}
+
+.dock-tab {
+  background: rgba(255,255,255,0.06);
+  color: #eaeaea;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 999px;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+
+.dock-tab.is-active {
+  background: rgba(255,255,255,0.14);
+}
+
+.dock-sections {
+  padding: 6px 10px 12px;
+}
+
+.dock-section {
+  display: none;
+}
+
+.dock-section.is-active {
+  display: block;
+}
+
+.dock-section h3 {
+  margin: 8px 0 6px;
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.dock-cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.dock-card {
+  padding: 8px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.dock-card-hd {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+}
+
+.dock-name {
+  font-weight: 700;
+}
+
+.dock-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  font-size: 11px;
+}
+
+.dock-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.dock-kv {
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+  font-size: 12px;
+}
+
+.dock-label {
+  opacity: 0.7;
+}
+
+.dock-value {
+  font-weight: 600;
+}
+
+.tr-line {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.tr-editable {
+  padding: 0 4px;
+  border-radius: 4px;
+}
+
+.tr-editable:hover {
+  background: rgba(255,255,255,0.08);
+}
