@@ -33,7 +33,7 @@ let dockTemplatePreview = null;
 let dockTemplateStyleEl = null;
 let dockTemplateScript = null;
 let dockTemplateLastAssetsKey = "";
-const dockTemplateRenderer = new TrackerContentRenderer();
+let dockTemplateRenderer = null;
 
 
 
@@ -271,6 +271,9 @@ function applyDockTemplateAssets(template) {
 function renderDockFromTemplate(tracker, template) {
   if (!template?.html || !String(template.html).trim()) return "";
   try {
+    if (!dockTemplateRenderer) {
+      dockTemplateRenderer = new TrackerContentRenderer();
+    }
     return dockTemplateRenderer.renderFromTemplate(tracker, template.html);
   } catch (e) {
     console.warn("[TrackerRevamp] Dock template render failed, using default renderer", e);
