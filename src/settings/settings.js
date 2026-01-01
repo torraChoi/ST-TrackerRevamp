@@ -257,8 +257,6 @@ function registerSettingsListeners() {
 
 	$("#tracker_settings_panel_color").on("input", onSettingsPanelThemeChange);
 	$("#tracker_settings_panel_opacity").on("input", onSettingsPanelThemeChange);
-	$(window).on("resize", positionDockTemplateModal);
-	$(document).on("scroll", positionDockTemplateModal);
 	$("#tracker_dock_template_html_undo").on("click", () => runDockTemplateEditorCommand("tracker_dock_template_html", "undo"));
 	$("#tracker_dock_template_html_redo").on("click", () => runDockTemplateEditorCommand("tracker_dock_template_html", "redo"));
 	$("#tracker_dock_template_css_undo").on("click", () => runDockTemplateEditorCommand("tracker_dock_template_css", "undo"));
@@ -883,7 +881,6 @@ function openDockTemplateEditor() {
 
 	modal.detach();
 	$("body").append(modal);
-	positionDockTemplateModal();
 	modal.show();
 }
 
@@ -896,42 +893,6 @@ function closeDockTemplateEditor() {
 	if (originalParent && originalParent.length) {
 		originalParent.append(modal);
 	}
-}
-
-function getDockTemplateAnchorRect() {
-	const selectors = ["#expression-wrapper", "#extensions_settings2", "#extensions_settings"];
-	for (const sel of selectors) {
-		const el = document.querySelector(sel);
-		if (el) return el.getBoundingClientRect();
-	}
-	return null;
-}
-
-function positionDockTemplateModal() {
-	const modal = $("#tracker_dock_template_modal");
-	const box = modal.find(".tracker-modal");
-	if (!modal.length || !box.length) return;
-
-	const rect = getDockTemplateAnchorRect();
-	const margin = 10;
-
-	if (!rect) {
-		modal.css({ left: "0px", top: "0px", width: "100vw", height: "100vh", paddingTop: "60px" });
-		box.css({ width: "min(var(--sheldWidth), 92vw)" });
-		return;
-	}
-
-	modal.css({
-		left: `${rect.left}px`,
-		top: `${rect.top}px`,
-		width: `${rect.width}px`,
-		height: `${rect.height}px`,
-		paddingTop: `${margin}px`,
-	});
-
-	const innerWidth = Math.max(280, rect.width - margin * 2);
-	const innerHeight = Math.max(200, rect.height - margin * 2);
-	box.css({ width: `${innerWidth}px`, maxHeight: `${innerHeight}px` });
 }
 
 function toLowerCamel(str) {

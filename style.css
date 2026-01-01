@@ -355,15 +355,14 @@
   background: rgba(0,0,0,0.45);
   z-index: 10050;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  padding-top: 60px;
   pointer-events: none;
 }
 
 .tracker-modal {
-  width: min(var(--sheldWidth), 92vw);
-  max-height: calc(100vh - 120px);
+  width: min(calc(var(--sheldWidth) - 20px), 92vw);
+  max-height: calc(100vh - 80px);
   overflow: auto;
   background: #111;
   border: 1px solid var(--SmartThemeBorderColor);

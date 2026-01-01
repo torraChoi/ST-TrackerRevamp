@@ -272,6 +272,14 @@ function applyDockTemplateScript(template) {
   if (!js.trim()) return;
 
   try {
+    if (dockTemplateScript && typeof dockTemplateScript.cleanup === "function") {
+      try {
+        dockTemplateScript.cleanup();
+      } catch (e) {
+        console.warn("[TrackerRevamp] Dock template cleanup failed", e);
+      }
+    }
+
     const parsedFunction = new Function(`return (${js})`)();
     let parsedObject = parsedFunction;
     if (typeof parsedFunction === "function") parsedObject = parsedFunction();
@@ -279,11 +287,13 @@ function applyDockTemplateScript(template) {
     if (typeof parsedObject === "object" && parsedObject !== null) {
       dockTemplateScript = parsedObject;
       if (typeof dockTemplateScript.init === "function") {
-        try {
-          dockTemplateScript.init({ root: dockEl });
-        } catch {
-          dockTemplateScript.init();
-        }
+        requestAnimationFrame(() => {
+          try {
+            dockTemplateScript.init({ root: dockEl });
+          } catch {
+            dockTemplateScript.init();
+          }
+        });
       }
     }
   } catch (e) {
