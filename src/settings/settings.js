@@ -870,6 +870,8 @@ function processTrackerJavascript() {
 let dockTemplateActiveTextarea = null;
 let dockTemplateMacroGroups = null;
 let dockTemplateImportQueue = [];
+let dockTemplateImportActive = false;
+let dockTemplateImportInputId = "";
 
 function openDockTemplateEditor() {
 	const modal = $("#tracker_dock_template_modal");
@@ -960,7 +962,14 @@ function onDockTemplateCancelClick() {
 
 function onDockTemplateImportChange(event, type) {
 	const file = event.target.files[0];
-	if (!file) return;
+	if (!file) {
+		if (dockTemplateImportActive) {
+			dockTemplateImportQueue = [];
+			dockTemplateImportActive = false;
+			dockTemplateImportInputId = "";
+		}
+		return;
+	}
 
 	const reader = new FileReader();
 	reader.onload = function (e) {
@@ -1008,21 +1017,24 @@ function exportDockTemplateFiles() {
 
 function startDockTemplateImportSequence() {
 	dockTemplateImportQueue = ["html", "css", "js"];
+	dockTemplateImportActive = true;
 	continueDockTemplateImportSequence();
 }
 
 function continueDockTemplateImportSequence() {
 	const next = dockTemplateImportQueue.shift();
-	if (!next) return;
-	const label = next.toUpperCase();
-	const ok = confirm(`Select ${label} file (Cancel to stop)`);
-	if (!ok) {
-		dockTemplateImportQueue = [];
+	if (!next) {
+		dockTemplateImportActive = false;
+		dockTemplateImportInputId = "";
 		return;
 	}
-	if (next === "html") $("#tracker_dock_template_import_html").click();
-	if (next === "css") $("#tracker_dock_template_import_css").click();
-	if (next === "js") $("#tracker_dock_template_import_js").click();
+
+	if (next === "html") dockTemplateImportInputId = "tracker_dock_template_import_html";
+	if (next === "css") dockTemplateImportInputId = "tracker_dock_template_import_css";
+	if (next === "js") dockTemplateImportInputId = "tracker_dock_template_import_js";
+
+	const input = document.getElementById(dockTemplateImportInputId);
+	if (input) input.click();
 }
 
 function runDockTemplateEditorCommand(textareaId, command) {
