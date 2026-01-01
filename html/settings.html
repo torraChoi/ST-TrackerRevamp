@@ -221,65 +221,98 @@
 					</div>
 
 					<div class="tracker-block m-b-1 m-t-1">
+						<label for="tracker_dock_template_preset_select">Dock Template Presets</label>
+						<select id="tracker_dock_template_preset_select" class="text_pole"></select>
+						<div class="tracker-preset-buttons">
+							<button id="tracker_dock_template_preset_new" class="menu_button fa-solid fa-file-circle-plus interactable" title="Save preset as"></button>
+							<button id="tracker_dock_template_preset_save" class="menu_button fa-solid fa-save interactable" title="Update current preset"></button>
+							<button id="tracker_dock_template_preset_rename" class="menu_button fa-pencil fa-solid interactable" title="Rename current preset"></button>
+							<button id="tracker_dock_template_preset_delete" class="menu_button fa-solid fa-trash-can interactable" title="Delete current preset"></button>
+						</div>
+					</div>
+
+					<div class="tracker-block m-b-1 m-t-1">
 						<label>Dock Template Files</label><br />
 						<small>Import/export the dock HTML, CSS, and JS as separate files.</small><br />
 						<div class="tracker-preset-buttons">
 							<input type="file" id="tracker_dock_template_import_html" style="display: none" accept=".html" />
 							<input type="file" id="tracker_dock_template_import_css" style="display: none" accept=".css" />
 							<input type="file" id="tracker_dock_template_import_js" style="display: none" accept=".js" />
-							<button id="tracker_dock_template_import_html_button" class="menu_button interactable" title="Import dock HTML">Import HTML</button>
-							<button id="tracker_dock_template_import_css_button" class="menu_button interactable" title="Import dock CSS">Import CSS</button>
-							<button id="tracker_dock_template_import_js_button" class="menu_button interactable" title="Import dock JS">Import JS</button>
-							<button id="tracker_dock_template_export_html" class="menu_button interactable" title="Export dock HTML">Export HTML</button>
-							<button id="tracker_dock_template_export_css" class="menu_button interactable" title="Export dock CSS">Export CSS</button>
-							<button id="tracker_dock_template_export_js" class="menu_button interactable" title="Export dock JS">Export JS</button>
-						</div>
-					</div>
-
-					<div class="tracker-block m-b-1 m-t-1">
-						<label for="tracker_dock_template_html">Dock HTML</label><br />
-						<small>Live preview updates as you type. Save to make it permanent. To keep dock editing, add editable fields with data-path and class tr-editable.</small><br />
-						<textarea id="tracker_dock_template_html" class="text_pole" rows="8"></textarea>
-						<div class="tracker-preset-buttons">
-							<button id="tracker_dock_template_html_undo" class="menu_button interactable" title="Undo">Undo</button>
-							<button id="tracker_dock_template_html_redo" class="menu_button interactable" title="Redo">Redo</button>
-						</div>
-					</div>
-
-					<div class="tracker-block m-b-1 m-t-1">
-						<label for="tracker_dock_template_css">Dock CSS</label><br />
-						<textarea id="tracker_dock_template_css" class="text_pole" rows="6"></textarea>
-						<div class="tracker-preset-buttons">
-							<button id="tracker_dock_template_css_undo" class="menu_button interactable" title="Undo">Undo</button>
-							<button id="tracker_dock_template_css_redo" class="menu_button interactable" title="Redo">Redo</button>
-						</div>
-					</div>
-
-					<div class="tracker-block m-b-1 m-t-1">
-						<label for="tracker_dock_template_js">Dock JS</label><br />
-						<small>Optional. JS runs with full access. Return an object with init/cleanup if needed.</small><br />
-						<textarea id="tracker_dock_template_js" class="text_pole" rows="6"></textarea>
-						<div class="tracker-preset-buttons">
-							<button id="tracker_dock_template_js_undo" class="menu_button interactable" title="Undo">Undo</button>
-							<button id="tracker_dock_template_js_redo" class="menu_button interactable" title="Redo">Redo</button>
+							<button id="tracker_dock_template_import_html_button" class="menu_button fa-solid fa-file-import interactable" title="Import dock HTML"></button>
+							<button id="tracker_dock_template_import_css_button" class="menu_button fa-solid fa-file-import interactable" title="Import dock CSS"></button>
+							<button id="tracker_dock_template_import_js_button" class="menu_button fa-solid fa-file-import interactable" title="Import dock JS"></button>
+							<button id="tracker_dock_template_export_html" class="menu_button fa-solid fa-file-export interactable" title="Export dock HTML"></button>
+							<button id="tracker_dock_template_export_css" class="menu_button fa-solid fa-file-export interactable" title="Export dock CSS"></button>
+							<button id="tracker_dock_template_export_js" class="menu_button fa-solid fa-file-export interactable" title="Export dock JS"></button>
 						</div>
 					</div>
 
 					<div class="tracker-block m-b-1 m-t-1">
 						<div class="tracker-preset-buttons">
-							<button id="tracker_dock_template_save" class="menu_button interactable" title="Save dock template">Save Dock Template</button>
-							<button id="tracker_dock_template_cancel" class="menu_button interactable" title="Cancel preview changes">Cancel Preview</button>
+							<button id="tracker_dock_template_open_editor" class="menu_button interactable" title="Open dock template editor">Open Dock Editor</button>
 						</div>
 					</div>
-
-					<details class="tracker-block m-b-1 m-t-1">
-						<summary>Dock Template Macros</summary>
-						<small>Click to insert macros at the cursor.</small><br />
-						<div id="tracker_dock_template_macros" class="tracker-macro-list"></div>
-					</details>
 				</div>
 			</details>
 			<hr class="sysHR" />
+
+			<div id="tracker_dock_template_modal" class="tracker-modal-overlay" style="display: none;">
+				<div class="tracker-modal">
+					<div class="tracker-modal-header">
+						<b>Dock Template Editor</b>
+						<button id="tracker_dock_template_close_editor" class="menu_button">X</button>
+					</div>
+					<div class="tracker-dock-template-editor">
+						<div class="tracker-dock-template-left">
+							<div class="tracker-block m-b-1 m-t-1">
+								<label for="tracker_dock_template_html">Dock HTML</label><br />
+								<small>Live preview updates as you type. Save to make it permanent. To keep dock editing, add editable fields with data-path and class tr-editable.</small><br />
+								<textarea id="tracker_dock_template_html" class="text_pole" rows="10"></textarea>
+								<div class="tracker-preset-buttons">
+									<button id="tracker_dock_template_html_undo" class="menu_button interactable" title="Undo">Undo</button>
+									<button id="tracker_dock_template_html_redo" class="menu_button interactable" title="Redo">Redo</button>
+								</div>
+							</div>
+
+							<div class="tracker-block m-b-1 m-t-1">
+								<label for="tracker_dock_template_css">Dock CSS</label><br />
+								<textarea id="tracker_dock_template_css" class="text_pole" rows="8"></textarea>
+								<div class="tracker-preset-buttons">
+									<button id="tracker_dock_template_css_undo" class="menu_button interactable" title="Undo">Undo</button>
+									<button id="tracker_dock_template_css_redo" class="menu_button interactable" title="Redo">Redo</button>
+								</div>
+							</div>
+
+							<div class="tracker-block m-b-1 m-t-1">
+								<label for="tracker_dock_template_js">Dock JS</label><br />
+								<small>Optional. JS runs with full access. Return an object with init/cleanup if needed.</small><br />
+								<textarea id="tracker_dock_template_js" class="text_pole" rows="8"></textarea>
+								<div class="tracker-preset-buttons">
+									<button id="tracker_dock_template_js_undo" class="menu_button interactable" title="Undo">Undo</button>
+									<button id="tracker_dock_template_js_redo" class="menu_button interactable" title="Redo">Redo</button>
+								</div>
+							</div>
+
+							<div class="tracker-block m-b-1 m-t-1">
+								<div class="tracker-preset-buttons">
+									<button id="tracker_dock_template_save" class="menu_button interactable" title="Save dock template">Save Dock Template</button>
+									<button id="tracker_dock_template_cancel" class="menu_button interactable" title="Cancel preview changes">Cancel Preview</button>
+								</div>
+							</div>
+						</div>
+						<div class="tracker-dock-template-right">
+							<div class="tracker-block m-b-1 m-t-1">
+								<label for="tracker_dock_template_macro_group">Dock Template Macros</label><br />
+								<small>Click to insert at the cursor.</small><br />
+								<select id="tracker_dock_template_macro_group" class="text_pole">
+									<option value="all">All</option>
+								</select>
+								<div id="tracker_dock_template_macros" class="tracker-macro-list tracker-macro-scroll"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
 
 			<!-- Other Settings -->
 			<div class="tracker-block m-b-1 m-t-1">

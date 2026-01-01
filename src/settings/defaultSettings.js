@@ -363,6 +363,15 @@ const dockTemplateEnabled = false;
 const dockTemplateHtml = "";
 const dockTemplateCss = "";
 const dockTemplateJs = "";
+const dockTemplatePresets = {
+	"Default": {
+		enabled: dockTemplateEnabled,
+		html: dockTemplateHtml,
+		css: dockTemplateCss,
+		js: dockTemplateJs,
+	},
+};
+const selectedDockTemplatePreset = "Default";
 
 const trackerDef = {
 	"field-0": {
@@ -540,6 +549,8 @@ export const defaultSettings = {
 	dockTemplateHtml: dockTemplateHtml,
 	dockTemplateCss: dockTemplateCss,
 	dockTemplateJs: dockTemplateJs,
+	dockTemplatePresets: dockTemplatePresets,
+	selectedDockTemplatePreset: selectedDockTemplatePreset,
 	trackerDef: trackerDef,
 
 	trackerPreviewSelector: trackerPreviewSelector,
@@ -574,6 +585,8 @@ export const defaultSettings = {
 			dockTemplateHtml: dockTemplateHtml,
 			dockTemplateCss: dockTemplateCss,
 			dockTemplateJs: dockTemplateJs,
+			dockTemplatePresets: dockTemplatePresets,
+			selectedDockTemplatePreset: selectedDockTemplatePreset,
 			trackerDef: trackerDef,
 		},
 		"Default-TwoStage": {
@@ -599,6 +612,8 @@ export const defaultSettings = {
 			dockTemplateHtml: dockTemplateHtml,
 			dockTemplateCss: dockTemplateCss,
 			dockTemplateJs: dockTemplateJs,
+			dockTemplatePresets: dockTemplatePresets,
+			selectedDockTemplatePreset: selectedDockTemplatePreset,
 			trackerDef: trackerDef,
 		},
 		"Default-Inline": {
@@ -624,6 +639,8 @@ export const defaultSettings = {
 			dockTemplateHtml: dockTemplateHtml,
 			dockTemplateCss: dockTemplateCss,
 			dockTemplateJs: dockTemplateJs,
+			dockTemplatePresets: dockTemplatePresets,
+			selectedDockTemplatePreset: selectedDockTemplatePreset,
 			trackerDef: trackerDef,
 		},
 	},

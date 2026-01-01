@@ -48,6 +48,8 @@ export async function initSettings() {
 			"dockTemplateHtml",
 			"dockTemplateCss",
 			"dockTemplateJs",
+			"dockTemplatePresets",
+			"selectedDockTemplatePreset",
 			"numberOfMessages",
 			"responseLength",
 			"debugMode",
@@ -136,6 +138,7 @@ try {
 function setSettingsInitialValues() {
 	// Populate presets dropdown
 	updatePresetDropdown();
+	updateDockTemplatePresetDropdown();
 	initializeOverridesDropdowns();
 	updatePopupDropdown();
 	updateFieldVisibility(extensionSettings.generationMode);
@@ -164,6 +167,7 @@ function setSettingsInitialValues() {
 	$("#tracker_dock_template_html").val(extensionSettings.dockTemplateHtml);
 	$("#tracker_dock_template_css").val(extensionSettings.dockTemplateCss);
 	$("#tracker_dock_template_js").val(extensionSettings.dockTemplateJs);
+	$("#tracker_dock_template_preset_select").val(extensionSettings.selectedDockTemplatePreset);
 	$("#tracker_number_of_messages").val(extensionSettings.numberOfMessages);
 	$("#tracker_generate_from_message").val(extensionSettings.generateFromMessage);
 	$("#tracker_minimum_depth").val(extensionSettings.minimumDepth);
@@ -215,6 +219,11 @@ function registerSettingsListeners() {
 	$("#tracker_character_description").on("input", onSettingInputareaInput("characterDescriptionTemplate"));
 	$("#tracker_mes_tracker_template").on("input", onSettingInputareaInput("mesTrackerTemplate"));
 	$("#tracker_mes_tracker_javascript").on("input", onSettingInputareaInput("mesTrackerJavascript"));
+	$("#tracker_dock_template_preset_select").on("change", onDockTemplatePresetSelectChange);
+	$("#tracker_dock_template_preset_new").on("click", onDockTemplatePresetNewClick);
+	$("#tracker_dock_template_preset_save").on("click", onDockTemplatePresetSaveClick);
+	$("#tracker_dock_template_preset_rename").on("click", onDockTemplatePresetRenameClick);
+	$("#tracker_dock_template_preset_delete").on("click", onDockTemplatePresetDeleteClick);
 	$("#tracker_dock_template_enabled").on("change", onDockTemplateSettingsChange);
 	$("#tracker_dock_template_html").on("input", onDockTemplateSettingsChange);
 	$("#tracker_dock_template_css").on("input", onDockTemplateSettingsChange);
@@ -237,6 +246,9 @@ function registerSettingsListeners() {
 	$("#tracker_dock_template_export_html").on("click", () => onDockTemplateExportClick("html"));
 	$("#tracker_dock_template_export_css").on("click", () => onDockTemplateExportClick("css"));
 	$("#tracker_dock_template_export_js").on("click", () => onDockTemplateExportClick("js"));
+	$("#tracker_dock_template_open_editor").on("click", openDockTemplateEditor);
+	$("#tracker_dock_template_close_editor").on("click", closeDockTemplateEditor);
+	$("#tracker_dock_template_macro_group").on("change", buildDockTemplateMacroList);
 	$("#tracker_dock_template_html_undo").on("click", () => runDockTemplateEditorCommand("tracker_dock_template_html", "undo"));
 	$("#tracker_dock_template_html_redo").on("click", () => runDockTemplateEditorCommand("tracker_dock_template_html", "redo"));
 	$("#tracker_dock_template_css_undo").on("click", () => runDockTemplateEditorCommand("tracker_dock_template_css", "undo"));
@@ -446,6 +458,117 @@ function onPresetSelectChange() {
 
 	setSettingsInitialValues();
 	saveSettingsDebounced();
+}
+
+function updateDockTemplatePresetDropdown() {
+	const presetSelect = $("#tracker_dock_template_preset_select");
+	if (!presetSelect.length) return;
+
+	presetSelect.empty();
+	const presets = extensionSettings.dockTemplatePresets || {};
+	for (const presetName in presets) {
+		const option = $("<option>").val(presetName).text(presetName);
+		if (presetName === extensionSettings.selectedDockTemplatePreset) {
+			option.attr("selected", "selected");
+		}
+		presetSelect.append(option);
+	}
+}
+
+function onDockTemplatePresetSelectChange() {
+	const selectedPreset = $(this).val();
+	const preset = extensionSettings.dockTemplatePresets?.[selectedPreset];
+	if (!preset) return;
+
+	extensionSettings.selectedDockTemplatePreset = selectedPreset;
+	extensionSettings.dockTemplateEnabled = Boolean(preset.enabled);
+	extensionSettings.dockTemplateHtml = preset.html ?? "";
+	extensionSettings.dockTemplateCss = preset.css ?? "";
+	extensionSettings.dockTemplateJs = preset.js ?? "";
+	saveSettingsDebounced();
+	setSettingsInitialValues();
+	applyDockTemplatePreviewFromUI();
+}
+
+function onDockTemplatePresetNewClick() {
+	const presetName = prompt("Enter a name for the new dock template preset:");
+	if (presetName && !extensionSettings.dockTemplatePresets?.[presetName]) {
+		const draft = getDockTemplateDraftFromUI();
+		if (!extensionSettings.dockTemplatePresets) extensionSettings.dockTemplatePresets = {};
+		extensionSettings.dockTemplatePresets[presetName] = {
+			enabled: draft.enabled,
+			html: draft.html,
+			css: draft.css,
+			js: draft.js,
+		};
+		extensionSettings.selectedDockTemplatePreset = presetName;
+		updateDockTemplatePresetDropdown();
+		saveSettingsDebounced();
+		toastr.success(`Dock template preset ${presetName} created.`);
+	} else if (extensionSettings.dockTemplatePresets?.[presetName]) {
+		alert("A dock template preset with that name already exists.");
+	}
+}
+
+function onDockTemplatePresetSaveClick() {
+	const presetName = extensionSettings.selectedDockTemplatePreset;
+	if (!presetName) return;
+
+	const draft = getDockTemplateDraftFromUI();
+	if (!extensionSettings.dockTemplatePresets) extensionSettings.dockTemplatePresets = {};
+	extensionSettings.dockTemplatePresets[presetName] = {
+		enabled: draft.enabled,
+		html: draft.html,
+		css: draft.css,
+		js: draft.js,
+	};
+	saveSettingsDebounced();
+	toastr.success(`Dock template preset ${presetName} saved.`);
+}
+
+function onDockTemplatePresetRenameClick() {
+	const oldName = $("#tracker_dock_template_preset_select").val();
+	const newName = prompt("Enter the new name for the dock template preset:", oldName);
+	if (newName && !extensionSettings.dockTemplatePresets?.[newName]) {
+		extensionSettings.dockTemplatePresets[newName] = extensionSettings.dockTemplatePresets[oldName];
+		delete extensionSettings.dockTemplatePresets[oldName];
+		if (extensionSettings.selectedDockTemplatePreset === oldName) {
+			extensionSettings.selectedDockTemplatePreset = newName;
+		}
+		updateDockTemplatePresetDropdown();
+		saveSettingsDebounced();
+		toastr.success(`Dock template preset ${oldName} renamed to ${newName}.`);
+	} else if (extensionSettings.dockTemplatePresets?.[newName]) {
+		alert("A dock template preset with that name already exists.");
+	}
+}
+
+function onDockTemplatePresetDeleteClick() {
+	const presetName = $("#tracker_dock_template_preset_select").val();
+	if (!presetName) return;
+	if (confirm(`Are you sure you want to delete the dock template preset "${presetName}"?`)) {
+		delete extensionSettings.dockTemplatePresets[presetName];
+		const remaining = Object.keys(extensionSettings.dockTemplatePresets);
+		if (!remaining.length) {
+			extensionSettings.dockTemplatePresets = {
+				"Default": {
+					enabled: false,
+					html: "",
+					css: "",
+					js: "",
+				},
+			};
+			extensionSettings.selectedDockTemplatePreset = "Default";
+			updateDockTemplatePresetDropdown();
+			onDockTemplatePresetSelectChange.call($("#tracker_dock_template_preset_select"));
+		} else {
+			extensionSettings.selectedDockTemplatePreset = remaining[0];
+			updateDockTemplatePresetDropdown();
+			onDockTemplatePresetSelectChange.call($("#tracker_dock_template_preset_select"));
+		}
+		saveSettingsDebounced();
+		toastr.success(`Dock template preset ${presetName} deleted.`);
+	}
 }
 
 /**
@@ -728,6 +851,29 @@ function processTrackerJavascript() {
 }
 
 let dockTemplateActiveTextarea = null;
+let dockTemplateMacroGroups = null;
+
+function openDockTemplateEditor() {
+	$("#tracker_dock_template_modal").show();
+}
+
+function closeDockTemplateEditor() {
+	$("#tracker_dock_template_modal").hide();
+}
+
+function toLowerCamel(str) {
+	const s = String(str ?? "");
+	if (!s) return "";
+	return s[0].toLowerCase() + s.slice(1);
+}
+
+function singularize(name) {
+	const n = String(name ?? "");
+	if (n.endsWith("ies")) return n.slice(0, -3) + "y";
+	if (n.endsWith("ses")) return n.slice(0, -2);
+	if (n.endsWith("s")) return n.slice(0, -1);
+	return n;
+}
 
 function getDockTemplateDraftFromUI() {
 	return {
@@ -757,6 +903,14 @@ function onDockTemplateSaveClick() {
 	extensionSettings.dockTemplateHtml = draft.html;
 	extensionSettings.dockTemplateCss = draft.css;
 	extensionSettings.dockTemplateJs = draft.js;
+	if (extensionSettings.dockTemplatePresets && extensionSettings.selectedDockTemplatePreset) {
+		extensionSettings.dockTemplatePresets[extensionSettings.selectedDockTemplatePreset] = {
+			enabled: draft.enabled,
+			html: draft.html,
+			css: draft.css,
+			js: draft.js,
+		};
+	}
 	saveSettingsDebounced();
 	clearDockTemplatePreview();
 	toastr.success("Dock template saved.");
@@ -783,6 +937,7 @@ function onDockTemplateImportChange(event, type) {
 		applyDockTemplatePreviewFromUI();
 	};
 	reader.readAsText(file);
+	event.target.value = "";
 }
 
 function onDockTemplateExportClick(type) {
@@ -823,17 +978,35 @@ function buildDockTemplateMacroList() {
 
 	listEl.empty();
 	const schema = extensionSettings.trackerDef || {};
+	const selectedGroup = $("#tracker_dock_template_macro_group").val() || "all";
 	const macros = [];
+	const groupSelect = $("#tracker_dock_template_macro_group");
+	const groupOptions = new Map();
+	const categoryNames = new Set(["MainCharacters", "OtherCharacters", "SmallEnemies", "BigEnemies"]);
 
 	for (const field of Object.values(schema)) {
 		const name = field.name;
 		const type = String(field.type || "").toUpperCase();
+		const groupName = name;
+		if (!groupOptions.has(groupName)) {
+			groupOptions.set(groupName, groupName);
+		}
+
+		const isGeneralGroup = selectedGroup === "general";
+		if (isGeneralGroup && categoryNames.has(groupName)) {
+			continue;
+		}
+		if (selectedGroup !== "all" && !isGeneralGroup && selectedGroup !== groupName) {
+			continue;
+		}
 
 		if (type === "FOR_EACH_OBJECT" || type === "FOR_EACH_ARRAY") {
-			macros.push(`{{#foreach ${name} item}}`);
+			const alias = toLowerCamel(singularize(name));
+			macros.push(`{{#foreach ${name} ${alias}}}`);
+			macros.push(`{{${alias}}}`);
 			if (field.nestedFields) {
 				for (const nested of Object.values(field.nestedFields)) {
-					macros.push(`{{item.${nested.name}}}`);
+					macros.push(`{{${alias}.${nested.name}}}`);
 				}
 			}
 			macros.push(`{{/foreach}}`);
@@ -841,9 +1014,24 @@ function buildDockTemplateMacroList() {
 			for (const nested of Object.values(field.nestedFields)) {
 				macros.push(`{{${name}.${nested.name}}}`);
 			}
+		} else if (type === "ARRAY") {
+			macros.push(`{{#join "; " ${name}}}`);
 		} else {
 			macros.push(`{{${name}}}`);
 		}
+	}
+
+	if (groupSelect.length) {
+		groupSelect.empty();
+		groupSelect.append($("<option>").val("all").text("All"));
+		const hasGeneral = Object.values(schema).some((field) => !categoryNames.has(field.name));
+		if (hasGeneral) {
+			groupSelect.append($("<option>").val("general").text("General"));
+		}
+		for (const groupName of groupOptions.values()) {
+			groupSelect.append($("<option>").val(groupName).text(groupName));
+		}
+		groupSelect.val(selectedGroup);
 	}
 
 	macros.forEach((macro) => {
