@@ -44,8 +44,35 @@
       button.textContent = trimmed[0].toUpperCase();
     };
 
-    mainButtons.forEach(applyInitial);
-    otherButtons.forEach(applyInitial);
+    mainButtons.forEach((button) => {
+      applyInitial(button);
+      const label = button.getAttribute("title") || button.dataset.mainTarget || "";
+      const name = String(label).trim().toLowerCase();
+      const isJill = name.includes("jill");
+      if (isJill) {
+        button.style.setProperty("--rail-ring", "rgba(202, 106, 127, 0.72)");
+        button.style.setProperty("--rail-core", "rgba(202, 106, 127, 0.28)");
+        button.style.setProperty("--rail-ring-hover", "rgba(225, 135, 155, 0.95)");
+        button.style.setProperty("--rail-core-hover", "rgba(225, 135, 155, 0.45)");
+        button.style.setProperty("--rail-glow", "rgba(202, 106, 127, 0.55)");
+      } else {
+        button.style.setProperty("--rail-ring", "rgba(64, 160, 238, 0.72)");
+        button.style.setProperty("--rail-core", "rgba(64, 160, 238, 0.28)");
+        button.style.setProperty("--rail-ring-hover", "rgba(120, 190, 245, 0.95)");
+        button.style.setProperty("--rail-core-hover", "rgba(120, 190, 245, 0.45)");
+        button.style.setProperty("--rail-glow", "rgba(64, 160, 238, 0.55)");
+      }
+    });
+    otherButtons.forEach((button) => {
+      applyInitial(button);
+      const hue = Math.floor(Math.random() * 360);
+      const ring = `hsla(${hue}, 70%, 65%, 0.72)`;
+      const ringHover = `hsla(${hue}, 80%, 75%, 0.9)`;
+      const glow = `hsla(${hue}, 70%, 65%, 0.55)`;
+      button.style.setProperty("--rail-ring", ring);
+      button.style.setProperty("--rail-ring-hover", ringHover);
+      button.style.setProperty("--rail-glow", glow);
+    });
 
     const otherBlock = otherToggle ? otherToggle.closest(".dock-rail-block") : null;
     const smallBlock = smallToggle ? smallToggle.closest(".dock-rail-block") : null;

@@ -270,6 +270,63 @@ function registerSettingsListeners() {
 
 	$("#tracker_dock_template_html, #tracker_dock_template_css, #tracker_dock_template_js").on("keydown", function (e) {
 		const isCtrl = e.ctrlKey || e.metaKey;
+		if (e.key === "Tab") {
+			e.preventDefault();
+			const el = this;
+			const tabStr = "  ";
+			const value = el.value;
+			const start = el.selectionStart ?? 0;
+			const end = el.selectionEnd ?? 0;
+			const hasSelection = start !== end;
+
+			if (!hasSelection) {
+				if (e.shiftKey && value.slice(Math.max(0, start - tabStr.length), start) === tabStr) {
+					el.value = value.slice(0, start - tabStr.length) + value.slice(start);
+					el.selectionStart = el.selectionEnd = start - tabStr.length;
+				} else if (!e.shiftKey) {
+					el.value = value.slice(0, start) + tabStr + value.slice(start);
+					el.selectionStart = el.selectionEnd = start + tabStr.length;
+				}
+			} else {
+				const lineStart = value.lastIndexOf("\n", start - 1) + 1;
+				const lineEnd = value.indexOf("\n", end);
+				const blockEnd = lineEnd === -1 ? value.length : lineEnd;
+				const block = value.slice(lineStart, blockEnd);
+				const lines = block.split("\n");
+				let removedFirst = 0;
+				let totalRemoved = 0;
+
+				const updated = lines.map((line, index) => {
+					if (e.shiftKey) {
+						if (line.startsWith(tabStr)) {
+							if (index === 0) removedFirst = tabStr.length;
+							totalRemoved += tabStr.length;
+							return line.slice(tabStr.length);
+						}
+						if (line.startsWith("\t")) {
+							if (index === 0) removedFirst = 1;
+							totalRemoved += 1;
+							return line.slice(1);
+						}
+					} else {
+						return tabStr + line;
+					}
+					return line;
+				});
+
+				el.value = value.slice(0, lineStart) + updated.join("\n") + value.slice(blockEnd);
+				if (e.shiftKey) {
+					el.selectionStart = Math.max(lineStart, start - removedFirst);
+					el.selectionEnd = Math.max(lineStart, end - totalRemoved);
+				} else {
+					el.selectionStart = start + tabStr.length;
+					el.selectionEnd = end + tabStr.length * lines.length;
+				}
+			}
+
+			el.dispatchEvent(new Event("input", { bubbles: true }));
+			return;
+		}
 		if (isCtrl && e.shiftKey && e.key.toLowerCase() === "z") {
 			e.preventDefault();
 			runDockTemplateEditorCommand(this.id, "redo");

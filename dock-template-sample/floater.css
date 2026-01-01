@@ -4,6 +4,7 @@
   border-radius: 0;
   max-height: 100vh;
   background: none;
+  backdrop-filter: none !important;
 }
 
 #trackerrevamp-dock-body {
@@ -14,13 +15,6 @@
    border-bottom: none !important;
 }
 
-.dock-meta {
-   display: flex;
-   background: rgba(170, 170, 170, 0.1);
-   align-items: center;
-   padding: 0 20px;
-   height: 65px;
-}
 
 .dock-value {
    height: 100%;
@@ -33,19 +27,11 @@
   display: flex;
   gap: 14px;
   color: #e6e6e6;
-  font-family: "Georgia", "Times New Roman", serif;
+  font-family: "Ubuntu", "Times New Roman", serif;
 }
 
 .trackerrevamp-dock-header {
   display: none;
-}
-
-.dock-meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 10px;
 }
 
 .dock-rail {
@@ -70,38 +56,60 @@
 }
 
 .rail-btn {
-  width: 40px;
-  height: 40px;
+  width: 60px;
+  height: 60px;
   border-radius: 999px;
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  border: 2px solid var(--rail-ring, rgba(255, 255, 255, 0.2));
   background: rgba(20, 20, 20, 0.8);
-  color: #f5f5f5;
+  color: #fff;
   font-weight: 700;
+  font-size: 15px;
+  line-height: 1;
   letter-spacing: 0.4px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  position: relative;
 }
 
 .rail-btn.is-active {
-  border-color: var(--dock-accent);
-  box-shadow: 0 0 0 2px rgba(107, 180, 255, 0.25);
+  border-color: var(--rail-ring, var(--dock-accent));
+  box-shadow: 0 0 0 2px var(--rail-glow, rgba(107, 180, 255, 0.25));
 }
 
 .rail-btn-group {
-  border-color: rgba(144, 190, 110, 0.8);
+  --rail-ring: rgba(162, 200, 145, 0.72);
+  --rail-core: rgba(162, 200, 145, 0.3);
+  --rail-ring-hover: rgba(176, 214, 160, 0.9);
+  --rail-core-hover: rgba(176, 214, 160, 0.4);
+  --rail-glow: rgba(162, 200, 145, 0.45);
+}
+
+.rail-btn-enemy  {
+  --rail-ring: rgba(200, 90, 90, 0.85);
+  --rail-core: rgba(200, 90, 90, 0.25);
+  --rail-ring-hover: rgba(220, 120, 120, 0.95);
+  --rail-core-hover: rgba(220, 120, 120, 0.45);
+  --rail-glow: rgba(200, 90, 90, 0.45);
 }
 
 .rail-btn-enemy {
-  border-color: rgba(200, 90, 90, 0.85);
+  --rail-ring: rgba(200, 90, 90, 0.85);
+  --rail-core: rgba(200, 90, 90, 0.25);
+  --rail-ring-hover: rgba(220, 120, 120, 0.95);
+  --rail-core-hover: rgba(220, 120, 120, 0.45);
+  --rail-glow: rgba(200, 90, 90, 0.45);
 }
 
 .rail-ico svg {
   width: 20px;
   height: 20px;
   display: block;
-  fill: currentColor;
+}
+
+.rail-ico svg path { 
+   fill: #fff;
 }
 
 .rail-sublist {
@@ -121,11 +129,15 @@
 }
 
 .dock-meta {
+   background: rgba(170, 170, 170, 0.1);
+   align-items: center;
+   padding: 0 20px;
+   height: 65px;
   display: flex;
   gap: 18px;
   justify-content: space-between;
   margin-bottom: 14px;
-  font-size: 0.9rem;
+  font-size: 1rem;
   opacity: 0.9;
 }
 
@@ -215,6 +227,64 @@
 .dock-enemy-block .dock-card:last-child {
   margin-bottom: 0;
 }
+
+/* small enemies */
+.rail-btn-enemy[data-enemy-toggle="small"] {
+  --rail-ring: rgba(175, 33, 35, 0.72);
+  --rail-core: rgba(175, 33, 35, 0.28);
+  --rail-ring-hover: rgba(210, 70, 70, 0.95);
+  --rail-core-hover: rgba(210, 70, 70, 0.45);
+  --rail-glow: rgba(175, 33, 35, 0.45);
+}
+
+/* big enemies */
+.rail-btn-enemy[data-enemy-toggle="big"] {
+  --rail-ring: rgba(135, 75, 237, 0.72);
+  --rail-core: rgba(135, 75, 237, 0.28);
+  --rail-ring-hover: rgba(170, 120, 245, 0.95);
+  --rail-core-hover: rgba(170, 120, 245, 0.45);
+  --rail-glow: rgba(135, 75, 237, 0.45);
+}
+
+
+.rail-btn::before {
+  content: "";
+  position: absolute;
+  inset: 11px;
+  border-radius: 999px;
+  background: var(--rail-core, rgba(255, 255, 255, 0.12));
+  z-index: 0;
+}
+
+.rail-btn:hover {
+  border-color: var(--rail-ring-hover, var(--rail-ring, rgba(255, 255, 255, 0.4)));
+}
+
+.rail-btn:hover::before {
+  background: var(--rail-core-hover, var(--rail-core, rgba(255, 255, 255, 0.2)));
+}
+
+.rail-btn-other::before {
+  background: transparent;
+}
+
+.rail-btn-other:hover::before {
+  background: transparent;
+}
+
+
+.rail-btn > span,
+.rail-btn > svg,
+.rail-btn > img,
+.rail-btn > .rail-ico {
+  position: relative;
+  z-index: 1;
+}
+
+.dock-enemy-block[data-enemy-panel="small"] .dock-pill { background: rgba(224, 107, 107, 0.3); }
+.dock-enemy-block[data-enemy-panel="big"] .dock-pill { background: rgba(139, 107, 255, 0.3); }
+
+
 
 .dock-card-enemy .dock-pill {
   background: rgba(180, 80, 80, 0.3);
