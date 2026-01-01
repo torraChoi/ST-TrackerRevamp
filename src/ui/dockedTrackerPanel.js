@@ -288,8 +288,10 @@ function applyDockTemplateScript(template) {
       dockTemplateScript = parsedObject;
       if (typeof dockTemplateScript.init === "function") {
         requestAnimationFrame(() => {
+          const body = dockEl?.querySelector("#trackerrevamp-dock-body");
+          const templateRoot = body?.querySelector(".dock-sample") || body || dockEl;
           try {
-            dockTemplateScript.init({ root: dockEl });
+            dockTemplateScript.init({ root: templateRoot, dockEl });
           } catch {
             dockTemplateScript.init();
           }
