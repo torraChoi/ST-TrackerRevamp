@@ -642,8 +642,9 @@ function renderDockFromTracker(tracker, schema) {
 
   let html = "";
   const used = new Set();
+  const categoryNames = new Set(categoryOrder.map((cat) => cat.name));
 
-  const generalFields = schemaFields.filter((field) => !used.has(field.name));
+  const generalFields = schemaFields.filter((field) => !categoryNames.has(field.name));
   if (generalFields.length) {
     const generalNode = {};
     generalFields.forEach((field, idx) => {
