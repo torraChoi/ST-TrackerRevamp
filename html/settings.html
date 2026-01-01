@@ -215,7 +215,7 @@
 			<details>
 				<summary>Dock Template</summary>
 				<div id="dock_template_settings">
-					<div class="tracker-block flex-container">
+					<div class="tracker-block flex-container dock-template-top">
 						<input id="tracker_dock_template_enabled" type="checkbox" />
 						<label for="tracker_dock_template_enabled">Enable Custom Dock Template</label>
 					</div>
@@ -238,12 +238,12 @@
 							<input type="file" id="tracker_dock_template_import_html" style="display: none" accept=".html" />
 							<input type="file" id="tracker_dock_template_import_css" style="display: none" accept=".css" />
 							<input type="file" id="tracker_dock_template_import_js" style="display: none" accept=".js" />
-							<button id="tracker_dock_template_import_html_button" class="menu_button fa-solid fa-file-import interactable" title="Import dock HTML"></button>
-							<button id="tracker_dock_template_import_css_button" class="menu_button fa-solid fa-file-import interactable" title="Import dock CSS"></button>
-							<button id="tracker_dock_template_import_js_button" class="menu_button fa-solid fa-file-import interactable" title="Import dock JS"></button>
-							<button id="tracker_dock_template_export_html" class="menu_button fa-solid fa-file-export interactable" title="Export dock HTML"></button>
-							<button id="tracker_dock_template_export_css" class="menu_button fa-solid fa-file-export interactable" title="Export dock CSS"></button>
-							<button id="tracker_dock_template_export_js" class="menu_button fa-solid fa-file-export interactable" title="Export dock JS"></button>
+							<button id="tracker_dock_template_import_html_button" class="menu_button fa-solid fa-file-import interactable" title="Import dock HTML">HTML</button>
+							<button id="tracker_dock_template_import_css_button" class="menu_button fa-solid fa-file-import interactable" title="Import dock CSS">CSS</button>
+							<button id="tracker_dock_template_import_js_button" class="menu_button fa-solid fa-file-import interactable" title="Import dock JS">JS</button>
+							<button id="tracker_dock_template_export_html" class="menu_button fa-solid fa-file-export interactable" title="Export dock HTML">HTML</button>
+							<button id="tracker_dock_template_export_css" class="menu_button fa-solid fa-file-export interactable" title="Export dock CSS">CSS</button>
+							<button id="tracker_dock_template_export_js" class="menu_button fa-solid fa-file-export interactable" title="Export dock JS">JS</button>
 						</div>
 					</div>
 
@@ -293,12 +293,6 @@
 								</div>
 							</div>
 
-							<div class="tracker-block m-b-1 m-t-1">
-								<div class="tracker-preset-buttons">
-									<button id="tracker_dock_template_save" class="menu_button interactable" title="Save dock template">Save Dock Template</button>
-									<button id="tracker_dock_template_cancel" class="menu_button interactable" title="Cancel preview changes">Cancel Preview</button>
-								</div>
-							</div>
 						</div>
 						<div class="tracker-dock-template-right">
 							<div class="tracker-block m-b-1 m-t-1">
@@ -308,6 +302,12 @@
 									<option value="all">All</option>
 								</select>
 								<div id="tracker_dock_template_macros" class="tracker-macro-list tracker-macro-scroll"></div>
+							</div>
+							<div class="tracker-block m-b-1 m-t-1">
+								<div class="tracker-preset-buttons">
+									<button id="tracker_dock_template_save" class="menu_button interactable" title="Save dock template">Save Dock Template</button>
+									<button id="tracker_dock_template_cancel" class="menu_button interactable" title="Cancel preview changes">Cancel Preview</button>
+								</div>
 							</div>
 						</div>
 					</div>

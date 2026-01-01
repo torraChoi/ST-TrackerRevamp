@@ -260,6 +260,14 @@ function registerSettingsListeners() {
 		dockTemplateActiveTextarea = this;
 	});
 
+	$("#tracker_dock_template_html, #tracker_dock_template_css, #tracker_dock_template_js").on("keydown", function (e) {
+		const isCtrl = e.ctrlKey || e.metaKey;
+		if (isCtrl && e.shiftKey && e.key.toLowerCase() === "z") {
+			e.preventDefault();
+			runDockTemplateEditorCommand(this.id, "redo");
+		}
+	});
+
 	const {
 		eventSource,
 		event_types,
@@ -481,7 +489,6 @@ function onDockTemplatePresetSelectChange() {
 	if (!preset) return;
 
 	extensionSettings.selectedDockTemplatePreset = selectedPreset;
-	extensionSettings.dockTemplateEnabled = Boolean(preset.enabled);
 	extensionSettings.dockTemplateHtml = preset.html ?? "";
 	extensionSettings.dockTemplateCss = preset.css ?? "";
 	extensionSettings.dockTemplateJs = preset.js ?? "";
@@ -854,11 +861,28 @@ let dockTemplateActiveTextarea = null;
 let dockTemplateMacroGroups = null;
 
 function openDockTemplateEditor() {
-	$("#tracker_dock_template_modal").show();
+	const modal = $("#tracker_dock_template_modal");
+	if (!modal.length) return;
+
+	if (!modal.data("original-parent")) {
+		modal.data("original-parent", modal.parent());
+	}
+
+	if (!document.body.contains(modal[0])) {
+		$("body").append(modal);
+	}
+	modal.show();
 }
 
 function closeDockTemplateEditor() {
-	$("#tracker_dock_template_modal").hide();
+	const modal = $("#tracker_dock_template_modal");
+	if (!modal.length) return;
+	modal.hide();
+
+	const originalParent = modal.data("original-parent");
+	if (originalParent && originalParent.length) {
+		originalParent.append(modal);
+	}
 }
 
 function toLowerCamel(str) {
