@@ -201,11 +201,43 @@ function wireDockActionProxies() {
       if (typeof handler === "function") {
         handler();
       } else {
-        target.click();
+        performDockAction(action, target);
       }
     });
     button.dataset.dockActionBound = "1";
   });
+}
+
+function performDockAction(action, fallbackTarget) {
+  if (!dockEl) return;
+  if (action === "toggle-side") {
+    const next = dockEl.dataset.side === "left" ? "right" : "left";
+    dockEl.dataset.side = next;
+    currentDockSide = next;
+
+    dockEl.classList.toggle("is-left", next === "left");
+    dockEl.classList.toggle("is-right", next === "right");
+
+    positionDockToggleButton();
+    return;
+  }
+
+  if (action === "toggle-og") {
+    const og = document.querySelector("#trackerInterface");
+    if (!og) {
+      console.warn("[TrackerRevamp] OG tracker not found (can't toggle)");
+      return;
+    }
+
+    const isHidden = window.getComputedStyle(og).display === "none";
+    if (isHidden) showOgTracker();
+    else hideOgTracker();
+    return;
+  }
+
+  if (fallbackTarget) {
+    fallbackTarget.click();
+  }
 }
 
 function waitForOgRegenerationDone(timeoutMs = 30000) {
@@ -1042,30 +1074,9 @@ export function ensureDock(side = "right") {
     }
     if (!actionBtn) return;
     const action = actionBtn.dataset.dockAction;
-    if (action === "toggle-side") {
+    if (action === "toggle-side" || action === "toggle-og") {
       event.preventDefault();
-      const next = dockEl.dataset.side === "left" ? "right" : "left";
-      dockEl.dataset.side = next;
-      currentDockSide = next;
-
-      dockEl.classList.toggle("is-left", next === "left");
-      dockEl.classList.toggle("is-right", next === "right");
-
-      positionDockToggleButton();
-      return;
-    }
-
-    if (action === "toggle-og") {
-      event.preventDefault();
-      const og = document.querySelector("#trackerInterface");
-      if (!og) {
-        console.warn("[TrackerRevamp] OG tracker not found (can't toggle)");
-        return;
-      }
-
-      const isHidden = window.getComputedStyle(og).display === "none";
-      if (isHidden) showOgTracker();
-      else hideOgTracker();
+      performDockAction(action);
       return;
     }
     const map = {
