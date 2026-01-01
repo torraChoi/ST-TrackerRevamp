@@ -283,8 +283,15 @@ function applyDockTemplateScript(template) {
       }
     }
 
+    const cleaned = js.trim().replace(/;+\s*$/, "");
     console.log("[TrackerRevamp] Dock template JS eval");
-    const parsedFunction = new Function(`return (${js})`)();
+    let parsedFunction;
+    try {
+      parsedFunction = new Function(`return (${cleaned})`)();
+    } catch (innerErr) {
+      console.warn("[TrackerRevamp] Dock template JS eval fallback", innerErr);
+      parsedFunction = new Function(`${cleaned}\n`)();
+    }
     let parsedObject = parsedFunction;
     if (typeof parsedFunction === "function") parsedObject = parsedFunction();
 
