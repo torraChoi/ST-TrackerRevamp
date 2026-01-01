@@ -34,6 +34,7 @@ let dockTemplateStyleEl = null;
 let dockTemplateScript = null;
 let dockTemplateLastAssetsKey = "";
 let dockTemplateRenderer = null;
+let dockActionCaptureInstalled = false;
 
 
 
@@ -238,6 +239,50 @@ function performDockAction(action, fallbackTarget) {
   if (fallbackTarget) {
     fallbackTarget.click();
   }
+}
+
+function installDockActionCapture() {
+  if (dockActionCaptureInstalled) return;
+  dockActionCaptureInstalled = true;
+
+  document.addEventListener(
+    "click",
+    (event) => {
+      const dockRoot = document.querySelector("#trackerrevamp-dock");
+      if (!dockRoot) return;
+
+      let node = event.target;
+      let actionBtn = null;
+      while (node && node !== dockRoot) {
+        if (node.dataset && node.dataset.dockAction) {
+          actionBtn = node;
+          break;
+        }
+        node = node.parentElement;
+      }
+
+      if (!actionBtn || !dockRoot.contains(actionBtn)) return;
+      const action = actionBtn.dataset.dockAction;
+      const header = dockRoot.querySelector(".trackerrevamp-dock-header");
+      const fallbackTarget =
+        action === "regenerate"
+          ? header?.querySelector("#trackerrevamp-dock-regenerate")
+          : action === "close"
+          ? header?.querySelector("#trackerrevamp-dock-close")
+          : action === "toggle-side"
+          ? header?.querySelector("#trackerrevamp-dock-pin")
+          : action === "toggle-og"
+          ? header?.querySelector("#trackerrevamp-og-toggle")
+          : null;
+
+      if (!fallbackTarget && action !== "toggle-side" && action !== "toggle-og") return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      performDockAction(action, fallbackTarget);
+    },
+    true
+  );
 }
 
 function waitForOgRegenerationDone(timeoutMs = 30000) {
@@ -1039,6 +1084,8 @@ function ensureDockToggleButton() {
 export function ensureDock(side = "right") {
   currentDockSide = side;
   if (dockEl) return dockEl;
+
+  installDockActionCapture();
 
   dockEl = document.createElement("div");
   dockEl.id = "trackerrevamp-dock";
