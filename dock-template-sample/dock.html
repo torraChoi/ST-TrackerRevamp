@@ -1,0 +1,162 @@
+<div class="dock-sample">
+  <div class="dock-top">
+    <div class="dock-title">Tracker</div>
+    <div class="dock-time">
+      <span class="dock-label">Time</span>
+      <span class="dock-value">{{Time}}</span>
+    </div>
+  </div>
+
+  <div class="dock-tabs">
+    <button class="dock-tab is-active" data-tab="main">Main</button>
+    <button class="dock-tab" data-tab="others">Others</button>
+    <button class="dock-tab" data-tab="enemies">Enemies</button>
+  </div>
+
+  <div class="dock-sections">
+    <section class="dock-section is-active" data-tab-panel="main">
+      <h3>Main Characters</h3>
+      <div class="dock-cards">
+        {{#foreach MainCharacters mainCharacter}}
+        <article class="dock-card">
+          <header class="dock-card-hd">
+            <div class="dock-name">{{mainCharacter}}</div>
+            <div class="dock-pill">LV
+              <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.Level" data-type="STRING">
+                <span class="tr-editable">{{mainCharacter.Level}}</span>
+              </span>
+            </div>
+          </header>
+
+          <div class="dock-row">
+            <div class="dock-kv">
+              <span class="dock-label">HP</span>
+              <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.HP" data-type="STRING">
+                <span class="tr-editable">{{mainCharacter.HP}}</span>
+              </span>
+            </div>
+            <div class="dock-kv">
+              <span class="dock-label">EXP</span>
+              <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.Exp" data-type="STRING">
+                <span class="tr-editable">{{mainCharacter.Exp}}</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="dock-row">
+            <div class="dock-kv">
+              <span class="dock-label">Role</span>
+              <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.Role" data-type="STRING">
+                <span class="tr-editable">{{mainCharacter.Role}}</span>
+              </span>
+            </div>
+            <div class="dock-kv">
+              <span class="dock-label">Location</span>
+              <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.Location" data-type="STRING">
+                <span class="tr-editable">{{mainCharacter.Location}}</span>
+              </span>
+            </div>
+          </div>
+        </article>
+        {{/foreach}}
+      </div>
+    </section>
+
+    <section class="dock-section" data-tab-panel="others">
+      <h3>Other Characters</h3>
+      <div class="dock-cards">
+        {{#foreach OtherCharacters otherCharacter}}
+        <article class="dock-card">
+          <header class="dock-card-hd">
+            <div class="dock-name">{{otherCharacter}}</div>
+            <div class="dock-pill">
+              <span class="dock-label">HP</span>
+              <span class="tr-line" data-path="OtherCharacters.{{otherCharacter}}.HP" data-type="STRING">
+                <span class="tr-editable">{{otherCharacter.HP}}</span>
+              </span>
+            </div>
+          </header>
+          <div class="dock-row">
+            <div class="dock-kv">
+              <span class="dock-label">Role</span>
+              <span class="tr-line" data-path="OtherCharacters.{{otherCharacter}}.Role" data-type="STRING">
+                <span class="tr-editable">{{otherCharacter.Role}}</span>
+              </span>
+            </div>
+            <div class="dock-kv">
+              <span class="dock-label">Location</span>
+              <span class="tr-line" data-path="OtherCharacters.{{otherCharacter}}.Location" data-type="STRING">
+                <span class="tr-editable">{{otherCharacter.Location}}</span>
+              </span>
+            </div>
+          </div>
+        </article>
+        {{/foreach}}
+      </div>
+    </section>
+
+    <section class="dock-section" data-tab-panel="enemies">
+      <h3>Small Enemies</h3>
+      <div class="dock-cards">
+        {{#foreach SmallEnemies smallEnemy}}
+        <article class="dock-card">
+          <header class="dock-card-hd">
+            <div class="dock-name">{{smallEnemy}}</div>
+            <div class="dock-pill">
+              <span class="dock-label">EXP</span>
+              <span class="tr-line" data-path="SmallEnemies.{{smallEnemy}}.ExpGain" data-type="STRING">
+                <span class="tr-editable">{{smallEnemy.ExpGain}}</span>
+              </span>
+            </div>
+          </header>
+          <div class="dock-row">
+            <div class="dock-kv">
+              <span class="dock-label">Number</span>
+              <span class="tr-line" data-path="SmallEnemies.{{smallEnemy}}.Number" data-type="STRING">
+                <span class="tr-editable">{{smallEnemy.Number}}</span>
+              </span>
+            </div>
+            <div class="dock-kv">
+              <span class="dock-label">Location</span>
+              <span class="tr-line" data-path="SmallEnemies.{{smallEnemy}}.Location" data-type="STRING">
+                <span class="tr-editable">{{smallEnemy.Location}}</span>
+              </span>
+            </div>
+          </div>
+        </article>
+        {{/foreach}}
+      </div>
+
+      <h3>Big Enemies</h3>
+      <div class="dock-cards">
+        {{#foreach BigEnemies bigEnemy}}
+        <article class="dock-card">
+          <header class="dock-card-hd">
+            <div class="dock-name">{{bigEnemy}}</div>
+            <div class="dock-pill">
+              <span class="dock-label">LV</span>
+              <span class="tr-line" data-path="BigEnemies.{{bigEnemy}}.Level" data-type="STRING">
+                <span class="tr-editable">{{bigEnemy.Level}}</span>
+              </span>
+            </div>
+          </header>
+          <div class="dock-row">
+            <div class="dock-kv">
+              <span class="dock-label">HP</span>
+              <span class="tr-line" data-path="BigEnemies.{{bigEnemy}}.HP" data-type="STRING">
+                <span class="tr-editable">{{bigEnemy.HP}}</span>
+              </span>
+            </div>
+            <div class="dock-kv">
+              <span class="dock-label">Type</span>
+              <span class="tr-line" data-path="BigEnemies.{{bigEnemy}}.Type" data-type="STRING">
+                <span class="tr-editable">{{bigEnemy.Type}}</span>
+              </span>
+            </div>
+          </div>
+        </article>
+        {{/foreach}}
+      </div>
+    </section>
+  </div>
+</div>

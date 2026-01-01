@@ -228,23 +228,17 @@
 							<button id="tracker_dock_template_preset_save" class="menu_button fa-solid fa-save interactable" title="Update current preset"></button>
 							<button id="tracker_dock_template_preset_rename" class="menu_button fa-pencil fa-solid interactable" title="Rename current preset"></button>
 							<button id="tracker_dock_template_preset_delete" class="menu_button fa-solid fa-trash-can interactable" title="Delete current preset"></button>
+							<button id="tracker_dock_template_import_preset" class="menu_button fa-solid fa-file-import interactable" title="Import dock template files"></button>
+							<button id="tracker_dock_template_export_preset" class="menu_button fa-solid fa-file-export interactable" title="Export dock template files"></button>
 						</div>
 					</div>
 
 					<div class="tracker-block m-b-1 m-t-1">
 						<label>Dock Template Files</label><br />
-						<small>Import/export the dock HTML, CSS, and JS as separate files.</small><br />
-						<div class="tracker-preset-buttons">
-							<input type="file" id="tracker_dock_template_import_html" style="display: none" accept=".html" />
-							<input type="file" id="tracker_dock_template_import_css" style="display: none" accept=".css" />
-							<input type="file" id="tracker_dock_template_import_js" style="display: none" accept=".js" />
-							<button id="tracker_dock_template_import_html_button" class="menu_button fa-solid fa-file-import interactable" title="Import dock HTML">HTML</button>
-							<button id="tracker_dock_template_import_css_button" class="menu_button fa-solid fa-file-import interactable" title="Import dock CSS">CSS</button>
-							<button id="tracker_dock_template_import_js_button" class="menu_button fa-solid fa-file-import interactable" title="Import dock JS">JS</button>
-							<button id="tracker_dock_template_export_html" class="menu_button fa-solid fa-file-export interactable" title="Export dock HTML">HTML</button>
-							<button id="tracker_dock_template_export_css" class="menu_button fa-solid fa-file-export interactable" title="Export dock CSS">CSS</button>
-							<button id="tracker_dock_template_export_js" class="menu_button fa-solid fa-file-export interactable" title="Export dock JS">JS</button>
-						</div>
+						<small>Use Import/Export above to load or save HTML/CSS/JS for this preset.</small><br />
+						<input type="file" id="tracker_dock_template_import_html" style="display: none" accept=".html" />
+						<input type="file" id="tracker_dock_template_import_css" style="display: none" accept=".css" />
+						<input type="file" id="tracker_dock_template_import_js" style="display: none" accept=".js" />
 					</div>
 
 					<div class="tracker-block m-b-1 m-t-1">
@@ -304,6 +298,15 @@
 								<div id="tracker_dock_template_macros" class="tracker-macro-list tracker-macro-scroll"></div>
 							</div>
 							<div class="tracker-block m-b-1 m-t-1">
+								<label>Color Helper</label><br />
+								<div class="tracker-dock-template-color">
+									<input id="tracker_dock_template_color" type="color" />
+									<input id="tracker_dock_template_opacity" type="range" min="0" max="100" value="100" />
+									<span id="tracker_dock_template_color_value">rgba(0, 0, 0, 1)</span>
+									<button id="tracker_dock_template_insert_color" class="menu_button interactable" title="Insert color">Insert</button>
+								</div>
+							</div>
+							<div class="tracker-block m-b-1 m-t-1">
 								<div class="tracker-preset-buttons">
 									<button id="tracker_dock_template_save" class="menu_button interactable" title="Save dock template">Save Dock Template</button>
 									<button id="tracker_dock_template_cancel" class="menu_button interactable" title="Cancel preview changes">Cancel Preview</button>
@@ -344,6 +347,16 @@
 			<div class="tracker-block flex-container" style="flex-wrap: nowrap; overflow: hidden;">
 				<input id="tracker_reset_presets" class="menu_button" type="submit" value="Reset Default Presets" />
 				<label for="tracker_reset_presets"></label>
+			</div>
+			<hr class="sysHR" />
+			<div class="tracker-block m-b-1 m-t-1">
+				<label>Extra Settings</label><br />
+				<small>Customize the Tracker Revamp settings panel appearance.</small><br />
+				<div class="tracker-settings-theme">
+					<input id="tracker_settings_panel_color" type="color" />
+					<input id="tracker_settings_panel_opacity" type="range" min="0" max="100" />
+					<span id="tracker_settings_panel_value"></span>
+				</div>
 			</div>
 			<hr class="sysHR" />
 		</div>

@@ -50,6 +50,8 @@ export async function initSettings() {
 			"dockTemplateJs",
 			"dockTemplatePresets",
 			"selectedDockTemplatePreset",
+			"settingsPanelColor",
+			"settingsPanelOpacity",
 			"numberOfMessages",
 			"responseLength",
 			"debugMode",
@@ -168,6 +170,10 @@ function setSettingsInitialValues() {
 	$("#tracker_dock_template_css").val(extensionSettings.dockTemplateCss);
 	$("#tracker_dock_template_js").val(extensionSettings.dockTemplateJs);
 	$("#tracker_dock_template_preset_select").val(extensionSettings.selectedDockTemplatePreset);
+	$("#tracker_settings_panel_color").val(extensionSettings.settingsPanelColor);
+	$("#tracker_settings_panel_opacity").val(extensionSettings.settingsPanelOpacity);
+	$("#tracker_dock_template_color").val("#000000");
+	$("#tracker_dock_template_opacity").val(100);
 	$("#tracker_number_of_messages").val(extensionSettings.numberOfMessages);
 	$("#tracker_generate_from_message").val(extensionSettings.generateFromMessage);
 	$("#tracker_minimum_depth").val(extensionSettings.minimumDepth);
@@ -176,6 +182,8 @@ function setSettingsInitialValues() {
 	// Process the tracker javascript
 	processTrackerJavascript();
 	buildDockTemplateMacroList();
+	applySettingsPanelTheme();
+	updateDockTemplateColorPreview();
 }
 
 // #endregion
@@ -237,18 +245,20 @@ function registerSettingsListeners() {
 	$("#tracker_reset_presets").on("click", onTrackerPromptResetClick);
 	$("#tracker_dock_template_save").on("click", onDockTemplateSaveClick);
 	$("#tracker_dock_template_cancel").on("click", onDockTemplateCancelClick);
-	$("#tracker_dock_template_import_html_button").on("click", () => $("#tracker_dock_template_import_html").click());
-	$("#tracker_dock_template_import_css_button").on("click", () => $("#tracker_dock_template_import_css").click());
-	$("#tracker_dock_template_import_js_button").on("click", () => $("#tracker_dock_template_import_js").click());
+	$("#tracker_dock_template_import_preset").on("click", startDockTemplateImportSequence);
+	$("#tracker_dock_template_export_preset").on("click", exportDockTemplateFiles);
 	$("#tracker_dock_template_import_html").on("change", (e) => onDockTemplateImportChange(e, "html"));
 	$("#tracker_dock_template_import_css").on("change", (e) => onDockTemplateImportChange(e, "css"));
 	$("#tracker_dock_template_import_js").on("change", (e) => onDockTemplateImportChange(e, "js"));
-	$("#tracker_dock_template_export_html").on("click", () => onDockTemplateExportClick("html"));
-	$("#tracker_dock_template_export_css").on("click", () => onDockTemplateExportClick("css"));
-	$("#tracker_dock_template_export_js").on("click", () => onDockTemplateExportClick("js"));
 	$("#tracker_dock_template_open_editor").on("click", openDockTemplateEditor);
 	$("#tracker_dock_template_close_editor").on("click", closeDockTemplateEditor);
 	$("#tracker_dock_template_macro_group").on("change", buildDockTemplateMacroList);
+	$("#tracker_dock_template_color").on("input", updateDockTemplateColorPreview);
+	$("#tracker_dock_template_opacity").on("input", updateDockTemplateColorPreview);
+	$("#tracker_dock_template_insert_color").on("click", insertDockTemplateColor);
+
+	$("#tracker_settings_panel_color").on("input", onSettingsPanelThemeChange);
+	$("#tracker_settings_panel_opacity").on("input", onSettingsPanelThemeChange);
 	$("#tracker_dock_template_html_undo").on("click", () => runDockTemplateEditorCommand("tracker_dock_template_html", "undo"));
 	$("#tracker_dock_template_html_redo").on("click", () => runDockTemplateEditorCommand("tracker_dock_template_html", "redo"));
 	$("#tracker_dock_template_css_undo").on("click", () => runDockTemplateEditorCommand("tracker_dock_template_css", "undo"));
@@ -859,6 +869,7 @@ function processTrackerJavascript() {
 
 let dockTemplateActiveTextarea = null;
 let dockTemplateMacroGroups = null;
+let dockTemplateImportQueue = [];
 
 function openDockTemplateEditor() {
 	const modal = $("#tracker_dock_template_modal");
@@ -869,6 +880,7 @@ function openDockTemplateEditor() {
 	}
 
 	if (!document.body.contains(modal[0])) {
+		modal.detach();
 		$("body").append(modal);
 	}
 	modal.show();
@@ -959,6 +971,7 @@ function onDockTemplateImportChange(event, type) {
 		if (type === "css") $("#tracker_dock_template_css").val(content);
 		if (type === "js") $("#tracker_dock_template_js").val(content);
 		applyDockTemplatePreviewFromUI();
+		continueDockTemplateImportSequence();
 	};
 	reader.readAsText(file);
 	event.target.value = "";
@@ -987,6 +1000,25 @@ function onDockTemplateExportClick(type) {
 	a[0].click();
 	a.remove();
 	URL.revokeObjectURL(url);
+}
+
+function exportDockTemplateFiles() {
+	onDockTemplateExportClick("html");
+	onDockTemplateExportClick("css");
+	onDockTemplateExportClick("js");
+}
+
+function startDockTemplateImportSequence() {
+	dockTemplateImportQueue = ["html", "css", "js"];
+	continueDockTemplateImportSequence();
+}
+
+function continueDockTemplateImportSequence() {
+	const next = dockTemplateImportQueue.shift();
+	if (!next) return;
+	if (next === "html") $("#tracker_dock_template_import_html").click();
+	if (next === "css") $("#tracker_dock_template_import_css").click();
+	if (next === "js") $("#tracker_dock_template_import_js").click();
 }
 
 function runDockTemplateEditorCommand(textareaId, command) {
@@ -1079,6 +1111,47 @@ function insertDockTemplateMacro(text) {
 	target.selectionStart = target.selectionEnd = start + text.length;
 	target.focus();
 	applyDockTemplatePreviewFromUI();
+}
+
+function hexToRgb(hex) {
+	const raw = String(hex ?? "").replace("#", "").trim();
+	if (raw.length !== 6) return null;
+	const r = parseInt(raw.slice(0, 2), 16);
+	const g = parseInt(raw.slice(2, 4), 16);
+	const b = parseInt(raw.slice(4, 6), 16);
+	if (Number.isNaN(r) || Number.isNaN(g) || Number.isNaN(b)) return null;
+	return { r, g, b };
+}
+
+function updateDockTemplateColorPreview() {
+	const color = $("#tracker_dock_template_color").val() || "#000000";
+	const opacityVal = Number($("#tracker_dock_template_opacity").val() || 100);
+	const alpha = Math.max(0, Math.min(1, opacityVal / 100));
+	const rgb = hexToRgb(color) || { r: 0, g: 0, b: 0 };
+	const value = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+	$("#tracker_dock_template_color_value").text(value);
+}
+
+function insertDockTemplateColor() {
+	const colorText = $("#tracker_dock_template_color_value").text() || "";
+	if (colorText) insertDockTemplateMacro(colorText);
+}
+
+function applySettingsPanelTheme() {
+	const color = extensionSettings.settingsPanelColor || "#111111";
+	const opacityVal = Number(extensionSettings.settingsPanelOpacity ?? 100);
+	const alpha = Math.max(0, Math.min(1, opacityVal / 100));
+	const rgb = hexToRgb(color) || { r: 17, g: 17, b: 17 };
+	const value = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+	$("#tracker_settings .inline-drawer-content").css("background", value);
+	$("#tracker_settings_panel_value").text(value);
+}
+
+function onSettingsPanelThemeChange() {
+	extensionSettings.settingsPanelColor = $("#tracker_settings_panel_color").val() || "#111111";
+	extensionSettings.settingsPanelOpacity = Number($("#tracker_settings_panel_opacity").val() || 100);
+	saveSettingsDebounced();
+	applySettingsPanelTheme();
 }
 
 

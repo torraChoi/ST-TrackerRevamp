@@ -363,6 +363,8 @@ const dockTemplateEnabled = false;
 const dockTemplateHtml = "";
 const dockTemplateCss = "";
 const dockTemplateJs = "";
+const settingsPanelColor = "#111111";
+const settingsPanelOpacity = 85;
 const dockTemplatePresets = {
 	"Default": {
 		enabled: dockTemplateEnabled,
@@ -551,6 +553,8 @@ export const defaultSettings = {
 	dockTemplateJs: dockTemplateJs,
 	dockTemplatePresets: dockTemplatePresets,
 	selectedDockTemplatePreset: selectedDockTemplatePreset,
+	settingsPanelColor: settingsPanelColor,
+	settingsPanelOpacity: settingsPanelOpacity,
 	trackerDef: trackerDef,
 
 	trackerPreviewSelector: trackerPreviewSelector,

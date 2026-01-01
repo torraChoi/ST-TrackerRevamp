@@ -348,7 +348,10 @@
 
 .tracker-modal-overlay {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
   background: rgba(0,0,0,0.8);
   z-index: 10050;
   display: flex;
@@ -387,7 +390,19 @@
 }
 
 .dock-template-top {
-  margin-top: 8px;
+  margin-top: 12px;
+}
+
+.tracker-dock-template-color {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tracker-settings-theme {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 #tracker_reset_presets:hover {
