@@ -574,22 +574,83 @@ export class TrackerPromptMaker {
 	rebuildMiniNav() {
 		if (!this.navContainer) return;
 		this.navContainer.empty();
-		const topLevelFields = this.fieldsContainer.children(".field-wrapper");
-		topLevelFields.each((_, el) => {
-			const wrapper = $(el);
+
+		const buildEntry = (wrapper, depth) => {
 			const fieldId = wrapper.attr("data-field-id");
 			const name = wrapper.find("> .name-dynamic-type-wrapper .field-name-wrapper input").val() || "Untitled";
-			const navItem = $(`
-				<button class="menu_button interactable nav-item" data-nav-field-id="${fieldId}">
-					<span class="nav-label"></span>
-				</button>
-			`);
-			navItem.find(".nav-label").text(name);
-			navItem.on("click", () => {
-				el.scrollIntoView({ behavior: "smooth", block: "start" });
+			const children = wrapper.find("> .nested-fields-container > .field-wrapper");
+			const hasChildren = children.length > 0;
+
+			const entry = $(`<div class="nav-entry" data-nav-field-id="${fieldId}" data-nav-depth="${depth}"></div>`);
+			const row = $('<div class="nav-row"></div>');
+			if (hasChildren) {
+				const toggle = $('<span class="nav-toggle" role="button" tabindex="0">▾</span>');
+				toggle.on("click", (e) => {
+					e.stopPropagation();
+					entry.toggleClass("is-collapsed");
+					toggle.text(entry.hasClass("is-collapsed") ? "▸" : "▾");
+				});
+				row.append(toggle);
+			} else {
+				row.append('<span class="nav-toggle spacer"></span>');
+			}
+
+			if (depth === 0) {
+				row.append('<span class="nav-drag" title="Drag to reorder">≡</span>');
+			}
+
+			const label = $(`<span class="nav-label"></span>`);
+			label.text(name);
+			row.append(label);
+			row.on("click", () => {
+				wrapper.get(0).scrollIntoView({ behavior: "smooth", block: "start" });
 			});
-			this.navContainer.append(navItem);
+			entry.append(row);
+
+			if (hasChildren) {
+				const childWrap = $('<div class="nav-children"></div>');
+				children.each((_, childEl) => {
+					childWrap.append(buildEntry($(childEl), depth + 1));
+				});
+				entry.append(childWrap);
+			}
+			return entry;
+		};
+
+		this.fieldsContainer.children(".field-wrapper").each((_, el) => {
+			this.navContainer.append(buildEntry($(el), 0));
 		});
+
+		if (this.navContainer.sortable) {
+			this.navContainer.sortable("destroy");
+		}
+		this.navContainer.sortable({
+			items: "> .nav-entry[data-nav-depth='0']",
+			handle: ".nav-drag",
+			axis: "y",
+			stop: () => this.applyNavOrderFromSidebar(),
+		});
+	}
+
+	applyNavOrderFromSidebar() {
+		const order = [];
+		this.navContainer.children(".nav-entry[data-nav-depth='0']").each((_, el) => {
+			const fieldId = $(el).attr("data-nav-field-id");
+			if (fieldId) order.push(fieldId);
+		});
+		if (order.length === 0) return;
+		const wrappers = {};
+		this.fieldsContainer.children(".field-wrapper").each((_, el) => {
+			const id = $(el).attr("data-field-id");
+			wrappers[id] = $(el);
+		});
+		order.forEach((fieldId) => {
+			const wrapper = wrappers[fieldId];
+			if (wrapper) {
+				this.fieldsContainer.append(wrapper);
+			}
+		});
+		this.rebuildBackendObjectFromDOM();
 	}
 
 	getActiveFieldId() {
