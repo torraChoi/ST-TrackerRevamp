@@ -689,12 +689,13 @@ function buildPromptScoped(backendObj, includeFields, indentLevel, lines, includ
 		const effectiveScope = getEffectiveScope(field, currentTop, inheritedScope);
 		if (scopeFilter && !hasScopeMatch(field, scopeFilter, currentTop, effectiveScope)) continue;
 		if (!field.prompt && !field.nestedFields) continue;
+		const scopeTag = scopeTagForField(effectiveScope);
 
 		if (field.type === "FOR_EACH_OBJECT" || field.nestedFields) {
-			lines.push(`${indent}- **${field.name}:**${field.prompt ? " " + field.prompt : ""}`);
+			lines.push(`${indent}- ${scopeTag} **${field.name}:**${field.prompt ? " " + field.prompt : ""}`);
 			buildPromptScoped(field.nestedFields, includeFields, indentLevel + 1, lines, includeEphemeral, scopeFilter, currentTop, effectiveScope);
 		} else {
-			lines.push(`${indent}- **${field.name}:** ${field.prompt}`);
+			lines.push(`${indent}- ${scopeTag} **${field.name}:** ${field.prompt}`);
 		}
 	}
 }
@@ -732,6 +733,21 @@ function normalizeScopeValue(scopeValue) {
 	if (raw === FIELD_SCOPE_OPTIONS.USER) return FIELD_SCOPE_OPTIONS.USER;
 	if (raw === "npc") return FIELD_SCOPE_OPTIONS.UNIVERSAL;
 	return "";
+}
+
+function scopeTagForField(scopeKey) {
+	switch (scopeKey) {
+		case FIELD_SCOPE_OPTIONS.UNIVERSAL:
+			return "[UNIVERSAL]";
+		case FIELD_SCOPE_OPTIONS.BOTH:
+			return "[BOTH]";
+		case FIELD_SCOPE_OPTIONS.CHAR:
+			return "[CHAR ONLY]";
+		case FIELD_SCOPE_OPTIONS.USER:
+			return "[USER ONLY]";
+		default:
+			return "[BOTH]";
+	}
 }
 
 function hasScopedFields(backendObj) {
