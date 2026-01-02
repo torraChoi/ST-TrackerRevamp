@@ -21,6 +21,15 @@ export const FIELD_PRESENCE_OPTIONS = {
 	STATIC: "STATIC",
 };
 
+const FIELD_SCOPE_OPTIONS = {
+	BOTH: "both",
+	CHAR: "char",
+	USER: "user",
+	NPC: "npc",
+};
+
+const NPC_GROUP_NAMES = new Set(["othercharacters", "smallenemies", "bigenemies"]);
+
 // Handlers for different field types
 const FIELD_TYPES_HANDLERS = {
 	STRING: handleString,
@@ -117,7 +126,27 @@ export function getTracker(trackerInput, backendObject, includeFields = FIELD_IN
  */
 export function getTrackerPrompt(backendObject, includeFields = FIELD_INCLUDE_OPTIONS.DYNAMIC) {
 	const lines = [];
-	buildPrompt(backendObject, includeFields, 0, lines, true);
+	if (!hasScopedFields(backendObject)) {
+		buildPrompt(backendObject, includeFields, 0, lines, true);
+		return lines.join("\n").trim();
+	}
+
+	const sections = [
+		{ key: FIELD_SCOPE_OPTIONS.BOTH, title: "Both {{char}} and {{user}}" },
+		{ key: FIELD_SCOPE_OPTIONS.CHAR, title: "{{char}} only" },
+		{ key: FIELD_SCOPE_OPTIONS.USER, title: "{{user}} only" },
+		{ key: FIELD_SCOPE_OPTIONS.NPC, title: "Other NPCs" },
+	];
+
+	for (const section of sections) {
+		const sectionLines = [];
+		buildPromptScoped(backendObject, includeFields, 0, sectionLines, true, section.key, null);
+		if (sectionLines.length === 0) continue;
+		if (lines.length > 0) lines.push("");
+		lines.push(`### ${section.title}`);
+		lines.push(...sectionLines);
+	}
+
 	return lines.join("\n").trim();
 }
 
@@ -643,6 +672,72 @@ function buildPrompt(backendObj, includeFields, indentLevel, lines, includeEphem
 			lines.push(`${indent}- **${field.name}:** ${field.prompt}`);
 		}
 	}
+}
+
+function buildPromptScoped(backendObj, includeFields, indentLevel, lines, includeEphemeral = false, scopeFilter = null, topLevelName = null) {
+	const indent = "  ".repeat(indentLevel);
+	for (const field of Object.values(backendObj)) {
+		if (!shouldIncludeField(field, includeFields, includeEphemeral)) continue;
+		const currentTop = topLevelName || field.name || "";
+		if (!shouldIncludeFieldScope(field, scopeFilter, currentTop)) continue;
+		if (!field.prompt && !field.nestedFields) continue;
+
+		if (field.type === "FOR_EACH_OBJECT" || field.nestedFields) {
+			lines.push(`${indent}- **${field.name}:**${field.prompt ? " " + field.prompt : ""}`);
+			buildPromptScoped(field.nestedFields, includeFields, indentLevel + 1, lines, includeEphemeral, scopeFilter, currentTop);
+		} else {
+			lines.push(`${indent}- **${field.name}:** ${field.prompt}`);
+		}
+	}
+}
+
+function shouldIncludeFieldScope(field, scopeFilter, topLevelName) {
+	if (!scopeFilter) return true;
+	if (matchesScope(field, scopeFilter, topLevelName)) return true;
+	if (!field.nestedFields) return false;
+	return Object.values(field.nestedFields).some((nestedField) =>
+		shouldIncludeFieldScope(nestedField, scopeFilter, topLevelName)
+	);
+}
+
+function matchesScope(field, scopeFilter, topLevelName) {
+	const normalizedScope = normalizeScopeValue(field.scope);
+	const effectiveScope = normalizedScope || inferScopeFromTopLevel(topLevelName);
+	return effectiveScope === scopeFilter;
+}
+
+function inferScopeFromTopLevel(name) {
+	const normalized = String(name || "")
+		.toLowerCase()
+		.replace(/[^a-z0-9]/g, "");
+	if (NPC_GROUP_NAMES.has(normalized)) return FIELD_SCOPE_OPTIONS.NPC;
+	return FIELD_SCOPE_OPTIONS.BOTH;
+}
+
+function normalizeScopeValue(scopeValue) {
+	const raw = String(scopeValue || "").trim().toLowerCase();
+	if (!raw) return "";
+	if (raw === FIELD_SCOPE_OPTIONS.BOTH) return FIELD_SCOPE_OPTIONS.BOTH;
+	if (raw === FIELD_SCOPE_OPTIONS.CHAR) return FIELD_SCOPE_OPTIONS.CHAR;
+	if (raw === FIELD_SCOPE_OPTIONS.USER) return FIELD_SCOPE_OPTIONS.USER;
+	if (raw === FIELD_SCOPE_OPTIONS.NPC) return FIELD_SCOPE_OPTIONS.NPC;
+	return "";
+}
+
+function hasScopedFields(backendObj) {
+	let found = false;
+	const visit = (obj) => {
+		for (const field of Object.values(obj || {})) {
+			if (field.scope) {
+				found = true;
+				return;
+			}
+			if (field.nestedFields) visit(field.nestedFields);
+			if (found) return;
+		}
+	};
+	visit(backendObj);
+	return found;
 }
 
 function formatOutput(tracker, outputFormat) {

@@ -38,6 +38,15 @@ export class TrackerPromptMaker {
 		};
 	}
 
+	static get FIELD_SCOPE_OPTIONS() {
+		return {
+			BOTH: "Both Char + User",
+			CHAR: "Char-only",
+			USER: "User-only",
+			NPC: "Other NPCs",
+		};
+	}
+
 	static get FIELD_INCLUDE_OPTIONS() {
 		return {
 			DYNAMIC: "dynamic",
@@ -220,6 +229,24 @@ export class TrackerPromptMaker {
 			});
 		const presenceDiv = $('<div class="presence-wrapper"></div>').append(presenceLabel, presenceSelector);
 
+		// Scope Selector with label
+		const scopeLabel = $("<label>Scope:</label>");
+		const scopeKey = (fieldData.scope || "BOTH").toString().toUpperCase();
+		const scopeSelector = $(`
+            <select>
+                ${Object.entries(TrackerPromptMaker.FIELD_SCOPE_OPTIONS)
+					.map(([key, value]) => `<option value="${key}">${value}</option>`)
+					.join("")}        
+            </select>
+        `)
+			.val(scopeKey)
+			.on("change", (e) => {
+				const currentFieldId = fieldWrapper.attr("data-field-id");
+				this.selectScope(e.target.value, currentFieldId);
+				this.syncBackendObject();
+			});
+		const scopeDiv = $('<div class="scope-wrapper"></div>').append(scopeLabel, scopeSelector);
+
 		// Field Type Selector with label
 		const fieldTypeLabel = $("<label>Field Type:</label>");
 		const fieldTypeKey = fieldData.type || "STRING";
@@ -238,8 +265,8 @@ export class TrackerPromptMaker {
 			});
 		const fieldTypeDiv = $('<div class="field-type-wrapper"></div>').append(fieldTypeLabel, fieldTypeSelector);
 
-		// Append field name, static/dynamic toggle, and field type to the combined div
-		nameDynamicTypeDiv.append(fieldNameDiv, presenceDiv, fieldTypeDiv);
+		// Append field name, presence, scope, and field type to the combined div
+		nameDynamicTypeDiv.append(fieldNameDiv, presenceDiv, scopeDiv, fieldTypeDiv);
 
 		// Append the combined div to fieldWrapper
 		fieldWrapper.append(nameDynamicTypeDiv);
@@ -335,6 +362,7 @@ export class TrackerPromptMaker {
 					name: fieldData.name || "",
 					type: fieldData.type || "STRING",
 					presence: fieldData.presence || "DYNAMIC",
+					scope: (fieldData.scope || "BOTH").toString().toUpperCase(),
 					prompt: fieldData.prompt || "",
 					defaultValue: fieldData.defaultValue || "",
 					exampleValues: [...fieldData.exampleValues],
@@ -348,6 +376,7 @@ export class TrackerPromptMaker {
 				name: fieldData.name || "",
 				type: fieldData.type || "STRING",
 				presence: fieldData.presence || "DYNAMIC",
+				scope: (fieldData.scope || "BOTH").toString().toUpperCase(),
 				prompt: fieldData.prompt || "",
 				defaultValue: fieldData.defaultValue || "",
 				exampleValues: [...fieldData.exampleValues],
@@ -471,6 +500,20 @@ export class TrackerPromptMaker {
 		}
 	}
 
+	/**
+	 * Handles the selection of the scope.
+	 * @param {string} scope - The selected scope.
+	 * @param {string} fieldId - The ID of the field.
+	 */
+	selectScope(scope, fieldId) {
+		const fieldData = this.getFieldDataById(fieldId);
+		if (fieldData) {
+			fieldData.scope = scope || "BOTH";
+			debug(`Selected scope: ${scope} for field ID: ${fieldId}`);
+		} else {
+			error(`Field with ID ${fieldId} not found during scope selection.`);
+		}
+	}
 	/**
 	 * Updates the prompt or note for the field.
 	 * @param {string} promptText - The prompt text entered by the user.
@@ -746,6 +789,7 @@ export class TrackerPromptMaker {
 
 				const fieldName = $fieldEl.find(".field-name-wrapper input").val() || "";
 				const presence = $fieldEl.find(".presence-wrapper select").val() || "DYNAMIC";
+				const scope = $fieldEl.find(".scope-wrapper select").val() || "BOTH";
 				const fieldType = $fieldEl.find(".field-type-wrapper select").val() || "STRING";
 				const prompt = $fieldEl.find(".prompt-wrapper textarea").val() || "";
 				const defaultValue = $fieldEl.find(".default-value-wrapper input").val() || "";
@@ -769,6 +813,7 @@ export class TrackerPromptMaker {
 					name: fieldName,
 					type: fieldType,
 					presence: presence,
+					scope: scope,
 					prompt: prompt,
 					defaultValue: defaultValue,
 					exampleValues: exampleValues,
