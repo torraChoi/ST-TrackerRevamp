@@ -1,4 +1,4 @@
-import { chat, saveChatDebounced } from "../../../../../script.js";
+import { chat, saveChatDebounced, characters, this_chid, name1 } from "../../../../../script.js";
 import { debug } from "../lib/utils.js";
 
 import { jsonToYAML, yamlToJSON } from "../lib/ymlParser.js";
@@ -175,6 +175,7 @@ export function updateTracker(tracker, updatedTrackerInput, backendObject, inclu
 	let extraFields = {};
 
 	reconcileUpdatedTracker(tracker, updatedTracker, backendObject, finalTracker, extraFields, "", includeUnmatchedFields, useUpdatedExtraFieldsAsSource);
+	applyMainCharacterScopeSanitizer(finalTracker, backendObject);
 
 	if (includeUnmatchedFields && !useUpdatedExtraFieldsAsSource) {
 		extraFields = cleanEmptyObjects(extraFields);
@@ -748,6 +749,60 @@ function scopeTagForField(scopeKey) {
 		default:
 			return "[BOTH]";
 	}
+}
+
+function applyMainCharacterScopeSanitizer(trackerObj, backendObject) {
+	const mainDef = Object.values(backendObject || {}).find((field) => field?.name === "MainCharacters");
+	const mainValues = trackerObj?.MainCharacters;
+	if (!mainDef || !mainValues || typeof mainValues !== "object") return;
+
+	const userName = typeof name1 === "string" ? name1.trim() : "";
+	const charName = characters?.[this_chid]?.name ? String(characters[this_chid].name).trim() : "";
+	if (!userName && !charName) return;
+
+	const nestedFields = mainDef.nestedFields || {};
+	const fieldMetaByName = {};
+	Object.values(nestedFields).forEach((nf) => {
+		if (!nf?.name) return;
+		fieldMetaByName[nf.name] = {
+			scope: normalizeScopeValue(nf.scope),
+			type: nf.type || "STRING",
+		};
+	});
+
+	const blankForType = (type) => {
+		switch (type) {
+			case "ARRAY":
+			case "FOR_EACH_ARRAY":
+				return [];
+			case "OBJECT":
+			case "FOR_EACH_OBJECT":
+			case "ARRAY_OBJECT":
+				return {};
+			default:
+				return "";
+		}
+	};
+
+	Object.entries(mainValues).forEach(([entryName, entry]) => {
+		if (!entry || typeof entry !== "object") return;
+		const normalized = String(entryName || "").trim();
+		let mode = "";
+		if (userName && normalized.toLowerCase() === userName.toLowerCase()) mode = FIELD_SCOPE_OPTIONS.USER;
+		if (charName && normalized.toLowerCase() === charName.toLowerCase()) mode = FIELD_SCOPE_OPTIONS.CHAR;
+		if (!mode) return;
+
+		Object.entries(entry).forEach(([fieldName, fieldValue]) => {
+			const meta = fieldMetaByName[fieldName];
+			if (!meta || !meta.scope) return;
+			if (meta.scope === FIELD_SCOPE_OPTIONS.CHAR && mode === FIELD_SCOPE_OPTIONS.USER) {
+				entry[fieldName] = blankForType(meta.type);
+			}
+			if (meta.scope === FIELD_SCOPE_OPTIONS.USER && mode === FIELD_SCOPE_OPTIONS.CHAR) {
+				entry[fieldName] = blankForType(meta.type);
+			}
+		});
+	});
 }
 
 function hasScopedFields(backendObj) {
