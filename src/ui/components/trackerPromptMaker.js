@@ -97,6 +97,7 @@ export class TrackerPromptMaker {
 			const target = $(e.target);
 			if (target.closest(".field-wrapper").length > 0) return;
 			if (target.closest(".buttons-wrapper").length > 0) return;
+			if (target.closest(".prompt-maker-sidebar").length > 0) return;
 			this.clearSelection();
 		});
 
@@ -155,8 +156,10 @@ export class TrackerPromptMaker {
 		buttonsWrapper.append(deselectBtn);
 
 		const navTitle = $('<div class="prompt-maker-nav-title">Navigator</div>');
+		const navShell = $('<div class="prompt-maker-nav-shell"></div>');
 		this.navContainer = $('<div class="prompt-maker-nav"></div>');
-		sidebar.append(buttonsWrapper, navTitle, this.navContainer);
+		navShell.append(navTitle, this.navContainer);
+		sidebar.append(buttonsWrapper, navShell);
 	}
 
 	/**
@@ -571,6 +574,21 @@ export class TrackerPromptMaker {
 		}
 	}
 
+	selectFieldFromNav(fieldId, event) {
+		const fieldWrapper = this.element.find(`[data-field-id="${fieldId}"]`);
+		if (!fieldWrapper.length) return;
+		const checkbox = fieldWrapper.find("> .name-dynamic-type-wrapper > .field-select");
+		if (!checkbox.length) return;
+		if (this.multiSelectEnabled) {
+			const willSelect = !checkbox.prop("checked");
+			checkbox.prop("checked", willSelect).trigger("change");
+			if (event) event.preventDefault();
+		} else {
+			this.clearSelection();
+			checkbox.prop("checked", true).trigger("change");
+		}
+	}
+
 	rebuildMiniNav() {
 		if (!this.navContainer) return;
 		this.navContainer.empty();
@@ -600,7 +618,8 @@ export class TrackerPromptMaker {
 			const label = $(`<span class="nav-label"></span>`);
 			label.text(name);
 			row.append(label);
-			row.on("click", () => {
+			row.on("click", (event) => {
+				this.selectFieldFromNav(fieldId, event);
 				wrapper.get(0).scrollIntoView({ behavior: "smooth", block: "start" });
 			});
 			entry.append(row);
@@ -628,8 +647,14 @@ export class TrackerPromptMaker {
 				items: "> .nav-entry",
 				handle: ".nav-drag",
 				axis: "y",
+				helper: "clone",
+				tolerance: "pointer",
+				distance: 3,
 				stop: () => this.applyNavOrderFromSidebar(),
 			});
+			if ($el.disableSelection) {
+				$el.disableSelection();
+			}
 		});
 
 		if (this.navContainer.sortable) {
@@ -639,8 +664,14 @@ export class TrackerPromptMaker {
 			items: "> .nav-entry",
 			handle: ".nav-drag",
 			axis: "y",
+			helper: "clone",
+			tolerance: "pointer",
+			distance: 3,
 			stop: () => this.applyNavOrderFromSidebar(),
 		});
+		if (this.navContainer.disableSelection) {
+			this.navContainer.disableSelection();
+		}
 	}
 
 	applyNavOrderFromSidebar() {

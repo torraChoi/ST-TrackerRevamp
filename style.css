@@ -95,6 +95,7 @@
 .tracker-prompt-maker-modal {
   width: calc(var(--sheldWidth) + 300px) !important;
   padding: 20px !important;
+  background: rgb(19 19 21 / 92%);
 }
 @media screen and (max-width: 1000px) {
   .tracker-prompt-maker-modal {
@@ -116,11 +117,14 @@
   flex: 0 0 25%;
   max-height: 80vh;
   overflow-y: auto;
-  padding-right: 10px;
+  padding-right: 16px;
 }
 .tracker-prompt-maker .prompt-maker-content {
   flex: 1;
   min-width: 0;
+}
+.tracker-prompt-maker .prompt-maker-content .fields-container {
+  padding-right: 12px;
 }
 .tracker-prompt-maker .prompt-maker-nav-title {
   margin: 8px 0 6px;
@@ -134,12 +138,20 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  position: relative;
+}
+.tracker-prompt-maker .prompt-maker-nav-shell {
+  background: rgb(35 35 39 / 80%);
+  border: 1px solid var(--SmartThemeBorderColor);
+  border-radius: 10px;
+  padding: 8px;
 }
 .tracker-prompt-maker .prompt-maker-nav .nav-entry {
   border: 1px solid var(--SmartThemeBorderColor);
   border-radius: 8px;
   padding: 4px;
-  background: var(--black30a);
+  background: rgb(35 35 39 / 80%);
+  position: relative;
 }
 .tracker-prompt-maker .prompt-maker-nav .nav-row {
   display: flex;
@@ -172,6 +184,8 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-height: 6px;
+  position: relative;
 }
 .tracker-prompt-maker .prompt-maker-nav .nav-entry.is-collapsed > .nav-children {
   display: none;
@@ -181,14 +195,14 @@
   overflow-y: scroll;
 }
 .tracker-prompt-maker .fields-container > .field-wrapper {
-  background-color: rgba(125, 125, 125, 0.3);
+  background-color: rgb(35 35 39 / 80%);
 }
 .tracker-prompt-maker .field-wrapper {
   border: 1px solid var(--SmartThemeBorderColor);
   border-radius: 10px;
   padding: 10px;
   margin-bottom: 10px;
-  background-color: var(--black30a);
+  background-color: rgb(35 35 39 / 80%);
 }
 .tracker-prompt-maker .field-wrapper select {
   margin-top: 5px;
@@ -287,17 +301,18 @@
   justify-content: center;
 }
 .tracker-prompt-maker .prompt-maker-sidebar .buttons-wrapper {
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: flex-start;
+  gap: 4px;
 }
 .tracker-prompt-maker .buttons-wrapper button {
   white-space: nowrap;
   background-color: var(--black30a);
 }
 .tracker-prompt-maker .buttons-wrapper .icon-button {
-  min-width: 36px;
-  padding: 4px 6px;
-  font-size: 0.85rem;
+  min-width: 28px;
+  padding: 3px 4px;
+  font-size: 0.75rem;
   letter-spacing: 0.02em;
 }
 .tracker-prompt-maker .buttons-wrapper button:hover {
