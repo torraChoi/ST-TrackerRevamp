@@ -51,6 +51,7 @@
   gap: 8px;
 }
 
+
 .dock-rail-block.is-hidden {
   display: none;
 }
@@ -60,7 +61,7 @@
   height: 60px;
   border-radius: 999px;
   border: 2px solid var(--rail-ring, rgba(255, 255, 255, 0.2));
-  background: rgba(20, 20, 20, 0.8);
+  background: rgb(12 12 12 / 59%);
   color: #fff;
   font-weight: 700;
   font-size: 15px;
@@ -71,11 +72,24 @@
   align-items: center;
   justify-content: center;
   position: relative;
+  transition: transform 0.2s ease-out, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.rail-btn:active {
+  transform: scale(0.95);
+  transition-duration: 0.1s;
+}
+
+.rail-btn:hover {
+  transform: scale(1.05);
+  border-color: var(--rail-ring-hover, var(--rail-ring, rgba(255, 255, 255, 0.4)));
+  box-shadow: 0 0 0 2px var(--rail-glow, rgba(107, 180, 255, 0.15));
 }
 
 .rail-btn.is-active {
-  border-color: var(--rail-ring, var(--dock-accent));
-  box-shadow: 0 0 0 2px var(--rail-glow, rgba(107, 180, 255, 0.25));
+  transform: scale(1.05);
+  border-color: var(--rail-ring-hover, var(--dock-accent));
+  box-shadow: 0 0 10px 0 var(--rail-ring-hover, var(--dock-accent));
 }
 
 .rail-btn-group {
@@ -84,17 +98,27 @@
   --rail-ring-hover: rgba(176, 214, 160, 0.9);
   --rail-core-hover: rgba(176, 214, 160, 0.4);
   --rail-glow: rgba(162, 200, 145, 0.45);
+  flex-direction: column;
+  gap: 8px;
+  height: 60px;
+  padding: 0;
+  /* overflow: hidden; -- Removed to prevent clipping hover effects */
+  border-radius: 30px;
+  transition: height 0.35s ease, padding 0.35s ease, background 0.35s ease, border-color 0.35s ease, margin 0.35s ease;
+}
+
+.rail-btn-group.is-open {
+  height: auto;
+  min-height: 60px;
+  padding: 0px 0px 10px;
+  justify-content: flex-start; /* Aligns content to top, preventing upward expansion */
+  border-color: var(--rail-ring, rgba(162, 200, 145, 0.72));
+  background: rgb(12 12 12 / 59%);
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
 .rail-btn-enemy  {
-  --rail-ring: rgba(200, 90, 90, 0.85);
-  --rail-core: rgba(200, 90, 90, 0.25);
-  --rail-ring-hover: rgba(220, 120, 120, 0.95);
-  --rail-core-hover: rgba(220, 120, 120, 0.45);
-  --rail-glow: rgba(200, 90, 90, 0.45);
-}
-
-.rail-btn-enemy {
   --rail-ring: rgba(200, 90, 90, 0.85);
   --rail-core: rgba(200, 90, 90, 0.25);
   --rail-ring-hover: rgba(220, 120, 120, 0.95);
@@ -112,15 +136,44 @@
    fill: #fff;
 }
 
-.rail-sublist {
-  display: none;
-  flex-direction: column;
-  gap: 8px;
-  padding-top: 4px;
+.rail-btn-group > .rail-ico {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: height 0.35s ease;
+  position: relative;
+  z-index: 1; /* Ensure icon is on top of the pseudo-element */
 }
 
-.rail-sublist.is-open {
+.rail-btn-group.is-open > .rail-ico {
+  height: 48px;
+}
+
+.rail-sublist {
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.2s ease 0.1s, margin-top 0.3s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.rail-btn-group.is-open .rail-sublist {
+  max-height: 500px;
+  opacity: 1;
+}
+
+.rail-btn-other {
+  width: 42px;
+  height: 42px;
+  font-size: 13px;
+  flex-shrink: 0;
 }
 
 .dock-stage {
@@ -254,21 +307,26 @@
   border-radius: 999px;
   background: var(--rail-core, rgba(255, 255, 255, 0.12));
   z-index: 0;
+  transition: background-color 0.2s ease;
 }
 
-.rail-btn:hover {
-  border-color: var(--rail-ring-hover, var(--rail-ring, rgba(255, 255, 255, 0.4)));
+/* Specific fix for the group's ::before pseudo-element */
+.rail-btn-group::before {
+  inset: auto;
+  top: 11px;
+  left: 11px;
+  width: 34px;
+  height: 34px;
 }
 
-.rail-btn:hover::before {
+.rail-btn:hover::before,
+.rail-btn.is-active::before {
   background: var(--rail-core-hover, var(--rail-core, rgba(255, 255, 255, 0.2)));
 }
 
-.rail-btn-other::before {
-  background: transparent;
-}
-
-.rail-btn-other:hover::before {
+.rail-btn-other::before,
+.rail-btn-other:hover::before,
+.rail-btn-other.is-active::before {
   background: transparent;
 }
 

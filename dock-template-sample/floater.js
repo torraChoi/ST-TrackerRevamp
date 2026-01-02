@@ -34,6 +34,26 @@
     const smallPanel = scope.querySelector('[data-enemy-panel="small"]');
     const bigPanel = scope.querySelector('[data-enemy-panel="big"]');
 
+    const isPlaceholderName = (value) => {
+      const text = String(value || "").trim();
+      if (!text) return true;
+      const lowered = text.toLowerCase();
+      if (lowered === "—" || lowered === "x" || lowered === "none" || lowered === "n/a") {
+        return true;
+      }
+      return text.startsWith("<") && text.endsWith(">");
+    };
+
+    const hasNamedCards = (panel) => {
+      if (!panel) return false;
+      const cards = Array.from(panel.querySelectorAll(".dock-card"));
+      if (cards.length === 0) return false;
+      return cards.some((card) => {
+        const nameEl = card.querySelector(".dock-name");
+        return nameEl && !isPlaceholderName(nameEl.textContent);
+      });
+    };
+
     const applyInitial = (button) => {
       const label = button.getAttribute("title")
         || button.dataset.mainTarget
@@ -74,75 +94,117 @@
       button.style.setProperty("--rail-glow", glow);
     });
 
+    if (otherToggle) {
+      otherToggle.setAttribute("role", "button");
+      otherToggle.setAttribute("tabindex", "0");
+    }
+
     const otherBlock = otherToggle ? otherToggle.closest(".dock-rail-block") : null;
     const smallBlock = smallToggle ? smallToggle.closest(".dock-rail-block") : null;
     const bigBlock = bigToggle ? bigToggle.closest(".dock-rail-block") : null;
 
-    if (otherButtons.length === 0 && otherBlock) {
+    const realOtherButtons = otherButtons.filter((button) => {
+      const label = button.getAttribute("title") || button.dataset.otherTarget || "";
+      return !isPlaceholderName(label);
+    });
+
+    if (realOtherButtons.length === 0 && otherBlock) {
       otherBlock.classList.add("is-hidden");
     }
 
-    if (smallPanel && smallPanel.querySelectorAll(".dock-card").length === 0 && smallBlock) {
+    if (!hasNamedCards(smallPanel) && smallBlock) {
       smallBlock.classList.add("is-hidden");
     }
 
-    if (bigPanel && bigPanel.querySelectorAll(".dock-card").length === 0 && bigBlock) {
+    if (!hasNamedCards(bigPanel) && bigBlock) {
       bigBlock.classList.add("is-hidden");
-    }
-
-    if (otherList) {
-      otherList.classList.remove("is-open");
     }
 
     if (smallPanel) smallPanel.classList.remove("is-open");
     if (bigPanel) bigPanel.classList.remove("is-open");
+    if (otherToggle) otherToggle.classList.remove("is-open");
+
+    const deactivateMainButtons = () => {
+      mainButtons.forEach((btn) => btn.classList.remove("is-active"));
+      clearPanels(scope, "main");
+    };
+    
+    const deactivateOtherButtons = () => {
+      otherButtons.forEach((btn) => btn.classList.remove("is-active"));
+      if (otherToggle) otherToggle.classList.remove("is-active");
+      clearPanels(scope, "other");
+    };
+
+    const deactivateEnemyButtons = () => {
+        if (smallToggle) smallToggle.classList.remove("is-active");
+        if (bigToggle) bigToggle.classList.remove("is-active");
+        if (smallPanel) smallPanel.classList.remove("is-open");
+        if (bigPanel) bigPanel.classList.remove("is-open");
+    };
 
     mainButtons.forEach((button) => {
       addListener(listeners, button, "click", () => {
-        mainButtons.forEach((btn) => btn.classList.remove("is-active"));
+        deactivateEnemyButtons();
+        deactivateMainButtons();
+        deactivateOtherButtons();
+        if (otherToggle) otherToggle.classList.remove("is-open");
+
         button.classList.add("is-active");
         setActivePanel(scope, "main", button.dataset.mainTarget);
-        clearPanels(scope, "other");
       });
     });
 
     otherButtons.forEach((button) => {
-      addListener(listeners, button, "click", () => {
-        otherButtons.forEach((btn) => btn.classList.remove("is-active"));
+      addListener(listeners, button, "click", (event) => {
+        event.stopPropagation();
+        deactivateEnemyButtons();
+        deactivateMainButtons();
+        deactivateOtherButtons();
+
         button.classList.add("is-active");
+        if (otherToggle) {
+          otherToggle.classList.add("is-active");
+          otherToggle.classList.add("is-open");
+        }
         setActivePanel(scope, "other", button.dataset.otherTarget);
-        clearPanels(scope, "main");
       });
     });
 
     addListener(listeners, otherToggle, "click", () => {
-      if (!otherList) return;
-      otherList.classList.toggle("is-open");
-      if (otherList.classList.contains("is-open") && otherButtons.length > 0) {
-        const active = otherButtons.find((btn) => btn.classList.contains("is-active"));
-        if (!active) otherButtons[0].click();
+      const willBeOpen = !otherToggle.classList.contains("is-open");
+
+      if (willBeOpen) {
+        deactivateEnemyButtons();
+        deactivateMainButtons();
+        otherToggle.classList.add("is-open");
+
+        if (otherButtons.length > 0) {
+            otherButtons[0].click();
+        }
+      } else {
+        otherToggle.classList.remove("is-open");
+        deactivateOtherButtons();
       }
     });
 
-    addListener(listeners, smallToggle, "click", () => {
-      if (!smallPanel) return;
-      const nextState = !smallPanel.classList.contains("is-open");
-      smallPanel.classList.toggle("is-open", nextState);
-      smallToggle.classList.toggle("is-active", nextState);
-    });
+    const enemyClickHandler = (toggle, panel) => {
+        deactivateMainButtons();
+        deactivateOtherButtons();
+        if (otherToggle) otherToggle.classList.remove("is-open");
 
-    addListener(listeners, bigToggle, "click", () => {
-      if (!bigPanel) return;
-      const nextState = !bigPanel.classList.contains("is-open");
-      bigPanel.classList.toggle("is-open", nextState);
-      bigToggle.classList.toggle("is-active", nextState);
-    });
+        if (!panel) return;
+        const nextState = !panel.classList.contains("is-open");
+        panel.classList.toggle("is-open", nextState);
+        toggle.classList.toggle("is-active", nextState);
+    };
+
+    addListener(listeners, smallToggle, "click", () => enemyClickHandler(smallToggle, smallPanel));
+    addListener(listeners, bigToggle, "click", () => enemyClickHandler(bigToggle, bigPanel));
 
     if (mainButtons.length > 0) {
       mainButtons[0].click();
     } else if (otherButtons.length > 0) {
       otherButtons[0].click();
-      if (otherList) otherList.classList.add("is-open");
     }
 
     svgTargets.forEach((el) => {
