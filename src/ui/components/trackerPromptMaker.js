@@ -40,10 +40,10 @@ export class TrackerPromptMaker {
 
 	static get FIELD_SCOPE_OPTIONS() {
 		return {
+			UNIVERSAL: "Universal (All Entities)",
 			BOTH: "Both Char + User",
 			CHAR: "Char-only",
 			USER: "User-only",
-			NPC: "Other NPCs",
 		};
 	}
 

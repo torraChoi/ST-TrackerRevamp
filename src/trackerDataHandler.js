@@ -22,10 +22,10 @@ export const FIELD_PRESENCE_OPTIONS = {
 };
 
 const FIELD_SCOPE_OPTIONS = {
+	UNIVERSAL: "universal",
 	BOTH: "both",
 	CHAR: "char",
 	USER: "user",
-	NPC: "npc",
 };
 
 const NPC_GROUP_NAMES = new Set(["othercharacters", "smallenemies", "bigenemies"]);
@@ -132,10 +132,10 @@ export function getTrackerPrompt(backendObject, includeFields = FIELD_INCLUDE_OP
 	}
 
 	const sections = [
+		{ key: FIELD_SCOPE_OPTIONS.UNIVERSAL, title: "Universal (All Entities)" },
 		{ key: FIELD_SCOPE_OPTIONS.BOTH, title: "Both {{char}} and {{user}}" },
 		{ key: FIELD_SCOPE_OPTIONS.CHAR, title: "{{char}} only" },
 		{ key: FIELD_SCOPE_OPTIONS.USER, title: "{{user}} only" },
-		{ key: FIELD_SCOPE_OPTIONS.NPC, title: "Other NPCs" },
 	];
 
 	for (const section of sections) {
@@ -710,17 +710,18 @@ function inferScopeFromTopLevel(name) {
 	const normalized = String(name || "")
 		.toLowerCase()
 		.replace(/[^a-z0-9]/g, "");
-	if (NPC_GROUP_NAMES.has(normalized)) return FIELD_SCOPE_OPTIONS.NPC;
+	if (NPC_GROUP_NAMES.has(normalized)) return FIELD_SCOPE_OPTIONS.UNIVERSAL;
 	return FIELD_SCOPE_OPTIONS.BOTH;
 }
 
 function normalizeScopeValue(scopeValue) {
 	const raw = String(scopeValue || "").trim().toLowerCase();
 	if (!raw) return "";
+	if (raw === FIELD_SCOPE_OPTIONS.UNIVERSAL) return FIELD_SCOPE_OPTIONS.UNIVERSAL;
 	if (raw === FIELD_SCOPE_OPTIONS.BOTH) return FIELD_SCOPE_OPTIONS.BOTH;
 	if (raw === FIELD_SCOPE_OPTIONS.CHAR) return FIELD_SCOPE_OPTIONS.CHAR;
 	if (raw === FIELD_SCOPE_OPTIONS.USER) return FIELD_SCOPE_OPTIONS.USER;
-	if (raw === FIELD_SCOPE_OPTIONS.NPC) return FIELD_SCOPE_OPTIONS.NPC;
+	if (raw === "npc") return FIELD_SCOPE_OPTIONS.UNIVERSAL;
 	return "";
 }
 
