@@ -14,6 +14,7 @@ export class TrackerPromptMaker {
 		this.exampleCounter = 0;
 		this.multiSelectEnabled = false;
 		this.selectedFieldIds = new Set();
+		this.clipboardFieldData = null;
 		this.init(existingObject); // Initialize the component.
 	}
 
@@ -119,6 +120,18 @@ export class TrackerPromptMaker {
 			.on("click", () => this.moveSelectedFields("down"));
 		this.bulkButtons = { bulkDeleteBtn, bulkMoveUpBtn, bulkMoveDownBtn };
 		buttonsWrapper.append(bulkMoveUpBtn, bulkMoveDownBtn, bulkDeleteBtn);
+
+		const copyBtn = $('<button class="menu_button interactable">Copy</button>')
+			.prop("disabled", true)
+			.on("click", () => this.copySelectedField());
+		const pasteBtn = $('<button class="menu_button interactable">Paste</button>')
+			.prop("disabled", true)
+			.on("click", () => this.pasteField());
+		const duplicateBtn = $('<button class="menu_button interactable">Duplicate</button>')
+			.prop("disabled", true)
+			.on("click", () => this.duplicateSelectedField());
+		this.clipboardButtons = { copyBtn, pasteBtn, duplicateBtn };
+		buttonsWrapper.append(copyBtn, pasteBtn, duplicateBtn);
 
 		this.element.append(buttonsWrapper);
 	}
@@ -503,6 +516,55 @@ export class TrackerPromptMaker {
 		this.bulkButtons.bulkDeleteBtn.prop("disabled", !hasSelection);
 		this.bulkButtons.bulkMoveUpBtn.prop("disabled", !hasSelection);
 		this.bulkButtons.bulkMoveDownBtn.prop("disabled", !hasSelection);
+
+		if (this.clipboardButtons) {
+			const singleSelected = this.selectedFieldIds.size === 1;
+			this.clipboardButtons.copyBtn.prop("disabled", !singleSelected);
+			this.clipboardButtons.duplicateBtn.prop("disabled", !singleSelected);
+			this.clipboardButtons.pasteBtn.prop("disabled", !this.clipboardFieldData);
+		}
+	}
+
+	copySelectedField() {
+		if (this.selectedFieldIds.size !== 1) return;
+		const fieldId = Array.from(this.selectedFieldIds)[0];
+		const fieldData = this.getFieldDataById(fieldId);
+		if (!fieldData) return;
+		this.clipboardFieldData = JSON.parse(JSON.stringify(fieldData));
+		this.updateBulkButtonsState();
+	}
+
+	pasteField() {
+		if (!this.clipboardFieldData) return;
+		const selectedId = Array.from(this.selectedFieldIds)[0] || null;
+		const parentFieldId = selectedId ? this.findParentFieldId(selectedId) : null;
+		const clone = JSON.parse(JSON.stringify(this.clipboardFieldData));
+		this.addField(null, parentFieldId, clone, null, true);
+		this.rebuildBackendObjectFromDOM();
+		this.updateBulkButtonsState();
+	}
+
+	duplicateSelectedField() {
+		if (this.selectedFieldIds.size !== 1) return;
+		const fieldId = Array.from(this.selectedFieldIds)[0];
+		const fieldData = this.getFieldDataById(fieldId);
+		if (!fieldData) return;
+		const parentFieldId = this.findParentFieldId(fieldId);
+		const clone = JSON.parse(JSON.stringify(fieldData));
+		this.addField(null, parentFieldId, clone, null, true);
+		this.rebuildBackendObjectFromDOM();
+		this.updateBulkButtonsState();
+	}
+
+	findParentFieldId(fieldId, obj = this.backendObject, parentId = null) {
+		for (const key in obj) {
+			if (key === fieldId) return parentId;
+			if (obj[key].nestedFields) {
+				const found = this.findParentFieldId(fieldId, obj[key].nestedFields, key);
+				if (found !== null) return found;
+			}
+		}
+		return parentId;
 	}
 
 	deleteSelectedFields() {
@@ -545,6 +607,7 @@ export class TrackerPromptMaker {
 
 		this.rebuildBackendObjectFromDOM();
 		this.syncBackendObject();
+		this.updateBulkButtonsState();
 	}
 
 	/**
@@ -957,7 +1020,9 @@ export class TrackerPromptMaker {
 		this.backendObject = rebuildObject(this.fieldsContainer);
 
 		this.selectedFieldIds.clear();
+		this.clipboardFieldData = this.clipboardFieldData ? this.clipboardFieldData : null;
 		this.element.find(".field-wrapper").each((_, el) => this.applyMultiSelectState($(el)));
+		this.updateBulkButtonsState();
 
 		// Update fieldCounter to one plus the highest index found
 		this.fieldCounter = rebuildCounter;
