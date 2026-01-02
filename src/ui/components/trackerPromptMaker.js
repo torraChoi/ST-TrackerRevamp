@@ -80,19 +80,19 @@ export class TrackerPromptMaker {
 		// Clear existing content in this.element to prevent duplication
 		this.element.empty();
 
-		this.element.off("mousedown.trackerPromptMaker").on("mousedown.trackerPromptMaker", (e) => {
-			if ($(e.target).closest(".field-wrapper").length === 0) {
-				this.selectedFieldIds.clear();
-				this.lastFocusedFieldId = null;
-				this.element.find(".field-wrapper").removeClass("is-selected");
-				this.element.find(".field-select").prop("checked", false);
-				this.updateBulkButtonsState();
-			}
-		});
-
 		// Container for fields.
 		this.fieldsContainer = $('<div class="fields-container"></div>');
 		this.element.append(this.fieldsContainer);
+		this.fieldsContainer.off("mousedown.trackerPromptMaker").on("mousedown.trackerPromptMaker", (e) => {
+			const target = $(e.target);
+			if (target.closest(".field-wrapper").length > 0) return;
+			if (target.closest(".buttons-wrapper").length > 0) return;
+			this.selectedFieldIds.clear();
+			this.lastFocusedFieldId = null;
+			this.element.find(".field-wrapper").removeClass("is-selected");
+			this.element.find(".field-select").prop("checked", false);
+			this.updateBulkButtonsState();
+		});
 
 		const buttonsWrapper = $('<div class="buttons-wrapper"></div>');
 
