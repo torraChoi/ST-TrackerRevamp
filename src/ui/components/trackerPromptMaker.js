@@ -550,6 +550,20 @@ export class TrackerPromptMaker {
 		return ordered;
 	}
 
+	getSelectedFieldIdsByParent() {
+		const grouped = new Map();
+		this.element.find(".field-wrapper").each((_, el) => {
+			const fieldId = $(el).attr("data-field-id");
+			if (!this.selectedFieldIds.has(fieldId)) return;
+			const parentContainer = $(el).parent().get(0);
+			if (!grouped.has(parentContainer)) {
+				grouped.set(parentContainer, []);
+			}
+			grouped.get(parentContainer).push(fieldId);
+		});
+		return grouped;
+	}
+
 	copySelectedField() {
 		const selectedIds = this.getSelectedFieldIdsOrdered();
 		if (selectedIds.length > 0) {
@@ -557,7 +571,8 @@ export class TrackerPromptMaker {
 				.map((fieldId) => {
 					const fieldData = this.getFieldDataById(fieldId);
 					if (!fieldData) return null;
-					return { data: JSON.parse(JSON.stringify(fieldData)) };
+					const parentFieldId = this.findParentFieldId(fieldId);
+					return { data: JSON.parse(JSON.stringify(fieldData)), parentFieldId };
 				})
 				.filter(Boolean);
 		} else {
@@ -582,7 +597,8 @@ export class TrackerPromptMaker {
 			let lastInserted = insertAfterWrapper && insertAfterWrapper.length ? insertAfterWrapper : null;
 			this.clipboardFieldData.forEach((item) => {
 				const clone = JSON.parse(JSON.stringify(item.data));
-				const newWrapper = this.addField(null, parentFieldId, clone, null, true);
+				const targetParentId = parentFieldId !== null ? parentFieldId : item.parentFieldId;
+				const newWrapper = this.addField(null, targetParentId, clone, null, true);
 				if (lastInserted && newWrapper) {
 					newWrapper.insertAfter(lastInserted);
 					lastInserted = newWrapper;
@@ -600,20 +616,28 @@ export class TrackerPromptMaker {
 	}
 
 	duplicateSelectedField() {
-		const selectedIds = this.getSelectedFieldIdsOrdered();
-		if (selectedIds.length > 0) {
-			selectedIds.forEach((fieldId) => {
-				const fieldData = this.getFieldDataById(fieldId);
-				if (!fieldData) return;
-				const parentFieldId = this.findParentFieldId(fieldId);
-				const clone = JSON.parse(JSON.stringify(fieldData));
-				const newWrapper = this.addField(null, parentFieldId, clone, null, true);
-				if (newWrapper) {
+		const grouped = this.getSelectedFieldIdsByParent();
+		if (grouped.size > 0) {
+			grouped.forEach((fieldIds, parentContainer) => {
+				let insertAfter = null;
+				fieldIds.forEach((fieldId) => {
 					const targetWrapper = this.element.find(`[data-field-id="${fieldId}"]`);
 					if (targetWrapper.length) {
-						newWrapper.insertAfter(targetWrapper);
+						insertAfter = targetWrapper;
 					}
-				}
+				});
+				let lastInserted = insertAfter;
+				fieldIds.forEach((fieldId) => {
+					const fieldData = this.getFieldDataById(fieldId);
+					if (!fieldData) return;
+					const parentFieldId = this.findParentFieldId(fieldId);
+					const clone = JSON.parse(JSON.stringify(fieldData));
+					const newWrapper = this.addField(null, parentFieldId, clone, null, true);
+					if (newWrapper && lastInserted) {
+						newWrapper.insertAfter(lastInserted);
+						lastInserted = newWrapper;
+					}
+				});
 			});
 		} else {
 			const fieldId = this.getActiveFieldId();
@@ -666,21 +690,22 @@ export class TrackerPromptMaker {
 		if (this.selectedFieldIds.size === 0) return;
 
 		const isUp = direction === "up";
-		const wrappers = Array.from(this.element.find(".field-wrapper"))
-			.filter((el) => this.selectedFieldIds.has($(el).attr("data-field-id")));
-
-		const ordered = isUp ? wrappers : wrappers.reverse();
-
-		ordered.forEach((el) => {
-			const $el = $(el);
-			const parent = $el.parent();
-			const sibling = isUp ? $el.prev(".field-wrapper") : $el.next(".field-wrapper");
-			if (sibling.length === 0) return;
-			if (isUp) {
-				$el.insertBefore(sibling);
-			} else {
-				$el.insertAfter(sibling);
-			}
+		const grouped = this.getSelectedFieldIdsByParent();
+		grouped.forEach((fieldIds, parentContainer) => {
+			const ordered = isUp ? fieldIds : fieldIds.slice().reverse();
+			ordered.forEach((fieldId) => {
+				const $el = this.element.find(`[data-field-id="${fieldId}"]`);
+				if ($el.length === 0) return;
+				const sibling = isUp ? $el.prev(".field-wrapper") : $el.next(".field-wrapper");
+				if (sibling.length === 0) return;
+				const siblingId = sibling.attr("data-field-id");
+				if (this.selectedFieldIds.has(siblingId)) return;
+				if (isUp) {
+					$el.insertBefore(sibling);
+				} else {
+					$el.insertAfter(sibling);
+				}
+			});
 		});
 
 		this.rebuildBackendObjectFromDOM();
