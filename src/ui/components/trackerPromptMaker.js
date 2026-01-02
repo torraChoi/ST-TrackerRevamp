@@ -580,7 +580,11 @@ export class TrackerPromptMaker {
 			if (!fieldId) return;
 			const fieldData = this.getFieldDataById(fieldId);
 			if (!fieldData) return;
-			this.clipboardFieldData = JSON.parse(JSON.stringify(fieldData));
+			const parentFieldId = this.findParentFieldId(fieldId);
+			this.clipboardFieldData = {
+				data: JSON.parse(JSON.stringify(fieldData)),
+				parentFieldId,
+			};
 		}
 		this.updateBulkButtonsState();
 	}
@@ -588,27 +592,40 @@ export class TrackerPromptMaker {
 	pasteField() {
 		if (!this.clipboardFieldData) return;
 		const selectedId = this.getActiveFieldId();
-		const parentFieldId = selectedId ? this.findParentFieldId(selectedId) : null;
-		let insertAfterWrapper = selectedId
+		const activeParentId = selectedId ? this.findParentFieldId(selectedId) : null;
+		const activeWrapper = selectedId
 			? this.element.find(`[data-field-id="${selectedId}"]`)
 			: null;
 
 		if (Array.isArray(this.clipboardFieldData)) {
-			let lastInserted = insertAfterWrapper && insertAfterWrapper.length ? insertAfterWrapper : null;
 			this.clipboardFieldData.forEach((item) => {
 				const clone = JSON.parse(JSON.stringify(item.data));
-				const targetParentId = parentFieldId !== null ? parentFieldId : item.parentFieldId;
+				const targetParentId = item.parentFieldId ?? null;
 				const newWrapper = this.addField(null, targetParentId, clone, null, true);
-				if (lastInserted && newWrapper) {
-					newWrapper.insertAfter(lastInserted);
-					lastInserted = newWrapper;
+				if (newWrapper) {
+					const canInsertAfterActive =
+						activeWrapper && activeWrapper.length && activeParentId === targetParentId;
+					if (canInsertAfterActive) {
+						newWrapper.insertAfter(activeWrapper);
+					} else if (targetParentId) {
+						const parentWrapper = this.element.find(`[data-field-id="${targetParentId}"] > .nested-fields-container`);
+						if (parentWrapper.length) {
+							const lastChild = parentWrapper.children(".field-wrapper").last();
+							if (lastChild.length) {
+								newWrapper.insertAfter(lastChild);
+							}
+						}
+					}
 				}
 			});
 		} else {
-			const clone = JSON.parse(JSON.stringify(this.clipboardFieldData));
-			const newWrapper = this.addField(null, parentFieldId, clone, null, true);
-			if (selectedId && newWrapper && insertAfterWrapper && insertAfterWrapper.length) {
-				newWrapper.insertAfter(insertAfterWrapper);
+			const clone = JSON.parse(JSON.stringify(this.clipboardFieldData.data));
+			const targetParentId = this.clipboardFieldData.parentFieldId ?? activeParentId;
+			const newWrapper = this.addField(null, targetParentId, clone, null, true);
+			if (newWrapper) {
+				if (activeWrapper && activeWrapper.length && activeParentId === targetParentId) {
+					newWrapper.insertAfter(activeWrapper);
+				}
 			}
 		}
 		this.rebuildBackendObjectFromDOM();
@@ -707,6 +724,11 @@ export class TrackerPromptMaker {
 				}
 			});
 		});
+
+		this.element
+			.find(".field-wrapper")
+			.filter((_, el) => this.selectedFieldIds.has($(el).attr("data-field-id")))
+			.attr("data-keep-selected", "1");
 
 		this.rebuildBackendObjectFromDOM();
 		this.syncBackendObject();
@@ -1122,7 +1144,17 @@ export class TrackerPromptMaker {
 		// Rebuild the entire backend object using the global counter
 		this.backendObject = rebuildObject(this.fieldsContainer);
 
+		const keepSelectedEls = this.element.find(".field-wrapper[data-keep-selected='1']");
 		this.selectedFieldIds.clear();
+		if (keepSelectedEls.length > 0) {
+			keepSelectedEls.each((_, el) => {
+				const fieldId = $(el).attr("data-field-id");
+				if (fieldId) {
+					this.selectedFieldIds.add(fieldId);
+				}
+				$(el).removeAttr("data-keep-selected");
+			});
+		}
 		this.clipboardFieldData = this.clipboardFieldData ? this.clipboardFieldData : null;
 		this.element.find(".field-wrapper").each((_, el) => this.applyMultiSelectState($(el)));
 		this.updateBulkButtonsState();
