@@ -674,36 +674,38 @@ function buildPrompt(backendObj, includeFields, indentLevel, lines, includeEphem
 	}
 }
 
-function buildPromptScoped(backendObj, includeFields, indentLevel, lines, includeEphemeral = false, scopeFilter = null, topLevelName = null) {
+function buildPromptScoped(backendObj, includeFields, indentLevel, lines, includeEphemeral = false, scopeFilter = null, topLevelName = null, inheritedScope = null) {
 	const indent = "  ".repeat(indentLevel);
 	for (const field of Object.values(backendObj)) {
 		if (!shouldIncludeField(field, includeFields, includeEphemeral)) continue;
 		const currentTop = topLevelName || field.name || "";
-		if (!shouldIncludeFieldScope(field, scopeFilter, currentTop)) continue;
+		const effectiveScope = getEffectiveScope(field, currentTop, inheritedScope);
+		if (scopeFilter && !hasScopeMatch(field, scopeFilter, currentTop, effectiveScope)) continue;
 		if (!field.prompt && !field.nestedFields) continue;
 
 		if (field.type === "FOR_EACH_OBJECT" || field.nestedFields) {
 			lines.push(`${indent}- **${field.name}:**${field.prompt ? " " + field.prompt : ""}`);
-			buildPromptScoped(field.nestedFields, includeFields, indentLevel + 1, lines, includeEphemeral, scopeFilter, currentTop);
+			buildPromptScoped(field.nestedFields, includeFields, indentLevel + 1, lines, includeEphemeral, scopeFilter, currentTop, effectiveScope);
 		} else {
 			lines.push(`${indent}- **${field.name}:** ${field.prompt}`);
 		}
 	}
 }
 
-function shouldIncludeFieldScope(field, scopeFilter, topLevelName) {
-	if (!scopeFilter) return true;
-	if (matchesScope(field, scopeFilter, topLevelName)) return true;
+function hasScopeMatch(field, scopeFilter, topLevelName, inheritedScope) {
+	const effectiveScope = getEffectiveScope(field, topLevelName, inheritedScope);
+	if (effectiveScope === scopeFilter) return true;
 	if (!field.nestedFields) return false;
 	return Object.values(field.nestedFields).some((nestedField) =>
-		shouldIncludeFieldScope(nestedField, scopeFilter, topLevelName)
+		hasScopeMatch(nestedField, scopeFilter, topLevelName, effectiveScope)
 	);
 }
 
-function matchesScope(field, scopeFilter, topLevelName) {
+function getEffectiveScope(field, topLevelName, inheritedScope) {
 	const normalizedScope = normalizeScopeValue(field.scope);
-	const effectiveScope = normalizedScope || inferScopeFromTopLevel(topLevelName);
-	return effectiveScope === scopeFilter;
+	if (normalizedScope) return normalizedScope;
+	if (inheritedScope) return inheritedScope;
+	return inferScopeFromTopLevel(topLevelName);
 }
 
 function inferScopeFromTopLevel(name) {
