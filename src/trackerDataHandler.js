@@ -132,18 +132,25 @@ export function getTrackerPrompt(backendObject, includeFields = FIELD_INCLUDE_OP
 	}
 
 	const sections = [
-		{ key: FIELD_SCOPE_OPTIONS.UNIVERSAL, title: "Universal (All Entities)" },
-		{ key: FIELD_SCOPE_OPTIONS.BOTH, title: "Both {{char}} and {{user}}" },
-		{ key: FIELD_SCOPE_OPTIONS.CHAR, title: "{{char}} only" },
-		{ key: FIELD_SCOPE_OPTIONS.USER, title: "{{user}} only" },
+		{ key: FIELD_SCOPE_OPTIONS.UNIVERSAL, title: "Universal (All Entities)", tag: "[UNIVERSAL]" },
+		{ key: FIELD_SCOPE_OPTIONS.BOTH, title: "Both {{char}} and {{user}}", tag: "[BOTH]" },
+		{ key: FIELD_SCOPE_OPTIONS.CHAR, title: "{{char}} only", tag: "[CHAR ONLY]" },
+		{ key: FIELD_SCOPE_OPTIONS.USER, title: "{{user}} only", tag: "[USER ONLY]" },
 	];
+
+	lines.push("## Field Usage Tags - CRITICAL UNDERSTANDING:");
+	lines.push("- **[UNIVERSAL]**: Applies to any entity with this field.");
+	lines.push("- **[BOTH]**: Only applies to {{char}} and {{user}}.");
+	lines.push("- **[CHAR ONLY]**: Only applies to {{char}}.");
+	lines.push("- **[USER ONLY]**: Only applies to {{user}}.");
+	lines.push("");
 
 	for (const section of sections) {
 		const sectionLines = [];
 		buildPromptScoped(backendObject, includeFields, 0, sectionLines, true, section.key, null);
 		if (sectionLines.length === 0) continue;
 		if (lines.length > 0) lines.push("");
-		lines.push(`### ${section.title}`);
+		lines.push(`### ${section.title} ${section.tag}`);
 		lines.push(...sectionLines);
 	}
 
