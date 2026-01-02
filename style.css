@@ -221,6 +221,12 @@
   white-space: nowrap;
   background-color: var(--black30a);
 }
+.tracker-prompt-maker .buttons-wrapper .icon-button {
+  min-width: 36px;
+  padding: 4px 6px;
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+}
 .tracker-prompt-maker .buttons-wrapper button:hover {
   background-color: var(--white30a);
 }

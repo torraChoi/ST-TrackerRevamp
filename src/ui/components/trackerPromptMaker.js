@@ -80,6 +80,9 @@ export class TrackerPromptMaker {
 		// Clear existing content in this.element to prevent duplication
 		this.element.empty();
 
+		const makeIconButton = (label, title) =>
+			$(`<button class="menu_button interactable icon-button">${label}</button>`).attr("title", title);
+
 		// Container for fields.
 		this.fieldsContainer = $('<div class="fields-container"></div>');
 		this.element.append(this.fieldsContainer);
@@ -97,52 +100,56 @@ export class TrackerPromptMaker {
 		const buttonsWrapper = $('<div class="buttons-wrapper"></div>');
 
 		// Button to add a new field.
-		const addFieldBtn = $('<button class="menu_button interactable">Add Field</button>').on("click", () => {
+		const addFieldBtn = makeIconButton("+", "Add Field").on("click", () => {
 			this.addField(); // Add field without specifying parent (top-level)
 			this.rebuildBackendObjectFromDOM(); // Rebuild keys after adding a new field.
 		});
 		buttonsWrapper.append(addFieldBtn);
 
 		// Button to add example values to all fields.
-		const addExampleValueBtn = $('<button class="menu_button interactable">Add Example Value</button>').on("click", () => {
+		const addExampleValueBtn = makeIconButton("E+", "Add Example Value").on("click", () => {
 			this.addExampleValueToAllFields();
 		});
 		buttonsWrapper.append(addExampleValueBtn);
 
 		// Button to remove example values from all fields.
-		const removeExampleValueBtn = $('<button class="menu_button interactable">Remove Example Value</button>').on("click", () => {
+		const removeExampleValueBtn = makeIconButton("E-", "Remove Example Value").on("click", () => {
 			this.removeExampleValueFromAllFields();
 		});
 		buttonsWrapper.append(removeExampleValueBtn);
 
-		const multiSelectBtn = $('<button class="menu_button interactable">Multi-select</button>').on("click", () => {
+		const multiSelectBtn = makeIconButton("MS", "Multi-select").on("click", () => {
 			this.toggleMultiSelect();
 		});
 		buttonsWrapper.append(multiSelectBtn);
 
-		const bulkDeleteBtn = $('<button class="menu_button interactable">Delete Selected</button>')
+		const bulkDeleteBtn = makeIconButton("Del", "Delete Selected")
 			.prop("disabled", true)
 			.on("click", () => this.deleteSelectedFields());
-		const bulkMoveUpBtn = $('<button class="menu_button interactable">Move Up</button>')
+		const bulkMoveUpBtn = makeIconButton("^", "Move Up")
 			.prop("disabled", true)
 			.on("click", () => this.moveSelectedFields("up"));
-		const bulkMoveDownBtn = $('<button class="menu_button interactable">Move Down</button>')
+		const bulkMoveDownBtn = makeIconButton("v", "Move Down")
 			.prop("disabled", true)
 			.on("click", () => this.moveSelectedFields("down"));
 		this.bulkButtons = { bulkDeleteBtn, bulkMoveUpBtn, bulkMoveDownBtn };
 		buttonsWrapper.append(bulkMoveUpBtn, bulkMoveDownBtn, bulkDeleteBtn);
 
-		const copyBtn = $('<button class="menu_button interactable">Copy</button>')
+		const copyBtn = makeIconButton("Cpy", "Copy")
 			.prop("disabled", true)
 			.on("click", () => this.copySelectedField());
-		const pasteBtn = $('<button class="menu_button interactable">Paste</button>')
+		const pasteBtn = makeIconButton("Pst", "Paste")
 			.prop("disabled", true)
 			.on("click", () => this.pasteField());
-		const duplicateBtn = $('<button class="menu_button interactable">Duplicate</button>')
+		const duplicateBtn = makeIconButton("Dup", "Duplicate")
 			.prop("disabled", true)
 			.on("click", () => this.duplicateSelectedField());
 		this.clipboardButtons = { copyBtn, pasteBtn, duplicateBtn };
 		buttonsWrapper.append(copyBtn, pasteBtn, duplicateBtn);
+
+		const deselectBtn = makeIconButton("Clr", "Deselect")
+			.on("click", () => this.clearSelection());
+		buttonsWrapper.append(deselectBtn);
 
 		this.element.append(buttonsWrapper);
 	}
@@ -540,6 +547,14 @@ export class TrackerPromptMaker {
 			this.clipboardButtons.duplicateBtn.prop("disabled", !canCopy);
 			this.clipboardButtons.pasteBtn.prop("disabled", !this.clipboardFieldData);
 		}
+	}
+
+	clearSelection() {
+		this.selectedFieldIds.clear();
+		this.lastFocusedFieldId = null;
+		this.element.find(".field-wrapper").removeClass("is-selected");
+		this.element.find(".field-select").prop("checked", false);
+		this.updateBulkButtonsState();
 	}
 
 	getActiveFieldId() {
