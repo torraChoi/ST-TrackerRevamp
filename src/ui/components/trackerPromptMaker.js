@@ -15,6 +15,7 @@ export class TrackerPromptMaker {
 		this.multiSelectEnabled = false;
 		this.selectedFieldIds = new Set();
 		this.clipboardFieldData = null;
+		this.lastFocusedFieldId = null;
 		this.init(existingObject); // Initialize the component.
 	}
 
@@ -224,6 +225,10 @@ export class TrackerPromptMaker {
 		}
 
 		const fieldWrapper = $('<div class="field-wrapper"></div>').attr("data-field-id", fieldId);
+		fieldWrapper.on("click focusin", () => {
+			this.lastFocusedFieldId = fieldId;
+			this.updateBulkButtonsState();
+		});
 
 		// Combined div for Field Name, Static/Dynamic Toggle, and Field Type Selector
 		const nameDynamicTypeDiv = $('<div class="name-dynamic-type-wrapper"></div>');
@@ -415,6 +420,7 @@ export class TrackerPromptMaker {
 		debug(`Added field with ID: ${fieldId}`);
 
 		this.applyMultiSelectState(fieldWrapper);
+		return fieldWrapper;
 
 		// Initialize the backend object structure for this field
 		if (parentFieldId) {
@@ -518,16 +524,23 @@ export class TrackerPromptMaker {
 		this.bulkButtons.bulkMoveDownBtn.prop("disabled", !hasSelection);
 
 		if (this.clipboardButtons) {
-			const singleSelected = this.selectedFieldIds.size === 1;
+			const singleSelected = this.getActiveFieldId() !== null;
 			this.clipboardButtons.copyBtn.prop("disabled", !singleSelected);
 			this.clipboardButtons.duplicateBtn.prop("disabled", !singleSelected);
 			this.clipboardButtons.pasteBtn.prop("disabled", !this.clipboardFieldData);
 		}
 	}
 
+	getActiveFieldId() {
+		if (this.selectedFieldIds.size === 1) {
+			return Array.from(this.selectedFieldIds)[0];
+		}
+		return this.lastFocusedFieldId;
+	}
+
 	copySelectedField() {
-		if (this.selectedFieldIds.size !== 1) return;
-		const fieldId = Array.from(this.selectedFieldIds)[0];
+		const fieldId = this.getActiveFieldId();
+		if (!fieldId) return;
 		const fieldData = this.getFieldDataById(fieldId);
 		if (!fieldData) return;
 		this.clipboardFieldData = JSON.parse(JSON.stringify(fieldData));
@@ -536,22 +549,34 @@ export class TrackerPromptMaker {
 
 	pasteField() {
 		if (!this.clipboardFieldData) return;
-		const selectedId = Array.from(this.selectedFieldIds)[0] || null;
+		const selectedId = this.getActiveFieldId();
 		const parentFieldId = selectedId ? this.findParentFieldId(selectedId) : null;
 		const clone = JSON.parse(JSON.stringify(this.clipboardFieldData));
-		this.addField(null, parentFieldId, clone, null, true);
+		const newWrapper = this.addField(null, parentFieldId, clone, null, true);
+		if (selectedId && newWrapper) {
+			const targetWrapper = this.element.find(`[data-field-id="${selectedId}"]`);
+			if (targetWrapper.length) {
+				newWrapper.insertAfter(targetWrapper);
+			}
+		}
 		this.rebuildBackendObjectFromDOM();
 		this.updateBulkButtonsState();
 	}
 
 	duplicateSelectedField() {
-		if (this.selectedFieldIds.size !== 1) return;
-		const fieldId = Array.from(this.selectedFieldIds)[0];
+		const fieldId = this.getActiveFieldId();
+		if (!fieldId) return;
 		const fieldData = this.getFieldDataById(fieldId);
 		if (!fieldData) return;
 		const parentFieldId = this.findParentFieldId(fieldId);
 		const clone = JSON.parse(JSON.stringify(fieldData));
-		this.addField(null, parentFieldId, clone, null, true);
+		const newWrapper = this.addField(null, parentFieldId, clone, null, true);
+		if (newWrapper) {
+			const targetWrapper = this.element.find(`[data-field-id="${fieldId}"]`);
+			if (targetWrapper.length) {
+				newWrapper.insertAfter(targetWrapper);
+			}
+		}
 		this.rebuildBackendObjectFromDOM();
 		this.updateBulkButtonsState();
 	}
@@ -564,7 +589,7 @@ export class TrackerPromptMaker {
 				if (found !== null) return found;
 			}
 		}
-		return parentId;
+		return null;
 	}
 
 	deleteSelectedFields() {
