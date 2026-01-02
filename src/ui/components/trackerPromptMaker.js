@@ -196,6 +196,16 @@ export class TrackerPromptMaker {
 		// Combined div for Field Name, Static/Dynamic Toggle, and Field Type Selector
 		const nameDynamicTypeDiv = $('<div class="name-dynamic-type-wrapper"></div>');
 
+		// Collapse Toggle (for nested fields)
+		const collapseToggle = $('<span class="collapse-toggle" role="button" tabindex="0">▾</span>')
+			.on("click", (e) => {
+				e.preventDefault();
+				fieldWrapper.toggleClass("is-collapsed");
+				const isCollapsed = fieldWrapper.hasClass("is-collapsed");
+				collapseToggle.text(isCollapsed ? "▸" : "▾");
+			});
+		nameDynamicTypeDiv.append(collapseToggle);
+
 		// Drag Handle
 		const dragHandle = $('<span class="drag-handle">&#x2630;</span>'); // Unicode for hamburger icon
 		nameDynamicTypeDiv.append(dragHandle);
@@ -332,6 +342,9 @@ export class TrackerPromptMaker {
 		// Show the button if the field type allows nesting
 		if (TrackerPromptMaker.NESTING_FIELD_TYPES.includes(fieldData.type)) {
 			addNestedFieldBtn.show();
+			collapseToggle.show();
+		} else {
+			collapseToggle.hide();
 		}
 
 		buttonsWrapper.append(addNestedFieldBtn);
@@ -478,8 +491,14 @@ export class TrackerPromptMaker {
 			debug(`Selected field type: ${type} for field ID: ${fieldId}`);
 			const fieldWrapper = this.element.find(`[data-field-id="${fieldId}"]`);
 			const addNestedFieldBtn = fieldWrapper.find(".menu_button:contains('Add Nested Field')");
+			const collapseToggle = fieldWrapper.find(".collapse-toggle");
 			const isNestingType = TrackerPromptMaker.NESTING_FIELD_TYPES.includes(type);
 			addNestedFieldBtn.toggle(isNestingType);
+			collapseToggle.toggle(isNestingType);
+			if (!isNestingType) {
+				fieldWrapper.removeClass("is-collapsed");
+				collapseToggle.text("▾");
+			}
 		} else {
 			error(`Field with ID ${fieldId} not found during type selection.`);
 		}
