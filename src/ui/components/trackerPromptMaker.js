@@ -419,9 +419,6 @@ export class TrackerPromptMaker {
 
 		debug(`Added field with ID: ${fieldId}`);
 
-		this.applyMultiSelectState(fieldWrapper);
-		return fieldWrapper;
-
 		// Initialize the backend object structure for this field
 		if (parentFieldId) {
 			const parentFieldData = this.getFieldDataById(parentFieldId);
@@ -471,6 +468,9 @@ export class TrackerPromptMaker {
 				this.addField(null, fieldId, nestedFieldData, nestedFieldId, false);
 			});
 		}
+
+		this.applyMultiSelectState(fieldWrapper);
+		return fieldWrapper;
 	}
 
 	/**
