@@ -524,9 +524,10 @@ export class TrackerPromptMaker {
 		this.bulkButtons.bulkMoveDownBtn.prop("disabled", !hasSelection);
 
 		if (this.clipboardButtons) {
-			const singleSelected = this.getActiveFieldId() !== null;
-			this.clipboardButtons.copyBtn.prop("disabled", !singleSelected);
-			this.clipboardButtons.duplicateBtn.prop("disabled", !singleSelected);
+			const hasActive = this.getActiveFieldId() !== null;
+			const canCopy = hasSelection || hasActive;
+			this.clipboardButtons.copyBtn.prop("disabled", !canCopy);
+			this.clipboardButtons.duplicateBtn.prop("disabled", !canCopy);
 			this.clipboardButtons.pasteBtn.prop("disabled", !this.clipboardFieldData);
 		}
 	}
@@ -538,12 +539,34 @@ export class TrackerPromptMaker {
 		return this.lastFocusedFieldId;
 	}
 
+	getSelectedFieldIdsOrdered() {
+		const ordered = [];
+		this.element.find(".field-wrapper").each((_, el) => {
+			const fieldId = $(el).attr("data-field-id");
+			if (this.selectedFieldIds.has(fieldId)) {
+				ordered.push(fieldId);
+			}
+		});
+		return ordered;
+	}
+
 	copySelectedField() {
-		const fieldId = this.getActiveFieldId();
-		if (!fieldId) return;
-		const fieldData = this.getFieldDataById(fieldId);
-		if (!fieldData) return;
-		this.clipboardFieldData = JSON.parse(JSON.stringify(fieldData));
+		const selectedIds = this.getSelectedFieldIdsOrdered();
+		if (selectedIds.length > 0) {
+			this.clipboardFieldData = selectedIds
+				.map((fieldId) => {
+					const fieldData = this.getFieldDataById(fieldId);
+					if (!fieldData) return null;
+					return { data: JSON.parse(JSON.stringify(fieldData)) };
+				})
+				.filter(Boolean);
+		} else {
+			const fieldId = this.getActiveFieldId();
+			if (!fieldId) return;
+			const fieldData = this.getFieldDataById(fieldId);
+			if (!fieldData) return;
+			this.clipboardFieldData = JSON.parse(JSON.stringify(fieldData));
+		}
 		this.updateBulkButtonsState();
 	}
 
@@ -551,12 +574,25 @@ export class TrackerPromptMaker {
 		if (!this.clipboardFieldData) return;
 		const selectedId = this.getActiveFieldId();
 		const parentFieldId = selectedId ? this.findParentFieldId(selectedId) : null;
-		const clone = JSON.parse(JSON.stringify(this.clipboardFieldData));
-		const newWrapper = this.addField(null, parentFieldId, clone, null, true);
-		if (selectedId && newWrapper) {
-			const targetWrapper = this.element.find(`[data-field-id="${selectedId}"]`);
-			if (targetWrapper.length) {
-				newWrapper.insertAfter(targetWrapper);
+		let insertAfterWrapper = selectedId
+			? this.element.find(`[data-field-id="${selectedId}"]`)
+			: null;
+
+		if (Array.isArray(this.clipboardFieldData)) {
+			let lastInserted = insertAfterWrapper && insertAfterWrapper.length ? insertAfterWrapper : null;
+			this.clipboardFieldData.forEach((item) => {
+				const clone = JSON.parse(JSON.stringify(item.data));
+				const newWrapper = this.addField(null, parentFieldId, clone, null, true);
+				if (lastInserted && newWrapper) {
+					newWrapper.insertAfter(lastInserted);
+					lastInserted = newWrapper;
+				}
+			});
+		} else {
+			const clone = JSON.parse(JSON.stringify(this.clipboardFieldData));
+			const newWrapper = this.addField(null, parentFieldId, clone, null, true);
+			if (selectedId && newWrapper && insertAfterWrapper && insertAfterWrapper.length) {
+				newWrapper.insertAfter(insertAfterWrapper);
 			}
 		}
 		this.rebuildBackendObjectFromDOM();
@@ -564,17 +600,34 @@ export class TrackerPromptMaker {
 	}
 
 	duplicateSelectedField() {
-		const fieldId = this.getActiveFieldId();
-		if (!fieldId) return;
-		const fieldData = this.getFieldDataById(fieldId);
-		if (!fieldData) return;
-		const parentFieldId = this.findParentFieldId(fieldId);
-		const clone = JSON.parse(JSON.stringify(fieldData));
-		const newWrapper = this.addField(null, parentFieldId, clone, null, true);
-		if (newWrapper) {
-			const targetWrapper = this.element.find(`[data-field-id="${fieldId}"]`);
-			if (targetWrapper.length) {
-				newWrapper.insertAfter(targetWrapper);
+		const selectedIds = this.getSelectedFieldIdsOrdered();
+		if (selectedIds.length > 0) {
+			selectedIds.forEach((fieldId) => {
+				const fieldData = this.getFieldDataById(fieldId);
+				if (!fieldData) return;
+				const parentFieldId = this.findParentFieldId(fieldId);
+				const clone = JSON.parse(JSON.stringify(fieldData));
+				const newWrapper = this.addField(null, parentFieldId, clone, null, true);
+				if (newWrapper) {
+					const targetWrapper = this.element.find(`[data-field-id="${fieldId}"]`);
+					if (targetWrapper.length) {
+						newWrapper.insertAfter(targetWrapper);
+					}
+				}
+			});
+		} else {
+			const fieldId = this.getActiveFieldId();
+			if (!fieldId) return;
+			const fieldData = this.getFieldDataById(fieldId);
+			if (!fieldData) return;
+			const parentFieldId = this.findParentFieldId(fieldId);
+			const clone = JSON.parse(JSON.stringify(fieldData));
+			const newWrapper = this.addField(null, parentFieldId, clone, null, true);
+			if (newWrapper) {
+				const targetWrapper = this.element.find(`[data-field-id="${fieldId}"]`);
+				if (targetWrapper.length) {
+					newWrapper.insertAfter(targetWrapper);
+				}
 			}
 		}
 		this.rebuildBackendObjectFromDOM();
