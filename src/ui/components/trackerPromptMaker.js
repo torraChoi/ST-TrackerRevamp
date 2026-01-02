@@ -121,12 +121,12 @@ export class TrackerPromptMaker {
 		});
 		buttonsWrapper.append(removeExampleValueBtn);
 
-		const multiSelectBtn = makeIconButton("MS", "Multi-select").on("click", () => {
+		const multiSelectBtn = makeIconButton("[]", "Multi-select").on("click", () => {
 			this.toggleMultiSelect();
 		});
 		buttonsWrapper.append(multiSelectBtn);
 
-		const bulkDeleteBtn = makeIconButton("Del", "Delete Selected")
+		const bulkDeleteBtn = makeIconButton("X", "Delete Selected")
 			.prop("disabled", true)
 			.on("click", () => this.deleteSelectedFields());
 		const bulkMoveUpBtn = makeIconButton("^", "Move Up")
@@ -138,13 +138,13 @@ export class TrackerPromptMaker {
 		this.bulkButtons = { bulkDeleteBtn, bulkMoveUpBtn, bulkMoveDownBtn };
 		buttonsWrapper.append(bulkMoveUpBtn, bulkMoveDownBtn, bulkDeleteBtn);
 
-		const copyBtn = makeIconButton("Cpy", "Copy")
+		const copyBtn = makeIconButton("Cp", "Copy")
 			.prop("disabled", true)
 			.on("click", () => this.copySelectedField());
-		const pasteBtn = makeIconButton("Pst", "Paste")
+		const pasteBtn = makeIconButton("Ps", "Paste")
 			.prop("disabled", true)
 			.on("click", () => this.pasteField());
-		const duplicateBtn = makeIconButton("Dup", "Duplicate")
+		const duplicateBtn = makeIconButton("Du", "Duplicate")
 			.prop("disabled", true)
 			.on("click", () => this.duplicateSelectedField());
 		this.clipboardButtons = { copyBtn, pasteBtn, duplicateBtn };
@@ -595,9 +595,7 @@ export class TrackerPromptMaker {
 				row.append('<span class="nav-toggle spacer"></span>');
 			}
 
-			if (depth === 0) {
-				row.append('<span class="nav-drag" title="Drag to reorder">≡</span>');
-			}
+			row.append('<span class="nav-drag" title="Drag to reorder">≡</span>');
 
 			const label = $(`<span class="nav-label"></span>`);
 			label.text(name);
@@ -621,11 +619,24 @@ export class TrackerPromptMaker {
 			this.navContainer.append(buildEntry($(el), 0));
 		});
 
+		this.navContainer.find(".nav-children").each((_, el) => {
+			const $el = $(el);
+			if ($el.sortable) {
+				$el.sortable("destroy");
+			}
+			$el.sortable({
+				items: "> .nav-entry",
+				handle: ".nav-drag",
+				axis: "y",
+				stop: () => this.applyNavOrderFromSidebar(),
+			});
+		});
+
 		if (this.navContainer.sortable) {
 			this.navContainer.sortable("destroy");
 		}
 		this.navContainer.sortable({
-			items: "> .nav-entry[data-nav-depth='0']",
+			items: "> .nav-entry",
 			handle: ".nav-drag",
 			axis: "y",
 			stop: () => this.applyNavOrderFromSidebar(),
@@ -633,23 +644,36 @@ export class TrackerPromptMaker {
 	}
 
 	applyNavOrderFromSidebar() {
-		const order = [];
-		this.navContainer.children(".nav-entry[data-nav-depth='0']").each((_, el) => {
-			const fieldId = $(el).attr("data-nav-field-id");
-			if (fieldId) order.push(fieldId);
-		});
-		if (order.length === 0) return;
-		const wrappers = {};
-		this.fieldsContainer.children(".field-wrapper").each((_, el) => {
-			const id = $(el).attr("data-field-id");
-			wrappers[id] = $(el);
-		});
-		order.forEach((fieldId) => {
-			const wrapper = wrappers[fieldId];
-			if (wrapper) {
-				this.fieldsContainer.append(wrapper);
-			}
-		});
+		const reorderFromNav = (navParent, fieldContainer) => {
+			const order = [];
+			navParent.children(".nav-entry").each((_, el) => {
+				const fieldId = $(el).attr("data-nav-field-id");
+				if (fieldId) order.push(fieldId);
+			});
+			if (order.length === 0) return;
+			const wrappers = {};
+			fieldContainer.children(".field-wrapper").each((_, el) => {
+				const id = $(el).attr("data-field-id");
+				wrappers[id] = $(el);
+			});
+			order.forEach((fieldId) => {
+				const wrapper = wrappers[fieldId];
+				if (wrapper) {
+					fieldContainer.append(wrapper);
+					const navChildren = navParent
+						.children(`.nav-entry[data-nav-field-id="${fieldId}"]`)
+						.children(".nav-children");
+					if (navChildren.length) {
+						const nestedContainer = wrapper.find("> .nested-fields-container");
+						if (nestedContainer.length) {
+							reorderFromNav(navChildren, nestedContainer);
+						}
+					}
+				}
+			});
+		};
+
+		reorderFromNav(this.navContainer, this.fieldsContainer);
 		this.rebuildBackendObjectFromDOM();
 	}
 

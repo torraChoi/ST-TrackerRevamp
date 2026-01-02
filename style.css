@@ -93,7 +93,8 @@
 }
 
 .tracker-prompt-maker-modal {
-  width: calc(var(--sheldWidth) + 100px) !important;
+  width: calc(var(--sheldWidth) + 300px) !important;
+  padding: 20px !important;
 }
 @media screen and (max-width: 1000px) {
   .tracker-prompt-maker-modal {
@@ -109,12 +110,13 @@
 }
 .tracker-prompt-maker .tracker-prompt-maker-layout {
   display: flex;
-  gap: 12px;
+  gap: 20px;
 }
 .tracker-prompt-maker .prompt-maker-sidebar {
   flex: 0 0 25%;
   max-height: 80vh;
   overflow-y: auto;
+  padding-right: 10px;
 }
 .tracker-prompt-maker .prompt-maker-content {
   flex: 1;
