@@ -568,7 +568,7 @@ export class TrackerPromptMaker {
 	updateNavLabel(fieldId, name) {
 		if (!this.navContainer) return;
 		const label = name && name.trim() ? name.trim() : "Untitled";
-		const item = this.navContainer.find(`[data-nav-field-id="${fieldId}"] .nav-label`);
+		const item = this.navContainer.find(`[data-nav-field-id="${fieldId}"] > .nav-row .nav-label`);
 		if (item.length) {
 			item.text(label);
 		}
