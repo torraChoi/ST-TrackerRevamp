@@ -118,6 +118,8 @@
   max-height: 80vh;
   overflow-y: auto;
   padding-right: 16px;
+  border-top: 1px solid var(--SmartThemeBorderColor);
+  margin-top: 3px;
 }
 .tracker-prompt-maker .prompt-maker-content {
   flex: 1;
@@ -145,6 +147,7 @@
   border: 1px solid var(--SmartThemeBorderColor);
   border-radius: 10px;
   padding: 8px;
+  margin-top: 10px;
 }
 .tracker-prompt-maker .prompt-maker-nav .nav-entry {
   border: 1px solid var(--SmartThemeBorderColor);
@@ -303,7 +306,8 @@
 .tracker-prompt-maker .prompt-maker-sidebar .buttons-wrapper {
   flex-wrap: nowrap;
   justify-content: flex-start;
-  gap: 4px;
+  gap: 6px;
+  margin-top: 10px;
 }
 .tracker-prompt-maker .buttons-wrapper button {
   white-space: nowrap;
@@ -312,7 +316,7 @@
 .tracker-prompt-maker .buttons-wrapper .icon-button {
   min-width: 28px;
   padding: 3px 4px;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   letter-spacing: 0.02em;
 }
 .tracker-prompt-maker .buttons-wrapper button:hover {

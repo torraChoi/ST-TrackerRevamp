@@ -122,18 +122,18 @@ export class TrackerPromptMaker {
 		});
 		buttonsWrapper.append(removeExampleValueBtn);
 
-		const multiSelectBtn = makeIconButton("[]", "Multi-select").on("click", () => {
+		const multiSelectBtn = makeIconButton("✔️", "Multi-select").on("click", () => {
 			this.toggleMultiSelect();
 		});
 		buttonsWrapper.append(multiSelectBtn);
 
-		const bulkDeleteBtn = makeIconButton("X", "Delete Selected")
+		const bulkDeleteBtn = makeIconButton("🗑️", "Delete Selected")
 			.prop("disabled", true)
 			.on("click", () => this.deleteSelectedFields());
-		const bulkMoveUpBtn = makeIconButton("^", "Move Up")
+		const bulkMoveUpBtn = makeIconButton("▲", "Move Up")
 			.prop("disabled", true)
 			.on("click", () => this.moveSelectedFields("up"));
-		const bulkMoveDownBtn = makeIconButton("v", "Move Down")
+		const bulkMoveDownBtn = makeIconButton("▼", "Move Down")
 			.prop("disabled", true)
 			.on("click", () => this.moveSelectedFields("down"));
 		this.bulkButtons = { bulkDeleteBtn, bulkMoveUpBtn, bulkMoveDownBtn };
@@ -145,7 +145,7 @@ export class TrackerPromptMaker {
 		const pasteBtn = makeIconButton("Ps", "Paste")
 			.prop("disabled", true)
 			.on("click", () => this.pasteField());
-		const duplicateBtn = makeIconButton("Du", "Duplicate")
+		const duplicateBtn = makeIconButton("📋", "Duplicate")
 			.prop("disabled", true)
 			.on("click", () => this.duplicateSelectedField());
 		this.clipboardButtons = { copyBtn, pasteBtn, duplicateBtn };
@@ -618,6 +618,11 @@ export class TrackerPromptMaker {
 			const label = $(`<span class="nav-label"></span>`);
 			label.text(name);
 			row.append(label);
+			row.on("mousedown", (event) => {
+				if ($(event.target).closest(".nav-drag").length) {
+					event.stopPropagation();
+				}
+			});
 			row.on("click", (event) => {
 				this.selectFieldFromNav(fieldId, event);
 				wrapper.get(0).scrollIntoView({ behavior: "smooth", block: "start" });
@@ -650,6 +655,7 @@ export class TrackerPromptMaker {
 				helper: "clone",
 				tolerance: "pointer",
 				distance: 3,
+				cancel: "",
 				stop: () => this.applyNavOrderFromSidebar(),
 			});
 			if ($el.disableSelection) {
@@ -667,6 +673,7 @@ export class TrackerPromptMaker {
 			helper: "clone",
 			tolerance: "pointer",
 			distance: 3,
+			cancel: "",
 			stop: () => this.applyNavOrderFromSidebar(),
 		});
 		if (this.navContainer.disableSelection) {
