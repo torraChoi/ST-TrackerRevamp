@@ -83,26 +83,29 @@ export class TrackerPromptMaker {
 		const makeIconButton = (label, title) =>
 			$(`<button class="menu_button interactable icon-button">${label}</button>`).attr("title", title);
 
+		const layout = $('<div class="tracker-prompt-maker-layout"></div>');
+		const sidebar = $('<div class="prompt-maker-sidebar"></div>');
+		const content = $('<div class="prompt-maker-content"></div>');
+
 		// Container for fields.
 		this.fieldsContainer = $('<div class="fields-container"></div>');
-		this.element.append(this.fieldsContainer);
+		content.append(this.fieldsContainer);
+		layout.append(sidebar, content);
+		this.element.append(layout);
+
 		this.element.off("mousedown.trackerPromptMaker").on("mousedown.trackerPromptMaker", (e) => {
 			const target = $(e.target);
 			if (target.closest(".field-wrapper").length > 0) return;
 			if (target.closest(".buttons-wrapper").length > 0) return;
-			this.selectedFieldIds.clear();
-			this.lastFocusedFieldId = null;
-			this.element.find(".field-wrapper").removeClass("is-selected");
-			this.element.find(".field-select").prop("checked", false);
-			this.updateBulkButtonsState();
+			this.clearSelection();
 		});
 
 		const buttonsWrapper = $('<div class="buttons-wrapper"></div>');
 
 		// Button to add a new field.
 		const addFieldBtn = makeIconButton("+", "Add Field").on("click", () => {
-			this.addField(); // Add field without specifying parent (top-level)
-			this.rebuildBackendObjectFromDOM(); // Rebuild keys after adding a new field.
+			this.addField();
+			this.rebuildBackendObjectFromDOM();
 		});
 		buttonsWrapper.append(addFieldBtn);
 
@@ -118,18 +121,18 @@ export class TrackerPromptMaker {
 		});
 		buttonsWrapper.append(removeExampleValueBtn);
 
-		const multiSelectBtn = makeIconButton("✔️", "Multi-select").on("click", () => {
+		const multiSelectBtn = makeIconButton("MS", "Multi-select").on("click", () => {
 			this.toggleMultiSelect();
 		});
 		buttonsWrapper.append(multiSelectBtn);
 
-		const bulkDeleteBtn = makeIconButton("🗑️", "Delete Selected")
+		const bulkDeleteBtn = makeIconButton("Del", "Delete Selected")
 			.prop("disabled", true)
 			.on("click", () => this.deleteSelectedFields());
-		const bulkMoveUpBtn = makeIconButton("▲", "Move Up")
+		const bulkMoveUpBtn = makeIconButton("^", "Move Up")
 			.prop("disabled", true)
 			.on("click", () => this.moveSelectedFields("up"));
-		const bulkMoveDownBtn = makeIconButton("▼", "Move Down")
+		const bulkMoveDownBtn = makeIconButton("v", "Move Down")
 			.prop("disabled", true)
 			.on("click", () => this.moveSelectedFields("down"));
 		this.bulkButtons = { bulkDeleteBtn, bulkMoveUpBtn, bulkMoveDownBtn };
@@ -141,7 +144,7 @@ export class TrackerPromptMaker {
 		const pasteBtn = makeIconButton("Pst", "Paste")
 			.prop("disabled", true)
 			.on("click", () => this.pasteField());
-		const duplicateBtn = makeIconButton("📋", "Duplicate")
+		const duplicateBtn = makeIconButton("Dup", "Duplicate")
 			.prop("disabled", true)
 			.on("click", () => this.duplicateSelectedField());
 		this.clipboardButtons = { copyBtn, pasteBtn, duplicateBtn };
@@ -151,7 +154,9 @@ export class TrackerPromptMaker {
 			.on("click", () => this.clearSelection());
 		buttonsWrapper.append(deselectBtn);
 
-		this.element.append(buttonsWrapper);
+		const navTitle = $('<div class="prompt-maker-nav-title">Navigator</div>');
+		this.navContainer = $('<div class="prompt-maker-nav"></div>');
+		sidebar.append(buttonsWrapper, navTitle, this.navContainer);
 	}
 
 	/**
@@ -557,6 +562,36 @@ export class TrackerPromptMaker {
 		this.updateBulkButtonsState();
 	}
 
+	updateNavLabel(fieldId, name) {
+		if (!this.navContainer) return;
+		const label = name && name.trim() ? name.trim() : "Untitled";
+		const item = this.navContainer.find(`[data-nav-field-id="${fieldId}"] .nav-label`);
+		if (item.length) {
+			item.text(label);
+		}
+	}
+
+	rebuildMiniNav() {
+		if (!this.navContainer) return;
+		this.navContainer.empty();
+		const topLevelFields = this.fieldsContainer.children(".field-wrapper");
+		topLevelFields.each((_, el) => {
+			const wrapper = $(el);
+			const fieldId = wrapper.attr("data-field-id");
+			const name = wrapper.find("> .name-dynamic-type-wrapper .field-name-wrapper input").val() || "Untitled";
+			const navItem = $(`
+				<button class="menu_button interactable nav-item" data-nav-field-id="${fieldId}">
+					<span class="nav-label"></span>
+				</button>
+			`);
+			navItem.find(".nav-label").text(name);
+			navItem.on("click", () => {
+				el.scrollIntoView({ behavior: "smooth", block: "start" });
+			});
+			this.navContainer.append(navItem);
+		});
+	}
+
 	getActiveFieldId() {
 		if (this.selectedFieldIds.size === 1) {
 			return Array.from(this.selectedFieldIds)[0];
@@ -808,6 +843,7 @@ export class TrackerPromptMaker {
 		const fieldData = this.getFieldDataById(fieldId);
 		if (fieldData) {
 			fieldData.name = name;
+			this.updateNavLabel(fieldId, name);
 			debug(`Validated field name: ${name} for field ID: ${fieldId}`);
 			return true;
 		} else {
@@ -1097,6 +1133,8 @@ export class TrackerPromptMaker {
 			// Make top-level container sortable
 			this.makeFieldsSortable(this.fieldsContainer, this.backendObject);
 
+			this.rebuildMiniNav();
+
 			debug("Populated from existing object.");
 		} catch (err) {
 			error("Error populating from existing object:", err);
@@ -1218,5 +1256,6 @@ export class TrackerPromptMaker {
 		debug("Rebuilt backend object from DOM.", { backendObject: this.backendObject });
 
 		this.syncBackendObject();
+		this.rebuildMiniNav();
 	}
 }

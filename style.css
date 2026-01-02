@@ -107,11 +107,42 @@
   /* Helper styling during dragging */
   /* Shrink sibling fields in the same container during drag */
 }
-.tracker-prompt-maker > .fields-container {
+.tracker-prompt-maker .tracker-prompt-maker-layout {
+  display: flex;
+  gap: 12px;
+}
+.tracker-prompt-maker .prompt-maker-sidebar {
+  flex: 0 0 160px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.tracker-prompt-maker .prompt-maker-content {
+  flex: 1;
+  min-width: 0;
+}
+.tracker-prompt-maker .prompt-maker-nav-title {
+  margin: 8px 0 6px;
+  font-weight: 600;
+  opacity: 0.85;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+}
+.tracker-prompt-maker .prompt-maker-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.tracker-prompt-maker .prompt-maker-nav .nav-item {
+  text-align: left;
+  padding: 6px 8px;
+  font-size: 0.85rem;
+}
+.tracker-prompt-maker .fields-container {
   max-height: 80vh;
   overflow-y: scroll;
 }
-.tracker-prompt-maker > .fields-container > .field-wrapper {
+.tracker-prompt-maker .fields-container > .field-wrapper {
   background-color: rgba(125, 125, 125, 0.3);
 }
 .tracker-prompt-maker .field-wrapper {
@@ -216,6 +247,10 @@
   flex-wrap: nowrap;
   gap: 5px;
   justify-content: center;
+}
+.tracker-prompt-maker .prompt-maker-sidebar .buttons-wrapper {
+  flex-wrap: wrap;
+  justify-content: flex-start;
 }
 .tracker-prompt-maker .buttons-wrapper button {
   white-space: nowrap;
