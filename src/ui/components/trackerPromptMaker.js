@@ -118,18 +118,18 @@ export class TrackerPromptMaker {
 		});
 		buttonsWrapper.append(removeExampleValueBtn);
 
-		const multiSelectBtn = makeIconButton("MS", "Multi-select").on("click", () => {
+		const multiSelectBtn = makeIconButton("✔️", "Multi-select").on("click", () => {
 			this.toggleMultiSelect();
 		});
 		buttonsWrapper.append(multiSelectBtn);
 
-		const bulkDeleteBtn = makeIconButton("Del", "Delete Selected")
+		const bulkDeleteBtn = makeIconButton("🗑️", "Delete Selected")
 			.prop("disabled", true)
 			.on("click", () => this.deleteSelectedFields());
-		const bulkMoveUpBtn = makeIconButton("^", "Move Up")
+		const bulkMoveUpBtn = makeIconButton("▲", "Move Up")
 			.prop("disabled", true)
 			.on("click", () => this.moveSelectedFields("up"));
-		const bulkMoveDownBtn = makeIconButton("v", "Move Down")
+		const bulkMoveDownBtn = makeIconButton("▼", "Move Down")
 			.prop("disabled", true)
 			.on("click", () => this.moveSelectedFields("down"));
 		this.bulkButtons = { bulkDeleteBtn, bulkMoveUpBtn, bulkMoveDownBtn };
@@ -141,7 +141,7 @@ export class TrackerPromptMaker {
 		const pasteBtn = makeIconButton("Pst", "Paste")
 			.prop("disabled", true)
 			.on("click", () => this.pasteField());
-		const duplicateBtn = makeIconButton("Dup", "Duplicate")
+		const duplicateBtn = makeIconButton("📋", "Duplicate")
 			.prop("disabled", true)
 			.on("click", () => this.duplicateSelectedField());
 		this.clipboardButtons = { copyBtn, pasteBtn, duplicateBtn };
