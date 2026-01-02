@@ -80,6 +80,16 @@ export class TrackerPromptMaker {
 		// Clear existing content in this.element to prevent duplication
 		this.element.empty();
 
+		this.element.off("mousedown.trackerPromptMaker").on("mousedown.trackerPromptMaker", (e) => {
+			if ($(e.target).closest(".field-wrapper").length === 0) {
+				this.selectedFieldIds.clear();
+				this.lastFocusedFieldId = null;
+				this.element.find(".field-wrapper").removeClass("is-selected");
+				this.element.find(".field-select").prop("checked", false);
+				this.updateBulkButtonsState();
+			}
+		});
+
 		// Container for fields.
 		this.fieldsContainer = $('<div class="fields-container"></div>');
 		this.element.append(this.fieldsContainer);
@@ -591,6 +601,7 @@ export class TrackerPromptMaker {
 
 	pasteField() {
 		if (!this.clipboardFieldData) return;
+		const selectedIds = this.getSelectedFieldIdsOrdered();
 		const selectedId = this.getActiveFieldId();
 		const activeParentId = selectedId ? this.findParentFieldId(selectedId) : null;
 		const activeWrapper = selectedId
@@ -598,14 +609,26 @@ export class TrackerPromptMaker {
 			: null;
 
 		if (Array.isArray(this.clipboardFieldData)) {
+			const lastSelectedByParent = new Map();
+			if (selectedIds.length > 0) {
+				selectedIds.forEach((fieldId) => {
+					const parentId = this.findParentFieldId(fieldId);
+					const wrapper = this.element.find(`[data-field-id="${fieldId}"]`);
+					if (wrapper.length) {
+						lastSelectedByParent.set(parentId, wrapper);
+					}
+				});
+			}
 			this.clipboardFieldData.forEach((item) => {
 				const clone = JSON.parse(JSON.stringify(item.data));
 				const targetParentId = item.parentFieldId ?? null;
 				const newWrapper = this.addField(null, targetParentId, clone, null, true);
 				if (newWrapper) {
-					const canInsertAfterActive =
-						activeWrapper && activeWrapper.length && activeParentId === targetParentId;
-					if (canInsertAfterActive) {
+					const lastSelected = lastSelectedByParent.get(targetParentId);
+					if (lastSelected && lastSelected.length) {
+						newWrapper.insertAfter(lastSelected);
+						lastSelectedByParent.set(targetParentId, newWrapper);
+					} else if (activeWrapper && activeWrapper.length && activeParentId === targetParentId) {
 						newWrapper.insertAfter(activeWrapper);
 					} else if (targetParentId) {
 						const parentWrapper = this.element.find(`[data-field-id="${targetParentId}"] > .nested-fields-container`);
