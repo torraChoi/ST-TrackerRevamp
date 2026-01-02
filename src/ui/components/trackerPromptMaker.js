@@ -83,7 +83,7 @@ export class TrackerPromptMaker {
 		// Container for fields.
 		this.fieldsContainer = $('<div class="fields-container"></div>');
 		this.element.append(this.fieldsContainer);
-		this.fieldsContainer.off("mousedown.trackerPromptMaker").on("mousedown.trackerPromptMaker", (e) => {
+		this.element.off("mousedown.trackerPromptMaker").on("mousedown.trackerPromptMaker", (e) => {
 			const target = $(e.target);
 			if (target.closest(".field-wrapper").length > 0) return;
 			if (target.closest(".buttons-wrapper").length > 0) return;
