@@ -125,6 +125,13 @@
   margin-top: 5px;
   margin-bottom: 5px;
 }
+.tracker-prompt-maker .field-wrapper .field-select {
+  display: none;
+  margin: 0;
+}
+.tracker-prompt-maker .field-wrapper.is-selected {
+  outline: 2px solid rgba(120, 180, 255, 0.5);
+}
 .tracker-prompt-maker .field-wrapper .name-dynamic-type-wrapper {
   display: flex;
   gap: 10px;

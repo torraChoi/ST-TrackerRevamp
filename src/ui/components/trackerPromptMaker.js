@@ -12,6 +12,8 @@ export class TrackerPromptMaker {
 		this.element = $('<div class="tracker-prompt-maker"></div>'); // Root element of the component.
 		this.fieldCounter = 0; // Counter to generate unique field IDs.
 		this.exampleCounter = 0;
+		this.multiSelectEnabled = false;
+		this.selectedFieldIds = new Set();
 		this.init(existingObject); // Initialize the component.
 	}
 
@@ -100,6 +102,23 @@ export class TrackerPromptMaker {
 			this.removeExampleValueFromAllFields();
 		});
 		buttonsWrapper.append(removeExampleValueBtn);
+
+		const multiSelectBtn = $('<button class="menu_button interactable">Multi-select</button>').on("click", () => {
+			this.toggleMultiSelect();
+		});
+		buttonsWrapper.append(multiSelectBtn);
+
+		const bulkDeleteBtn = $('<button class="menu_button interactable">Delete Selected</button>')
+			.prop("disabled", true)
+			.on("click", () => this.deleteSelectedFields());
+		const bulkMoveUpBtn = $('<button class="menu_button interactable">Move Up</button>')
+			.prop("disabled", true)
+			.on("click", () => this.moveSelectedFields("up"));
+		const bulkMoveDownBtn = $('<button class="menu_button interactable">Move Down</button>')
+			.prop("disabled", true)
+			.on("click", () => this.moveSelectedFields("down"));
+		this.bulkButtons = { bulkDeleteBtn, bulkMoveUpBtn, bulkMoveDownBtn };
+		buttonsWrapper.append(bulkMoveUpBtn, bulkMoveDownBtn, bulkDeleteBtn);
 
 		this.element.append(buttonsWrapper);
 	}
@@ -195,6 +214,21 @@ export class TrackerPromptMaker {
 
 		// Combined div for Field Name, Static/Dynamic Toggle, and Field Type Selector
 		const nameDynamicTypeDiv = $('<div class="name-dynamic-type-wrapper"></div>');
+
+		// Multi-select checkbox
+		const selectCheckbox = $('<input type="checkbox" class="field-select">')
+			.on("change", (e) => {
+				const currentFieldId = fieldWrapper.attr("data-field-id");
+				if (e.target.checked) {
+					this.selectedFieldIds.add(currentFieldId);
+					fieldWrapper.addClass("is-selected");
+				} else {
+					this.selectedFieldIds.delete(currentFieldId);
+					fieldWrapper.removeClass("is-selected");
+				}
+				this.updateBulkButtonsState();
+			});
+		nameDynamicTypeDiv.append(selectCheckbox);
 
 		// Collapse Toggle (for nested fields)
 		const collapseToggle = $('<span class="collapse-toggle" role="button" tabindex="0">▾</span>')
@@ -367,6 +401,8 @@ export class TrackerPromptMaker {
 
 		debug(`Added field with ID: ${fieldId}`);
 
+		this.applyMultiSelectState(fieldWrapper);
+
 		// Initialize the backend object structure for this field
 		if (parentFieldId) {
 			const parentFieldData = this.getFieldDataById(parentFieldId);
@@ -428,12 +464,87 @@ export class TrackerPromptMaker {
 		if (confirm("Are you sure you want to remove this field?")) {
 			// Remove from backend object
 			this.deleteFieldDataById(fieldId);
+			this.selectedFieldIds.delete(fieldId);
 			// Remove from UI
 			fieldWrapper.remove();
 			debug(`Removed field with ID: ${fieldId}`);
 			this.rebuildBackendObjectFromDOM(); // Rebuild keys after removal
 			this.syncBackendObject();
+			this.updateBulkButtonsState();
 		}
+	}
+
+	toggleMultiSelect() {
+		this.multiSelectEnabled = !this.multiSelectEnabled;
+		if (!this.multiSelectEnabled) {
+			this.selectedFieldIds.clear();
+		}
+		this.element.toggleClass("multi-select", this.multiSelectEnabled);
+		this.element.find(".field-wrapper").each((_, el) => this.applyMultiSelectState($(el)));
+		this.updateBulkButtonsState();
+	}
+
+	applyMultiSelectState(fieldWrapper) {
+		const checkbox = fieldWrapper.find("> .name-dynamic-type-wrapper > .field-select");
+		if (this.multiSelectEnabled) {
+			checkbox.show();
+			const fieldId = fieldWrapper.attr("data-field-id");
+			checkbox.prop("checked", this.selectedFieldIds.has(fieldId));
+			fieldWrapper.toggleClass("is-selected", this.selectedFieldIds.has(fieldId));
+		} else {
+			checkbox.hide().prop("checked", false);
+			fieldWrapper.removeClass("is-selected");
+		}
+	}
+
+	updateBulkButtonsState() {
+		if (!this.bulkButtons) return;
+		const hasSelection = this.selectedFieldIds.size > 0;
+		this.bulkButtons.bulkDeleteBtn.prop("disabled", !hasSelection);
+		this.bulkButtons.bulkMoveUpBtn.prop("disabled", !hasSelection);
+		this.bulkButtons.bulkMoveDownBtn.prop("disabled", !hasSelection);
+	}
+
+	deleteSelectedFields() {
+		if (this.selectedFieldIds.size === 0) return;
+		if (!confirm("Delete all selected fields?")) return;
+
+		const ids = Array.from(this.selectedFieldIds);
+		ids.forEach((fieldId) => {
+			const fieldWrapper = this.element.find(`[data-field-id="${fieldId}"]`);
+			if (fieldWrapper.length === 0) return;
+			this.deleteFieldDataById(fieldId);
+			fieldWrapper.remove();
+		});
+		this.selectedFieldIds.clear();
+		this.rebuildBackendObjectFromDOM();
+		this.syncBackendObject();
+		this.updateBulkButtonsState();
+	}
+
+	moveSelectedFields(direction = "up") {
+		if (this.selectedFieldIds.size === 0) return;
+
+		const isUp = direction === "up";
+		const wrappers = Array.from(this.element.find(".field-wrapper"))
+			.filter((el) => this.selectedFieldIds.has($(el).attr("data-field-id")));
+
+		const ordered = isUp ? wrappers : wrappers.reverse();
+
+		ordered.forEach((el) => {
+			const $el = $(el);
+			const parent = $el.parent();
+			const sibling = isUp ? $el.prev(".field-wrapper") : $el.next(".field-wrapper");
+			if (sibling.length === 0) return;
+			if (isUp) {
+				$el.insertBefore(sibling);
+			} else {
+				$el.insertAfter(sibling);
+			}
+		});
+
+		this.rebuildBackendObjectFromDOM();
+		this.syncBackendObject();
 	}
 
 	/**
@@ -844,6 +955,9 @@ export class TrackerPromptMaker {
 
 		// Rebuild the entire backend object using the global counter
 		this.backendObject = rebuildObject(this.fieldsContainer);
+
+		this.selectedFieldIds.clear();
+		this.element.find(".field-wrapper").each((_, el) => this.applyMultiSelectState($(el)));
 
 		// Update fieldCounter to one plus the highest index found
 		this.fieldCounter = rebuildCounter;
