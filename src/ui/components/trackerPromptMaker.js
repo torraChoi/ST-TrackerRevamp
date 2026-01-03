@@ -780,9 +780,21 @@ export class TrackerPromptMaker {
 			const wrapper = $(el);
 			const fieldId = wrapper.attr("data-field-id");
 			const name = wrapper.find("> .name-dynamic-type-wrapper .field-name-wrapper input").val() || "Untitled";
-			if (fieldId) options.push({ id: fieldId, label: name });
+			const typeSelect = wrapper.find("> .name-dynamic-type-wrapper .field-type-wrapper select");
+			const type = typeSelect.val();
+			const isNestable = TrackerPromptMaker.NESTING_FIELD_TYPES.includes(type);
+			if (fieldId) {
+				options.push({ id: fieldId, label: name, isNestable });
+			}
 		});
 		return options;
+	}
+
+	getFieldTypeFromDom(fieldId) {
+		const wrapper = this.element.find(`[data-field-id="${fieldId}"]`);
+		if (!wrapper.length) return null;
+		const typeSelect = wrapper.find("> .name-dynamic-type-wrapper .field-type-wrapper select");
+		return typeSelect.length ? typeSelect.val() : null;
 	}
 
 	refreshMoveTargetOptions() {
@@ -791,10 +803,13 @@ export class TrackerPromptMaker {
 		this.moveTargetSelect.empty();
 		this.moveTargetSelect.append('<option value="">Top level</option>');
 		this.getTopLevelFieldOptions().forEach((opt) => {
-			const option = $("<option></option>").val(opt.id).text(opt.label);
+			const option = $("<option></option>")
+				.val(opt.id)
+				.text(opt.label)
+				.prop("disabled", !opt.isNestable);
 			this.moveTargetSelect.append(option);
 		});
-		if (previous && this.moveTargetSelect.find(`option[value="${previous}"]`).length) {
+		if (previous && this.moveTargetSelect.find(`option[value="${previous}"]:not(:disabled)`).length) {
 			this.moveTargetSelect.val(previous);
 		}
 	}
@@ -818,7 +833,8 @@ export class TrackerPromptMaker {
 		}
 		if (targetParentId) {
 			const targetData = this.getFieldDataById(targetParentId);
-			if (!targetData || !TrackerPromptMaker.NESTING_FIELD_TYPES.includes(targetData.type)) {
+			const targetType = targetData?.type || this.getFieldTypeFromDom(targetParentId);
+			if (!targetType || !TrackerPromptMaker.NESTING_FIELD_TYPES.includes(targetType)) {
 				toastr.error("Target field does not support nested fields.");
 				return;
 			}
