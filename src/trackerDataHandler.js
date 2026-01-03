@@ -175,7 +175,6 @@ export function updateTracker(tracker, updatedTrackerInput, backendObject, inclu
 	let extraFields = {};
 
 	reconcileUpdatedTracker(tracker, updatedTracker, backendObject, finalTracker, extraFields, "", includeUnmatchedFields, useUpdatedExtraFieldsAsSource);
-	applyMainCharacterScopeSanitizer(finalTracker, backendObject, tracker);
 
 	if (includeUnmatchedFields && !useUpdatedExtraFieldsAsSource) {
 		extraFields = cleanEmptyObjects(extraFields);
@@ -749,77 +748,6 @@ function scopeTagForField(scopeKey) {
 		default:
 			return "[BOTH]";
 	}
-}
-
-function applyMainCharacterScopeSanitizer(trackerObj, backendObject, previousTracker) {
-	const mainDef = Object.values(backendObject || {}).find((field) => field?.name === "MainCharacters");
-	const mainValues = trackerObj?.MainCharacters;
-	if (!mainDef || !mainValues || typeof mainValues !== "object") return;
-
-	const userName = typeof name1 === "string" ? name1.trim() : "";
-	const charName = characters?.[this_chid]?.name ? String(characters[this_chid].name).trim() : "";
-	if (!userName && !charName) return;
-
-	const nestedFields = mainDef.nestedFields || {};
-	const fieldMetaByName = {};
-	Object.values(nestedFields).forEach((nf) => {
-		if (!nf?.name) return;
-		fieldMetaByName[nf.name] = {
-			scope: normalizeScopeValue(nf.scope),
-			type: nf.type || "STRING",
-		};
-	});
-
-	const blankForType = (type) => {
-		switch (type) {
-			case "ARRAY":
-			case "FOR_EACH_ARRAY":
-				return [];
-			case "OBJECT":
-			case "FOR_EACH_OBJECT":
-			case "ARRAY_OBJECT":
-				return {};
-			default:
-				return "";
-		}
-	};
-
-	const prevMain = previousTracker?.MainCharacters;
-
-	const isEmptyValue = (value) => {
-		if (value === null || value === undefined) return true;
-		if (typeof value === "string") return value.trim() === "";
-		if (Array.isArray(value)) return value.length === 0;
-		if (typeof value === "object") return Object.keys(value).length === 0;
-		return false;
-	};
-
-	Object.entries(mainValues).forEach(([entryName, entry]) => {
-		if (!entry || typeof entry !== "object") return;
-		const normalized = String(entryName || "").trim();
-		let mode = "";
-		if (userName && normalized.toLowerCase() === userName.toLowerCase()) mode = FIELD_SCOPE_OPTIONS.USER;
-		if (charName && normalized.toLowerCase() === charName.toLowerCase()) mode = FIELD_SCOPE_OPTIONS.CHAR;
-		if (!mode) return;
-
-		Object.entries(entry).forEach(([fieldName, fieldValue]) => {
-			const meta = fieldMetaByName[fieldName];
-			if (!meta || !meta.scope) return;
-			if (meta.scope === FIELD_SCOPE_OPTIONS.BOTH && prevMain && prevMain[entryName] && isEmptyValue(fieldValue)) {
-				const prevValue = prevMain[entryName][fieldName];
-				if (!isEmptyValue(prevValue)) {
-					entry[fieldName] = prevValue;
-					return;
-				}
-			}
-			if (meta.scope === FIELD_SCOPE_OPTIONS.CHAR && mode === FIELD_SCOPE_OPTIONS.USER) {
-				entry[fieldName] = blankForType(meta.type);
-			}
-			if (meta.scope === FIELD_SCOPE_OPTIONS.USER && mode === FIELD_SCOPE_OPTIONS.CHAR) {
-				entry[fieldName] = blankForType(meta.type);
-			}
-		});
-	});
 }
 
 function hasScopedFields(backendObj) {

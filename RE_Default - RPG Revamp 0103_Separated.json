@@ -1,0 +1,1408 @@
+{
+  "RE_Default - RPG Revamp 0103_Separated": {
+    "generationMode": "single-stage",
+    "generateContextTemplate": "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\nInstruction: You MUST follow Tracker Template!\n\n{{trackerSystemPrompt}}\n\n<!-- Start of Context -->\n\n{{characterDescriptions}}\n\n### Example Trackers\n<!-- Start of Example Trackers -->\n{{trackerExamples}}\n<!-- End of Example Trackers -->\n\n### Recent Messages with Trackers\n{{recentMessages}}\n\n### Current Tracker\n<tracker>\n{{currentTracker}}\n</tracker>\n\nInstruction: Again, You MUST follow Tracker Template! or else everything will be broken!\n<!-- End of Context --><|eot_id|>",
+    "generateSystemPrompt": "You are a Scene Tracker Assistant, tasked with providing clear, consistent, and structured updates to a scene tracker for a roleplay. Use the latest message, previous tracker details, and context from recent messages to accurately update the tracker. Your response must follow the specified {{trackerFormat}} structure exactly, ensuring that each field is filled and complete. If specific information is not provided, make reasonable assumptions based on prior descriptions, logical inferences, or default character details.\n\n### Key Instructions:\n1. **Tracker Format**: Always respond with a complete tracker in {{trackerFormat}} format. Every field must be present in the response, even if unchanged. Do not omit fields or change the {{trackerFormat}} structure.\n2. **Default Assumptions for Missing Information**: \n   - **Character Details**: If no new details are provided for a character, assume reasonable defaults (e.g., hairstyle, posture, or attire based on previous entries or context).\n   - **Outfit**: Describe the complete outfit for each character, using specific details for color, fabric, and style (e.g., \u201cfitted black leather jacket with silver studs on the collar\u201d).\n   - **StateOfDress**: Describe how put-together or disheveled the character appears, including any removed clothing. If the character is undressed, indicate where discarded items are placed.\n3. **Incremental Time Progression**: \n   - Adjust time to reflect realistic scene progression. Avoid large jumps unless a significant time skip (e.g., \"the next week\", sleep, travel) is explicitly stated.\n   - Format the time as \"HH:MM:SS; MM/DD/YYYY (Day Name)\". Always vary the added time. Avoid repeating patterns. Use irregular intervals like: `42s`, `1m17s`, `6m51s`, `1h08m`, etc. Don't be robotic or formulaic.\n4. **Context-Appropriate Times**: \n   - Ensure that the time aligns with the setting. For example, if the scene takes place in a public venue (e.g., a mall), choose an appropriate time within standard operating hours.\n5. **Location Format**: Avoid unintended reuse of specific locations from previous examples or responses. Provide specific, relevant, and detailed locations based on the context, using the format:\n   - **Example**: \u201cFood court, second floor near east wing entrance, Madison Square Mall, Los Angeles, CA\u201d \n6. **Consistency**: Match field structures precisely, maintaining {{trackerFormat}} syntax. If no changes occur in a field, keep the most recent value.\n7. **Topics Format**: Ensure topics are one- or two-word keywords relevant to the scene to help trigger contextual information. Avoid long phrases.\n8. **Avoid Redundancies**: Use only details provided or logically inferred from context. Do not introduce speculative or unnecessary information.\n9. **Focus and Pause**: Treat each scene update as a standalone, complete entry. Respond with the full tracker every time, even if there are only minor updates.\n\n## Character Classification (LOCKED):\n- **MainCharacters** MUST ONLY contain {{char}} and {{user}}. Never place them elsewhere.\n- **OtherCharacters / SmallEnemies / BigEnemies** MUST NOT contain {{char}} or {{user}}.\n- If unsure, treat unknown names as NPCs and place them under OtherCharacters or enemies.\n\n## Field Usage Tags - CRITICAL UNDERSTANDING:\nEach field line contains a tag:\n- **[BOTH]**: Applies to {{char}} and {{user}} only.\n- **[CHAR ONLY]**: Applies ONLY to {{char}}.\n- **[USER ONLY]**: Applies ONLY to {{user}}.\n- **[UNIVERSAL]**: Applies to any entity (NPCs/enemies too).\n\n## Data Management Rules (STRICT):\n- **Never** fill a field whose tag does not apply to that character.\n- For non\u2011applicable fields, **leave the value empty** (e.g., `FieldName:` with nothing after it). Do NOT write N/A.\n- Do NOT move characters between groups. {{char}}/{{user}} stay in MainCharacters.\n\n### Tracker Template\nReturn your response in the following {{trackerFormat}} structure, following this format precisely:\n\n```\n<tracker>\n{{defaultTracker}}\n</tracker>\n```\n\n### Important Reminders:\n1. **Recent Messages and Current Tracker**: Before updating, always consider the recent messages and the provided <Current Tracker> to ensure all changes are accurately represented.\n2. **Structured Response**: Do not add any extra information outside of the {{trackerFormat}} tracker structure.\n3. **Complete Entries**: Always provide the full tracker in {{trackerFormat}}, even if only minor updates are made.\n\nYour primary objective is to ensure clarity, consistency, and structured responses for scene tracking in {{trackerFormat}} format, providing complete details even when specifics are not explicitly stated.",
+    "generateRequestPrompt": "[Analyze the previous message along with the recent messages provided below and update the current scene tracker based on logical inferences and explicit details. Pause and ensure only the tracked data is provided, formatted in {{trackerFormat}}. Avoid adding, omitting, or rearranging fields unless specified. Respond with the full tracker every time.\n\n### Response Rules:\n{{trackerFieldPrompt}}\n\nEnsure the response remains consistent, strictly follows this structure in {{trackerFormat}}, and omits any extra data or deviations. You MUST enclose the tracker in <tracker></tracker> tags]",
+    "generateRecentMessagesTemplate": "{{#if tracker}}Tracker: <tracker>\n{{tracker}}\n</tracker>\n{{/if}}{{char}}: {{message}}",
+    "messageSummarizationContextTemplate": "",
+    "messageSummarizationSystemPrompt": "",
+    "messageSummarizationRequestPrompt": "",
+    "messageSummarizationRecentMessagesTemplate": "",
+    "inlineRequestPrompt": "",
+    "characterDescriptionTemplate": "### {{char}}'s Description\n{{charDescription}}",
+    "mesTrackerTemplate": "<div class=\"topbar\">\n  <div class=\"tabs\">\n    <button class=\"tab tab-icon\" data-target=\"#sec-main\" aria-label=\"Main Characters\">\n      <span class=\"tab-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/main.svg\"></span>\n    </button>\n    <button class=\"tab tab-icon\" data-target=\"#sec-others\" aria-label=\"Other Characters\">\n      <span class=\"tab-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/other-characters.svg\"></span>\n    </button>\n    <button class=\"tab tab-icon\" data-target=\"#sec-enemies\" aria-label=\"Enemies\">\n      <span class=\"tab-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/enemies.svg\"></span>\n    </button>\n  </div>\n  <div class=\"topbar-right\">\n    <span class=\"kv-ico time-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/time.svg\"></span>\n    <span class=\"time\">{{Time}}</span>\n  </div>\n</div>\n\n<section id=\"sec-main\" class=\"section\">\n  <h3 class=\"section-title\">Char Main</h3>\n  <div class=\"cards\">\n    {{#foreach CharMain charMain}}\n    <article class=\"card\" data-card>\n      <header class=\"hd hd-main\">\n        <div class=\"name blue\">{{charMain}}</div>\n        <div class=\"lvl pill\">LV {{charMain.Level}}</div>\n        <div class=\"role\">{{charMain.Role}}</div>\n      </header>\n\n      <div class=\"bars-main\">\n        <div class=\"labelblock\">\n          <div class=\"labeltext hp-line\">HP: {{charMain.HP}}</div>\n        </div>\n        <div class=\"labelblock\">\n          <div class=\"labeltext exp-line\">EXP: {{charMain.Exp}}</div>\n        </div>\n      </div>\n\n      <div class=\"kv\">\n        <div class=\"kv-row\"><strong>Relationship:</strong> {{charMain.Relationship}}</div>\n        <div class=\"kv-row\"><strong>Affection:</strong> {{charMain.Affection}}</div>\n        <div class=\"kv-row\"><strong>Devotion:</strong> {{charMain.Devotion}}</div>\n        <div class=\"kv-row\"><strong>Relationship Date:</strong> {{charMain.RelationshipDate}}</div>\n        <div class=\"kv-row\"><strong>Duration:</strong> {{charMain.Duration}}</div>\n        <div class=\"kv-row\"><strong>Weather:</strong> {{charMain.Weather}}</div>\n        <div class=\"kv-row\"><strong>Arousal:</strong> {{charMain.Arousal}}</div>\n        <div class=\"kv-row\"><strong>Kaomoji:</strong> {{charMain.Kaomoji}}</div>\n        <div class=\"kv-row\"><strong>Emotion:</strong> {{charMain.Emotion}}</div>\n        <div class=\"kv-row\"><strong>Genitals:</strong> {{charMain.Genitals}}</div>\n        <div class=\"kv-row\"><strong>Protection:</strong> {{charMain.Protection}}</div>\n        <div class=\"kv-row\"><strong>State:</strong> {{charMain.State}}</div>\n        <div class=\"kv-row\"><strong>Thoughts:</strong> {{charMain.Thoughts}}</div>\n        <div class=\"kv-row\"><strong>Stats:</strong> {{charMain.Stats}}</div>\n        <div class=\"kv-row\"><strong>Location:</strong> {{charMain.Location}}</div>\n        <div class=\"kv-row\"><strong>Injury/Ailments:</strong> {{charMain.InjuryAilments}}</div>\n        <div class=\"kv-row\"><strong>Posture/Interaction:</strong> {{charMain.PostureAndInteraction}}</div>\n        <div class=\"kv-row\"><strong>Sensory:</strong> {{charMain.Sensory}}</div>\n        <div class=\"kv-row\"><strong>Outfit:</strong> {{charMain.Outfit}}</div>\n        <div class=\"kv-row\"><strong>State of Dress:</strong> {{charMain.StateOfDress}}</div>\n        <div class=\"kv-row\"><strong>Hair:</strong> {{charMain.Hair}}</div>\n        <div class=\"kv-row\"><strong>Cash:</strong> {{charMain.Cash}}</div>\n        <div class=\"kv-row\"><strong>Income:</strong> {{charMain.Income}}</div>\n        <div class=\"kv-row\"><strong>Personal Savings:</strong> {{charMain.PersonalSavings}}</div>\n        <div class=\"kv-row\"><strong>Joint Savings:</strong> {{charMain.JointSavings}}</div>\n        <div class=\"kv-row\"><strong>Items:</strong> {{charMain.Items}}</div>\n        <div class=\"kv-row\"><strong>Weapons:</strong> {{charMain.Weapons}}</div>\n        <div class=\"kv-row\"><strong>Ammos:</strong> {{charMain.Ammos}}</div>\n      </div>\n    </article>\n    {{/foreach}}\n  </div>\n\n  <h3 class=\"section-title\">User Main</h3>\n  <div class=\"cards\">\n    {{#foreach UserMain userMain}}\n    <article class=\"card\" data-card>\n      <header class=\"hd hd-main\">\n        <div class=\"name blue\">{{userMain}}</div>\n        <div class=\"lvl pill\">LV {{userMain.Level}}</div>\n        <div class=\"role\">{{userMain.Role}}</div>\n      </header>\n\n      <div class=\"bars-main\">\n        <div class=\"labelblock\">\n          <div class=\"labeltext hp-line\">HP: {{userMain.HP}}</div>\n        </div>\n        <div class=\"labelblock\">\n          <div class=\"labeltext exp-line\">EXP: {{userMain.Exp}}</div>\n        </div>\n      </div>\n\n      <div class=\"kv\">\n        <div class=\"kv-row\"><strong>Weather:</strong> {{userMain.Weather}}</div>\n        <div class=\"kv-row\"><strong>Protection:</strong> {{userMain.Protection}}</div>\n        <div class=\"kv-row\"><strong>Period:</strong> {{userMain.Period}}</div>\n        <div class=\"kv-row\"><strong>Conceive:</strong> {{userMain.Conceive}}</div>\n        <div class=\"kv-row\"><strong>Conceive Duration:</strong> {{userMain.DurationOfConceive}}</div>\n        <div class=\"kv-row\"><strong>Pregnancy:</strong> {{userMain.Pregnancy}}</div>\n        <div class=\"kv-row\"><strong>Stats:</strong> {{userMain.Stats}}</div>\n        <div class=\"kv-row\"><strong>Location:</strong> {{userMain.Location}}</div>\n        <div class=\"kv-row\"><strong>Injury/Ailments:</strong> {{userMain.InjuryAilments}}</div>\n        <div class=\"kv-row\"><strong>Posture/Interaction:</strong> {{userMain.PostureAndInteraction}}</div>\n        <div class=\"kv-row\"><strong>Sensory:</strong> {{userMain.Sensory}}</div>\n        <div class=\"kv-row\"><strong>Outfit:</strong> {{userMain.Outfit}}</div>\n        <div class=\"kv-row\"><strong>State of Dress:</strong> {{userMain.StateOfDress}}</div>\n        <div class=\"kv-row\"><strong>Hair:</strong> {{userMain.Hair}}</div>\n        <div class=\"kv-row\"><strong>Cash:</strong> {{userMain.Cash}}</div>\n        <div class=\"kv-row\"><strong>Income:</strong> {{userMain.Income}}</div>\n        <div class=\"kv-row\"><strong>Personal Savings:</strong> {{userMain.PersonalSavings}}</div>\n        <div class=\"kv-row\"><strong>Joint Savings:</strong> {{userMain.JointSavings}}</div>\n        <div class=\"kv-row\"><strong>Items:</strong> {{userMain.Items}}</div>\n        <div class=\"kv-row\"><strong>Weapons:</strong> {{userMain.Weapons}}</div>\n        <div class=\"kv-row\"><strong>Ammos:</strong> {{userMain.Ammos}}</div>\n      </div>\n    </article>\n    {{/foreach}}\n  </div>\n</section>\n\n<section id=\"sec-others\" class=\"section\">\n  <div class=\"cards\">\n    {{#foreach OtherCharacters otherCharacter}}\n    <article class=\"card\" data-card>\n      <header class=\"hd hd-basic\">\n        <div class=\"name white\">{{otherCharacter}}</div>\n        <div class=\"role\" style=\"margin-left: auto\">{{otherCharacter.Role}}</div>\n      </header>\n      <div class=\"split\">\n        <div class=\"labelblock\">\n          <div class=\"labeltext hp-line\">HP: {{otherCharacter.HP}}</div>\n        </div>\n        <div class=\"labelblock\">\n          <div class=\"labeltext exp-line\">EXP: {{otherCharacter.Exp}}</div>\n        </div>\n      </div>\n      <div class=\"kv\">\n        <div class=\"kv-row\"><strong>Relationship:</strong> {{otherCharacter.Relationship}}</div>\n        <div class=\"kv-row\"><strong>Thoughts:</strong> {{otherCharacter.Thoughts}}</div>\n        <div class=\"kv-row\"><strong>Income:</strong> {{otherCharacter.Income}}</div>\n        <div class=\"kv-row\"><strong>Location:</strong> {{otherCharacter.Location}}</div>\n        <div class=\"kv-row\"><strong>Weather:</strong> {{otherCharacter.Weather}}</div>\n        <div class=\"kv-row\"><strong>Injury/Ailments:</strong> {{otherCharacter.InjuryAilments}}</div>\n        <div class=\"kv-row\"><strong>Posture/Interaction:</strong> {{otherCharacter.PostureAndInteraction}}</div>\n        <div class=\"kv-row\"><strong>Sensory:</strong> {{otherCharacter.Sensory}}</div>\n        <div class=\"kv-row\"><strong>Outfit:</strong> {{otherCharacter.Outfit}}</div>\n        <div class=\"kv-row\"><strong>State of Dress:</strong> {{otherCharacter.StateOfDress}}</div>\n        <div class=\"kv-row\"><strong>Hair:</strong> {{otherCharacter.Hair}}</div>\n        <div class=\"kv-row\"><strong>Cash:</strong> {{otherCharacter.Cash}}</div>\n        <div class=\"kv-row\"><strong>Items:</strong> {{otherCharacter.Items}}</div>\n      </div>\n    </article>\n    {{/foreach}}\n  </div>\n</section>\n\n<section id=\"sec-enemies\" class=\"section\">\n  <div class=\"enemies-wrap\">\n    <div class=\"enemies-grid\" id=\"enemies-grid\">\n      {{#foreach SmallEnemies smallEnemy}}\n      {{#if smallEnemy}}\n      <article class=\"enemy-card card\" data-card data-size=\"small\">\n        <header class=\"hd hd-small\">\n          <div class=\"small-name name red\">{{smallEnemy}}</div>\n          <div class=\"small-number\">{{smallEnemy.Number}}</div>\n          <span class=\"pill small-exp\">{{smallEnemy.ExpGain}}</span>\n        </header>\n        <div class=\"kv\">\n          <div class=\"kv-row\"><strong>Location:</strong> {{smallEnemy.Location}}</div>\n          <div class=\"kv-row\"><strong>Appearance:</strong> {{smallEnemy.Appearance}}</div>\n        </div>\n      </article>\n      {{/if}}\n      {{/foreach}}\n\n      {{#foreach BigEnemies bigEnemy}}\n      {{#if bigEnemy}}\n      <article class=\"enemy-card card big-50\" data-card data-size=\"big\">\n        <header class=\"hd hd-quad\">\n          <div class=\"name purple quad-name\">{{bigEnemy}}</div>\n          <span class=\"pill quad-exp\">{{bigEnemy.ExpGain}}</span>\n          <div class=\"quad-lvl pill\">Lv {{bigEnemy.Level}}</div>\n          <div class=\"quad-type\">Type: {{bigEnemy.Type}}</div>\n        </header>\n        <div class=\"split\">\n          <div class=\"labelblock\">\n            <div class=\"labeltext hp-line\">HP: {{bigEnemy.HP}}</div>\n          </div>\n        </div>\n        <div class=\"kv\">\n          <div class=\"kv-row\"><strong>Location:</strong> {{bigEnemy.Location}}</div>\n          <div class=\"kv-row\"><strong>Appearance:</strong> {{bigEnemy.Appearance}}</div>\n          <div class=\"kv-row\"><strong>Ailments:</strong> {{bigEnemy.Ailments}}</div>\n          <div class=\"kv-row\"><strong>Ability:</strong> {{bigEnemy.Ability}}</div>\n        </div>\n      </article>\n      {{/if}}\n      {{/foreach}}\n    </div>\n  </div>\n</section>\n",
+    "mesTrackerJavascript": "() => {\n  /* ---------- utilities ---------- */\n  const isNode = (x) => x && typeof x.querySelector === \"function\";\n  const toRoot = (...args) => {\n    // Try to find a DOM node in args; otherwise fallback to document.\n    for (const a of args) if (isNode(a)) return a;\n    // Some ST events pass { root: el } or { target: el }\n    for (const a of args) {\n      if (a?.root && isNode(a.root)) return a.root;\n      if (a?.target && isNode(a.target)) return a.target;\n    }\n    return document;\n  };\n\n  /* ---------- tabs (idempotent) ---------- */\n  function setupTabs(root = document) {\n    root.querySelectorAll(\".tab\").forEach((btn) => {\n      if (btn.__tabBound) return;\n      btn.__tabBound = true;\n      btn.addEventListener(\"click\", () => {\n        const sec = btn.dataset.target && root.querySelector(btn.dataset.target);\n        const on = sec?.classList.toggle(\"show\");\n        btn.classList.toggle(\"active\", !!on);\n      });\n    });\n  }\n\n  /* ---------- HP/EXP bars from text (idempotent) ---------- */\n  function renderBarFromText(el, kind) {\n    if (!el || el.__barized) return;           // guard\n    const t = (el.dataset.raw || el.textContent || \"\").trim();\n    const m = t.match(/(\\d+)\\s*\\/\\s*(\\d+)/);\n    if (!m) return;\n    const cur = +m[1], max = +m[2];\n    const pct = Math.max(0, Math.min(100, (cur / max) * 100));\n    el.dataset.raw = t;                         // remember original text\n    el.innerHTML = `<div class=\"labeltext\">${t}</div>`;\n    const bar = document.createElement(\"div\");\n    bar.className = \"bar \" + (kind === \"hp\" ? \"hp\" : \"exp\");\n    const fill = document.createElement(\"span\");\n    fill.style.width = pct + \"%\";\n    bar.appendChild(fill);\n    if (kind === \"hp\") {\n      bar.classList.add(pct < 30 ? \"bad\" : pct < 60 ? \"warn\" : \"ok\");\n    }\n    el.appendChild(bar);\n    el.__barized = true;                        // mark built\n  }\n\n  function initNumericBars(root = document) {\n    root.querySelectorAll(\".hp-line\").forEach((el) => renderBarFromText(el, \"hp\"));\n    root.querySelectorAll(\".exp-line\").forEach((el) => renderBarFromText(el, \"exp\"));\n  }\n\n  /* ---------- balloons (hover/click reveal) ---------- */\n  // One document handler shared by all cards:\n  let docClickBound = false;\n  function setupBalloons(root = document) {\n    root.querySelectorAll(\"[data-card]\").forEach((card) => {\n      if (card.__balloonBound) return;\n      card.__balloonBound = true;\n\n      const balloon = card.querySelector(\".balloon\");\n      const rows = card.querySelectorAll(\"[data-hoverbar]\");\n      let pinned = null, hideTimer;\n\n      const show = (id) => {\n        clearTimeout(hideTimer);\n        if (!balloon) return;\n        card.classList.add(\"raised\");\n        balloon.classList.add(\"open\");\n        balloon.querySelectorAll(\".content\").forEach((c) => c.classList.toggle(\"show\", c.dataset.id === id));\n        card.querySelectorAll(\".ic\").forEach((i) => i.classList.toggle(\"active\", i.dataset.id === id));\n      };\n\n      const hide = () => {\n        if (pinned) return;\n        hideTimer = setTimeout(() => {\n          if (!balloon) return;\n          balloon.classList.remove(\"open\");\n          card.classList.remove(\"raised\");\n          card.querySelectorAll(\".ic\").forEach((i) => i.classList.remove(\"active\"));\n          balloon.querySelectorAll(\".content\").forEach((c) => c.classList.remove(\"show\"));\n        }, 60);\n      };\n\n      rows.forEach((r) => {\n        r.querySelectorAll(\".ic\").forEach((ic) => {\n          ic.addEventListener(\"mouseenter\", () => show(ic.dataset.id));\n          ic.addEventListener(\"click\", (e) => {\n            e.stopPropagation();\n            if (pinned === ic.dataset.id) {\n              pinned = null;\n              hide();\n            } else {\n              pinned = ic.dataset.id;\n              show(pinned);\n            }\n          });\n        });\n        r.addEventListener(\"mouseleave\", hide);\n      });\n    });\n\n    if (!docClickBound) {\n      document.addEventListener(\"click\", (e) => {\n        document.querySelectorAll(\"[data-card]\").forEach((card) => {\n          if (card.contains(e.target)) return;\n          const balloon = card.querySelector(\".balloon\");\n          // clear pinned + hide\n          card.__pinned = null;\n          balloon?.classList.remove(\"open\");\n          card.classList.remove(\"raised\");\n          balloon?.querySelectorAll(\".content\").forEach((c) => c.classList.remove(\"show\"));\n          card.querySelectorAll(\".ic\").forEach((i) => i.classList.remove(\"active\"));\n        });\n      });\n      docClickBound = true;\n    }\n  }\n\n  // UNWRAP ACCIDENTAL <small enemy name> \n  function stripAccidentalSmallPlaceholders(root = document) {\n    // Unwrap any <small enemy name> wrappers and delete them\n    root.querySelectorAll('small[enemy], small[name]').forEach(el => {\n      // move its children before the <small> so structure is preserved\n      const parent = el.parentNode;\n      while (el.firstChild) parent.insertBefore(el.firstChild, el);\n      el.remove();\n    });\n  }\n\n  function hideEmptyEnemyCards(root = document) {\n  const grid = root.querySelector('#enemies-grid');\n  if (!grid) return;\n\n  grid.querySelectorAll('.enemy-card[data-size=\"small\"], .enemy-card[data-size=\"big\"]')\n    .forEach(card => {\n      const nameEl = card.querySelector('.small-name, .quad-name, .name');\n      const name = (nameEl?.textContent || '').trim();\n\n      const isEmpty = !name || name === '\u2014' || name.toLowerCase() === 'x';\n      if (isEmpty) {\n        // Either remove completely...\n        // card.remove();\n\n        // ...or mark hidden so layoutEnemies can ignore it:\n        card.dataset.hidden = '1';\n        card.style.display = 'none';\n      } else {\n        delete card.dataset.hidden;\n        card.style.display = '';\n      }\n    });\n}\n\nfunction hideEmptyOtherCards(root = document) {\n  const wrap = root.querySelector('#sec-others .cards');\n  if (!wrap) return;\n\n  wrap.querySelectorAll('article.card[data-card]').forEach(card => {\n    const nameEl = card.querySelector('.name');\n    // normalize: strip (off) / (off-screen) and zero-widths\n    const raw = (nameEl?.textContent || '')\n      .replace(/\\(\\s*off(?:-screen)?\\s*\\)/ig, '')\n      .replace(/[\\u200B-\\u200D\\uFEFF]/g, '')\n      .trim();\n\n    const isPlaceholder =\n      !raw ||\n      raw === '\u2014' ||\n      /^x$/i.test(raw) ||\n      /^n\\/?a$/i.test(raw) ||\n      /^none$/i.test(raw);\n\n    if (isPlaceholder) {\n      card.dataset.hidden = '1';\n      card.style.display = 'none';\n    } else {\n      card.removeAttribute('data-hidden');\n      card.style.display = '';\n    }\n  });\n}\n\n  /* ---------- small-enemy widths ---------- */\nfunction layoutEnemies(root = document) {\n  const grid = root.querySelector('#enemies-grid');\n  if (!grid) return;\n\n  // only count visible small enemies\n  const small = Array.from(\n    grid.querySelectorAll('.enemy-card[data-size=\"small\"]:not([data-hidden=\"1\"])')\n  );\n  const bigCount = grid.querySelectorAll('.enemy-card[data-size=\"big\"]:not([data-hidden=\"1\"])').length;\n\n  const n = small.length;\n  let cls = \"small-50\";\n  if (n === 1) cls = \"small-50\";\n  else if (n === 2) cls = bigCount >= 1 ? \"small-25\" : \"small-50\";\n  else if (n === 3) cls = \"small-33\";\n  else if (n >= 4) cls = \"small-25\";\n\n  small.forEach(c => {\n    c.classList.remove(\"small-25\", \"small-33\", \"small-50\");\n    c.classList.add(cls);\n  });\n}\n\n\n\n  /* ---------- inline SVG swap ---------- */\n  async function applySvgIcons(root = document) {\n    const els = root.querySelectorAll(\".ic[data-svg], .kv-ico[data-svg], .tab-ico[data-svg]\");\n    for (const el of els) {\n      if (el.__svgApplied) continue;\n      const url = el.getAttribute(\"data-svg\");\n      if (!url) continue;\n      try {\n        const res = await fetch(url, { mode: \"cors\" });\n        const ct = res.headers.get(\"content-type\") || \"\";\n        const txt = await res.text();\n        if (ct.includes(\"image/svg\") || txt.trim().startsWith(\"<svg\")) el.innerHTML = txt;\n        else el.innerHTML = `<img src=\"${url}\" alt=\"\">`;\n      } catch {\n        el.innerHTML = `<img src=\"${url}\" alt=\"\">`;\n      }\n      el.__svgApplied = true;\n    }\n  }\n\n   // swap \"(off-screen)\" or \"(off)\" text for an inline icon, scoped to tracker\nfunction swapOffscreenTokens(root = document) {\n  const scope = root.querySelector('.tracker-template-container') || root;\n  const iconPath = '/scripts/extensions/third-party/SillyTavern-Tracker/icons/off-screen.svg';\n  // only touch these fields\n  scope.querySelectorAll('.name, .role').forEach(host => {\n    // walk text nodes and find matches\n    const walker = document.createTreeWalker(host, NodeFilter.SHOW_TEXT, {\n      acceptNode(n) { return /\\(off(?:-screen)?\\)/i.test(n.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT; }\n    });\n    const hits = [];\n    while (walker.nextNode()) hits.push(walker.currentNode);\n    hits.forEach(txt => {\n      const frag = document.createDocumentFragment();\n      const parts = txt.nodeValue.split(/(\\(off(?:-screen)?\\))/i);\n      parts.forEach(part => {\n        if (!part) return;\n        if (/\\(off(?:-screen)?\\)/i.test(part)) {\n          const span = document.createElement('span');\n          span.className = 'ic ic--off';\n          span.dataset.id = 'off-screen';\n          span.dataset.svg = iconPath;\n          span.setAttribute('aria-label','off-screen');\n          frag.appendChild(span);\n        } else {\n          frag.appendChild(document.createTextNode(part));\n        }\n      });\n      txt.parentNode.replaceChild(frag, txt);\n    });\n  });\n}\n\n  /* ---------- apply everything to a given preview root ---------- */\n  function applyToAll(maybeRoot) {\n    const root = toRoot(maybeRoot);\n    setupTabs(root);\n    stripAccidentalSmallPlaceholders(root);\n    hideEmptyEnemyCards(root); \n    hideEmptyOtherCards(root);\n    initNumericBars(root);\n    setupBalloons(root);\n    layoutEnemies(root);\n    swapOffscreenTokens(root);\n    applySvgIcons(root);\n  }\n\n  /* ---------- ST wiring ---------- */\n  let onPreview;\n  const init = () => {\n    const ctx = SillyTavern?.getContext?.();\n    if (!ctx?.eventSource?.on) {\n      // Fallback: run once if events unavailable\n      applyToAll(document);\n      return;\n    }\n    // Normalize event callback so we always feed a DOM root to applyToAll\n    onPreview = (...args) => applyToAll(toRoot(...args));\n    ctx.eventSource.on(\"TRACKER_PREVIEW_ADDED\",  onPreview);\n    ctx.eventSource.on(\"TRACKER_PREVIEW_UPDATED\", onPreview);\n    // run once for current preview\n    applyToAll(document);\n  };\n\n  const cleanup = () => {\n    const ctx = SillyTavern?.getContext?.();\n    if (ctx?.eventSource?.off && onPreview) {\n      ctx.eventSource.off(\"TRACKER_PREVIEW_ADDED\",  onPreview);\n      ctx.eventSource.off(\"TRACKER_PREVIEW_UPDATED\", onPreview);\n    }\n  };\n\n  return { init, cleanup };\n}",
+    "dockTemplateEnabled": true,
+    "dockTemplateHtml": "<div class=\"dock-meta\">\n  <div class=\"dock-time\">\n    <span class=\"tr-line\" data-path=\"Time\" data-type=\"STRING\">\n      <span class=\"tr-editable dock-value\">{{Time}}</span>\n    </span>\n  </div>\n  <div class=\"trackerrevamp-dock-actions\">\n    <span data-dock-indicator=\"regen\" class=\"trackerrevamp-dock-regen-indicator\"></span>\n    <button class=\"menu_button\" data-dock-action=\"regenerate\" title=\"Regenerate tracker\">?Y3</button>\n    <button class=\"menu_button\" data-dock-action=\"toggle-og\" title=\"Show/Hide OG tracker\">dY>?</button>\n    <button class=\"menu_button\" data-dock-action=\"toggle-side\" title=\"Toggle side\">??,</button>\n    <button class=\"menu_button\" data-dock-action=\"close\" title=\"Close\">A-</button>\n  </div>\n</div>\n\n<div class=\"dock-sample dock-floater\">\n  <aside class=\"dock-rail\">\n    <div class=\"dock-rail-block dock-rail-main\">\n      {{#foreach MainCharacters mainCharacter}}\n      <button class=\"rail-btn rail-btn-main\" data-main-target=\"{{mainCharacter}}\" title=\"{{mainCharacter}}\">\n        {{_key|substring(0,1)|toUpperCase()}}\n      </button>\n      {{/foreach}}\n    </div>\n\n    <div class=\"dock-rail-block dock-rail-others\">\n      <div class=\"rail-btn rail-btn-group\" data-other-toggle title=\"Other Characters\">\n        <span class=\"rail-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/other-characters.svg\"></span>\n        <div class=\"rail-sublist\" data-other-list>\n          {{#foreach OtherCharacters otherCharacter}}\n          <button class=\"rail-btn rail-btn-other\" data-other-target=\"{{otherCharacter}}\" title=\"{{otherCharacter}}\">\n            {{_key|substring(0,1)|toUpperCase()}}\n          </button>\n          {{/foreach}}\n        </div>\n      </div>\n    </div>\n\n    <div class=\"dock-rail-block dock-rail-enemy\">\n      <button class=\"rail-btn rail-btn-enemy\" data-enemy-toggle=\"small\" title=\"Small Enemies\">\n        <span class=\"rail-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/enemies.svg\"></span>\n      </button>\n    </div>\n\n    <div class=\"dock-rail-block dock-rail-enemy\">\n      <button class=\"rail-btn rail-btn-enemy\" data-enemy-toggle=\"big\" title=\"Big Enemies\">\n        <span class=\"rail-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/big-enemies.svg\"></span>\n      </button>\n    </div>\n  </aside>\n  \n  <!------------------------------------------>\n  <!------- Main Docker Area -------->\n  <!------------------------------------------>\n\n  <!------- Main Character Area -------->\n\n  <section class=\"dock-stage\">\n    <div class=\"dock-cards\" data-panel-type=\"main\">\n      {{#foreach MainCharacters mainCharacter}}\n      <article class=\"dock-card dock-card-main\" data-panel=\"main:{{mainCharacter}}\" data-main-name=\"{{mainCharacter}}\">\n        <div class=\"dock-layout dock-layout-char\">\n        <div class=\"dock-main-top\">\n          <div class=\"dock-chip\">\n            <span class=\"dock-label\">{{mainCharacter.Relationship}}</span>\n          </div>\n          <div class=\"dock-chip\">\n            <span class=\"dock-label\">{{mainCharacter.Weather}}</span>\n          </div>\n        </div>\n\n        <div class=\"dock-main-hero\">\n          <div class=\"dock-hero-left\">\n            <div class=\"dock-name\">{{mainCharacter}}</div>\n            <div class=\"dock-pill\">\n              <span class=\"tr-line\" data-path=\"MainCharacters.{{mainCharacter}}.Devotion\" data-type=\"STRING\">\n                <span class=\"tr-editable\">{{mainCharacter.Devotion}}</span>\n              </span>\n            </div>\n          </div>\n          <div class=\"dock-hero-right\">\n            <div class=\"dock-kv-line\">\n              <span class=\"dock-label\">{{mainCharacter.RelationshipDate}}</span>\n            </div>\n            <div class=\"dock-kv-line\">\n              <span class=\"dock-label\">{{mainCharacter.Duration}}</span>\n            </div>\n          </div>\n        </div>\n\n        <div class=\"dock-main-row\">\n          <div class=\"dock-pill-stack\">\n            <img class=\"dock-ico\" src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAACXBIWXMAAAsTAAALEwEAmpwYAAAEXUlEQVR4nO2cT4scRRiHSwMKegkejEfNRdCjhFxy0S+gl+BBkHwBWcK67zt7mjl6EMKC7FTNHAKCoLnoST9APOTgwUsgQbzlEFlyiChJEPcXdvyDdlf3VFVXdVX1vs+xZ7v6/fWzPf1W7VJKCYIgCIIgCIIgCIIgCIJgBQrPgMwnreOWY2NSal1JweUbZ0DGgA1an7FBrvD46OB5kPmytLqSgvmN58D6q03AruA8fnhcXb8ENjdLqyspmJsXQOa7f8P1BefxwmN2eB5s7pRWV1Kwc/0syHz/v2DbgnP68JiZi2DzS2l1JQUff/YKyPzYCuUSnNOFx555D2R+L62upICXr4L0T9ZArsE5fniw2QGZP0urKynYX74BMvc6w/gE5zjh/2lre6+Toa7kYGYugM1R1OA8LPx/29qS6koO9szbYP1rkuAcFr7Z1pZSV3LAy3dB+lHS4OwX3tbWllBXcsDLD0Hmj1GCs1v4rrY2d13J2XQtrI9HDc794fva2px1JcW1a0kWnO3ht7W1ueoabZEwa3CON0708caS0lwkzB1cxbqBKcZLLcW2SJg7uIp5AxOMl0xK1yJh7uCqdCEppPQtEoYVqOeta8w0572B+vikhtZ4pK8XJWXbImEMGUOkqDhCHmOm37fWtPv5iyBzuwgpLouEsWSESlGDhegHYHOptyZavQnWv2WV4rpIGFNGiJTWuX4352fsHb6uHACvrsS7F55SfBYJh8gAm0VXcXCUEiyEzC3sHr7cOeGdmcvJ3ic+UnwXCQfJ2FIcHKQECvn6pIW3z7HMF3//zBH21+eSvU9cpIQsEg6WMVCK8hdygPn82dZ5Jzeb9beNmr5J+j7pkxK6SBhFxgApylmIva3dnLO/PgfSP1jPs311xXyfuDwpqeiVEShFta/h2dauXgPpuz01tb66JoGTDPaXYrmOc1uL2fotkL7vUE/rq6t6vCd95Cal9bljWwtevQMyD4d8/VZPCimq+dmWtnbzM3urD0D6SdEyQteSYr0LQsdRzeM9ba33H7BCGpOge9UhPfqF2CwiXWfRNY7l2DVrW/vXhO/TDLUHXafaJ8WFxoSv/CdjylJgm/DVJGNKUtA34atJxhSkYPuEry4ZNUuB64SvNhk1SoHPhK9GGTVJgc+Er2YZNcxTwGbXc7W6jHnGZJ8UHv4bW82TMSkpNDEZVUuhicqoUgpNXEZVUuiUyKhCCp0yGUVLoVMqo0gpdMplFCWFREY5UkhklCOFREZJa1+LnDVUw1hPig15MgqSApFRjhSIjHKkQGTklaKa44uMvFJUc2yRkVeKao4rMvJKUc0xRUZeKao5nsjIK0U1xxIZcci61wmJjHL2OiGRUc5eJyQyytnrhESGF0i514nICAMp9joRGcNAzL1OREYcEGOvE5ERFwzZ60RkpAEhe52IjLTAa68TkTEKcNrrRGSMCvr2OhEZeYB9r5O6/29KEARBEARBEARBEARBEFQdPAXTLPumqlYIIgAAAABJRU5ErkJggg==\" alt=\"diamond-heart\">\n            <div class=\"dock-pill-text\">\n              <div class=\"dock-pill-label\">{{mainCharacter.Affection}}</div>\n            </div>\n          </div>\n\n          <div class=\"dock-pill-stack\">\n            <img class=\"dock-ico\" src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAACXBIWXMAAAsTAAALEwEAmpwYAAAJe0lEQVR4nO1de8wdRRUfRXwQCBIQFSQ8FBEJisgbxfhCxSfERtSqEZsGU6DQ79uZ/Sh6+cfUIm2kj7vn7Fet1SatJaioCYglqdaqwZQYoNBaoFDQUNoGysvSQg+Z2dvv+9o7szu7d+6dvXP7S85f9+7O2d/ZeZ1z5ixjNQYJPJwE3kICtpOAZ4jDXJqKB/vWayBAAr5IHJ8kgbSPcJjrW7egQY0VbyQB0Eb8uAGe9q1jsKCh5tEk4K9G8pUBcIdvPYMEjSTvJwGP5ZKfycO+dQ0OFKfvJY7/syBf9oC/+dZ3cMkXygC/K93GVDyYBM4hjttI4FYS8BNqNN7ABh00tOh47Uon3wB3lG5Hkt92L0jZIIOuvuVNxOGeUuRnBlhXui311uvulXyVDSpIYDOH5FdJ4A8Nv+2m6Yvfat3OdXPeYjYobKfhBe9ggwYSMDmXfI7fUf8zzw1TrNvi6Xn5vQqWsQEc95/PIWX62H85LjGQ9ig1Fhxq1Z7A3xYOazF+ig0KSMAfcna5c/f5b5xcktNTfk+NxW/ObSsGYTm3rCVGr2Ohg2L4bM5QsGb/pSE1Gq8njg/lGOEhiuFrEw1Bk1YcRDz5dK6h9b1gEgsZ8g1Tb5qegGdpKD1Re12UfsFiZbSbBDxAAtere5VdWWW97x4WMgqI/H7utRznVSJV39OeM/42klzIQgUJuNM4jDTyd6VqJ8vhzx2Tz3ETxaPvIY6bDb8jCxEUN08iAXu0Dx3hV6w3bgKWdmCAtXuHOeI4bDDAtiADPiQgMjzwI2VXH8Tx8lLui2zJG0/sZTQy+nYS8Irh/xew0EAc/24Yj2/oIGgzmQTcbthT7CSBK4njNTKsqdfJMKRxHGEhQW6YslVKG/l7iKfvcrK6mrnwOIpHP6xkKD3RxtMpiTb0mltZSCCRfsI0+TKfekX4cYMB7mMhgQQOGQywxLtLRG+ArSwkkID5hvF/mle9GniIwQA7WUhQE6XuQWO82LtuWm8r/JeFBOJwt/5Na37Iu24CZmt0m8VCQk6ayenedcs2d7PlW6+E44/lEpeFBBK4uq49YCBgDIjw9DO+dRsISAdXp2FF18jiDKOnkkgvJYFXEIcZxJFTDFOJw2XE09P63ifUymy+ggQ8aNgHzNO7GPD0MkF3a30y/8+0bFGQ45Ie1+9F5a6Qxrke38n6BYpAAb8mDv8veMiV+133+Vbi1N6siFuJJ+d0rM/w6AfUvUzONyuBV4jDbyiCs1hdIdM7iOOo9YNy3DR27Qw8yhjJ4ricrk+OraSPfBFMbvCqUlGfrkKNpRx3lHyYldZhR3lvjpfb64PfyA51OCS+A326hiwAjj8q/ZZJF/KE4YUKc3fG5w05gRr1yYL4N3WN+DZ94Kd5+nQV6mFVF7ci7lXisFGlkgicJd3H7cTB3dZDgGaFIl3Q1vq47Q3LvST65qYWjit3v1reWYyZpFIIYaHdg8PSiZE0FRNQ80+PyR+XX/Q0r0hGsgqI31w1z4b0/hld929Y69ObnjDTKclGgnhyTu5KR43TeEhnWdO4yeKB5VL1IxTjufqIW69FcgIXuWVbT879OYRMd9KOsByKZFBf4H/8kz/WKzdIjlxwoCeG40xj4xF+y1070PBOZmUjdCmoL/MvSeAWQ6M3O22L46/62ADbbDO3y5Gi/DraRle7XIZR5rMp9tXUWThe5YqPcWI43qtPLencX7MXFC06jASs8k5g5/Iv5hLSG6jd7ZY8sdg6CxwRxwUq+iRwikyIVTthDtdarX76RQzZ3tUMoHwrmkYi/Jgd8T97m/ImunaMiVqLu3gHCVzU3gBst8pAixYdo44U+SeEeiw/73JgHZZaXcvxLzUgg3ovsMadAXTHhDgOF14X48X+iUBfBnCXXzQWqdq3gcmF1+WVnQldOD7vzgACd7U1EMEnLa5b6Z0I4U12uTTA1ipna0ngXTUggjzJFpcGWN9ugOTrhddxWFwDIsiLuEy/lzV62huAay0MN8U7EcKbrHZpgKRKfr86udJROgj2scBChwaA72oMsNnq2rIn1kUg0io44sgA6WnaRuLmSR0cBaKghY+e6s4AWdC73VHG8QdW13O8wzshopcCjzkP0mvzbaRRLPJiMi+oOjpKAyKznJKvSIzwTG1jHD9ndX0dMhdEryT5oHMDZCRqqp1w/KdNd8sqF8I//JOD3ZVuVl2RuT7aRiP8ktX1allqKKAnAhEOl3U5FxQ2tDcMD9geaJAuDK1vSQQh67ueK0pR+s1OM8NIJN8OMjoWF7tnXC1JdUGWnWXWvrk5RqIPRbprepUfKk84al0MsipKibNVFEy8QHLRpZWPkTyZG69XZnapOUXAMv8Edixzusu2KZ2c4zqNAfbY7g0mTOz967aWubIF5TO7OxRxeFmj1A7pPyo5r8zzTmZ52dnzoaeNPJlQpX0zYCPF848sZwQwDGsDlIJYBSTgl3olYVXZ7kkqM7oPlqgcFrO6QGVOG0vRw+1lk3dJ7riLzxn7lLVyDmR1gjwHRgIfN3TVJaWrI0bpR/XpML7ffNwks/1YHaHqL5hIk4foJq04qNT9ouTkep2AwW00gu9jdQbFcL6qs6AfjpaVLYJB8fwjaxHQUbUj0vNYP0ANHwJeMDzMH8uOnyRXSLIUfXYOzYcBXrJJRKsVWl7Plww9YZU8jMGqlcDc0nPy+/UDDyo51zwcralSloZEcoI8gdIb8uGFvnvzteeKjRMzbKCoeUrpe6qyBHhjd3OO4JlgytlnaS2yMJ72QbfL1JUOJvxHnJPP4SkaTs9gIYGG8d3m6lnwMvHke5XuGzePUAUznJGP65ye76oT5Jif+yEGjjeX3SuM3TuGKzteJXH8k6naejDIvoZhLORH6ksbM/CoSvfOTl5WJT8ZqO9LqqLe3PDGymorFT6k0Nq07a5QD64w0ztIkEi+nPNRt12qYmHpL2zAxhLkPyfLpbFBBsm0xbxvhcnCr3HzCOv7CXjCkvwHnSbQ9jNIlijguCJnfN4sd8HF92meYjneL+9KQY1+Bwm8zpi0lc0Xc0z1eFo17IrOIuxyVdMoWJCsgmXctCm5b/8damvyzd8LyC8vhfiFpG6AVMmaghOWHP/dIv2u4ugZ3ElDzaN9P1c/fntyujbrwn5tL5ekN3qr7RkCKMazK/p7Hg/GmeYbJP09Am8rQf5tZZauB2CJrLa/oWrj3glapJfa3u8AOjouJb8FgDdlZ9dg2oFPohwAq4LXAHTyzZ7Zoq90AAAAAElFTkSuQmCC\" alt=\"fire-heart\">\n            <div class=\"dock-pill-text\">\n              <div class=\"dock-pill-label\">{{mainCharacter.Arousal}}</div>\n            </div>\n          </div>\n\n          <div class=\"dock-pill-stack\">\n            <div class=\"dock-pill-top\">{{mainCharacter.Kaomoji}}</div>\n            <div class=\"dock-pill-label\">{{mainCharacter.Emotion}}</div>\n          </div>\n\n          <div class=\"dock-pill-stack\">\n            <span class=\"dock-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/placeholder-gender.svg\"></span>\n            <div class=\"dock-pill-label\">{{mainCharacter.Genitals}}</div>\n          </div>\n\n          <div class=\"dock-pill-stack\">\n            <span class=\"dock-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/placeholder-protection.svg\"></span>\n            <div class=\"dock-pill-label\">{{mainCharacter.Protection}}</div>\n          </div>\n\n          <div class=\"dock-pill-stack\">\n            <div class=\"dock-pill-label\">{{mainCharacter.State}}</div>\n          </div>\n        </div>\n\n        <div class=\"dock-quote\">\n          <span class=\"tr-line\" data-path=\"MainCharacters.{{mainCharacter}}.Thoughts\" data-type=\"STRING\">\n            <span class=\"tr-editable\">{{mainCharacter.Thoughts}}</span>\n          </span>\n        </div>\n\n        <div class=\"dock-kv-strip\">\n          <span class=\"dock-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/placeholder-role.svg\"></span>\n          <span class=\"tr-line\" data-path=\"MainCharacters.{{mainCharacter}}.Role\" data-type=\"STRING\">\n            <span class=\"tr-editable\">{{mainCharacter.Role}}</span>\n          </span>\n          <span class=\"dock-divider\">|</span>\n          <span class=\"tr-line\" data-path=\"MainCharacters.{{mainCharacter}}.Income\" data-type=\"STRING\">\n            <span class=\"tr-editable\">{{mainCharacter.Income}}</span>\n          </span>\n        </div>\n\n        <div class=\"dock-vitals\">\n          <div class=\"dock-vital\">\n            <div class=\"dock-vital-label\">HP</div>\n            <div class=\"labeltext hp-line\">{{mainCharacter.HP}}</div>\n          </div>\n          <div class=\"dock-vital\">\n            <div class=\"dock-vital-label\">LEVEL</div>\n            <div class=\"dock-vital-value\">{{mainCharacter.Level}}</div>\n            <div class=\"labeltext exp-line\">{{mainCharacter.Exp}}</div>\n          </div>\n        </div>\n\n        <div class=\"dock-kv-row\">\n          <span class=\"dock-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/location.svg\"></span>\n          <span class=\"tr-line\" data-path=\"MainCharacters.{{mainCharacter}}.Location\" data-type=\"STRING\">\n            <span class=\"tr-editable\">{{mainCharacter.Location}}</span>\n          </span>\n          <span class=\"dock-spacer\"></span>\n          <span class=\"dock-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/injury.svg\"></span>\n          <span class=\"tr-line\" data-path=\"MainCharacters.{{mainCharacter}}.InjuryAilments\" data-type=\"STRING\">\n            <span class=\"tr-editable\">{{mainCharacter.InjuryAilments}}</span>\n          </span>\n        </div>\n\n        <div class=\"dock-stats\">\n          <div class=\"dock-stats-header\">\n            <span class=\"dock-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/stat-1.svg\"></span>\n            <span class=\"dock-stats-title\">ABILITIES</span>\n          </div>\n          <span class=\"tr-line dock-stats-source\" data-path=\"MainCharacters.{{mainCharacter}}.Stats\" data-type=\"STRING\" style=\"display:none;\">\n            <span class=\"tr-editable\">{{mainCharacter.Stats}}</span>\n          </span>\n          <div class=\"dock-stats-pills\">\n            <div class=\"stat-pill\" data-stat-key=\"STR\"><span class=\"stat-key\">STR</span><span class=\"stat-val\" contenteditable=\"true\"></span></div>\n            <div class=\"stat-pill\" data-stat-key=\"END\"><span class=\"stat-key\">END</span><span class=\"stat-val\" contenteditable=\"true\"></span></div>\n            <div class=\"stat-pill\" data-stat-key=\"AGI\"><span class=\"stat-key\">AGI</span><span class=\"stat-val\" contenteditable=\"true\"></span></div>\n            <div class=\"stat-pill\" data-stat-key=\"DEX\"><span class=\"stat-key\">DEX</span><span class=\"stat-val\" contenteditable=\"true\"></span></div>\n            <div class=\"stat-pill\" data-stat-key=\"INT\"><span class=\"stat-key\">INT</span><span class=\"stat-val\" contenteditable=\"true\"></span></div>\n            <div class=\"stat-pill\" data-stat-key=\"CHA\"><span class=\"stat-key\">CHA</span><span class=\"stat-val\" contenteditable=\"true\"></span></div>\n            <div class=\"stat-pill\" data-stat-key=\"PER\"><span class=\"stat-key\">PER</span><span class=\"stat-val\" contenteditable=\"true\"></span></div>\n            <div class=\"stat-pill\" data-stat-key=\"LCK\"><span class=\"stat-key\">LCK</span><span class=\"stat-val\" contenteditable=\"true\"></span></div>\n          </div>\n        </div>\n\n        <div class=\"dock-finance\">\n          <div class=\"dock-finance-left\">\n            <span class=\"dock-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/cash.svg\"></span>\n            <div class=\"dock-finance-title\">CASH</div>\n            <span class=\"tr-line\" data-path=\"MainCharacters.{{mainCharacter}}.Cash\" data-type=\"STRING\">\n              <span class=\"tr-editable\">{{mainCharacter.Cash}}</span>\n            </span>\n          </div>\n          <div class=\"dock-finance-right\">\n            <div class=\"dock-finance-row\">\n              <span class=\"dock-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/placeholder-bank.svg\"></span>\n              <span class=\"tr-line\" data-path=\"MainCharacters.{{mainCharacter}}.PersonalSavings\" data-type=\"STRING\">\n                <span class=\"tr-editable\">{{mainCharacter.PersonalSavings}}</span>\n              </span>\n            </div>\n            <div class=\"dock-finance-row\">\n              <span class=\"dock-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/piggy-bank.svg\"></span>\n              <span class=\"tr-line\" data-path=\"MainCharacters.{{mainCharacter}}.JointSavings\" data-type=\"STRING\">\n                <span class=\"tr-editable\">{{mainCharacter.JointSavings}}</span>\n              </span>\n            </div>\n          </div>\n        </div>\n\n        <div class=\"dock-tabs\" data-tabs>\n          <button class=\"dock-tab\" data-tab=\"appearance\">\n            <span class=\"dock-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/characters-main-appearance.svg\"></span>\n            <span class=\"dock-tab-label\">Appearance</span>\n          </button>\n          <button class=\"dock-tab\" data-tab=\"state\">\n            <span class=\"dock-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/posture.svg\"></span>\n            <span class=\"dock-tab-label\">State</span>\n          </button>\n          <button class=\"dock-tab\" data-tab=\"inventory\">\n            <span class=\"dock-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/inventory.svg\"></span>\n            <span class=\"dock-tab-label\">Inventory</span>\n          </button>\n        </div>\n\n        <div class=\"dock-tab-panels\">\n          <div class=\"dock-tab-panel\" data-tab-panel=\"appearance\">\n            <div class=\"dock-panel-row\">\n              <span class=\"dock-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/outfit.svg\"></span>\n              <span class=\"tr-line\" data-path=\"MainCharacters.{{mainCharacter}}.Outfit\" data-type=\"STRING\">\n                <span class=\"tr-editable\">{{mainCharacter.Outfit}}</span>\n              </span>\n            </div>\n            <div class=\"dock-panel-row\">\n              <span class=\"dock-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/state-of-dress.svg\"></span>\n              <span class=\"tr-line\" data-path=\"MainCharacters.{{mainCharacter}}.StateOfDress\" data-type=\"STRING\">\n                <span class=\"tr-editable\">{{mainCharacter.StateOfDress}}</span>\n              </span>\n            </div>\n            <div class=\"dock-panel-row\">\n              <span class=\"dock-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/hair-2.svg\"></span>\n              <span class=\"tr-line\" data-path=\"MainCharacters.{{mainCharacter}}.Hair\" data-type=\"STRING\">\n                <span class=\"tr-editable\">{{mainCharacter.Hair}}</span>\n              </span>\n            </div>\n          </div>\n\n          <div class=\"dock-tab-panel\" data-tab-panel=\"state\">\n            <div class=\"dock-panel-row\">\n              <span class=\"dock-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/posture.svg\"></span>\n              <span class=\"tr-line\" data-path=\"MainCharacters.{{mainCharacter}}.PostureAndInteraction\" data-type=\"STRING\">\n                <span class=\"tr-editable\">{{mainCharacter.PostureAndInteraction}}</span>\n              </span>\n            </div>\n            <div class=\"dock-panel-row\">\n              <span class=\"dock-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/sensory.svg\"></span>\n              <span class=\"tr-line\" data-path=\"MainCharacters.{{mainCharacter}}.Sensory\" data-type=\"STRING\">\n                <span class=\"tr-editable\">{{mainCharacter.Sensory}}</span>\n              </span>\n            </div>\n          </div>\n\n          <div class=\"dock-tab-panel\" data-tab-panel=\"inventory\">\n            <div class=\"dock-panel-row\">\n              <span class=\"dock-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/items.svg\"></span>\n              <span class=\"tr-line\" data-path=\"MainCharacters.{{mainCharacter}}.Items\" data-type=\"STRING\">\n                <span class=\"tr-editable\">{{mainCharacter.Items}}</span>\n              </span>\n            </div>\n            <div class=\"dock-panel-row\">\n              <span class=\"dock-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/weapons.svg\"></span>\n              <span class=\"tr-line\" data-path=\"MainCharacters.{{mainCharacter}}.Weapons\" data-type=\"STRING\">\n                <span class=\"tr-editable\">{{mainCharacter.Weapons}}</span>\n              </span>\n            </div>\n            <div class=\"dock-panel-row\">\n              <span class=\"dock-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/ammos-1.svg\"></span>\n              <span class=\"tr-line\" data-path=\"MainCharacters.{{mainCharacter}}.Ammos\" data-type=\"STRING\">\n                <span class=\"tr-editable\">{{mainCharacter.Ammos}}</span>\n              </span>\n            </div>\n          </div>\n        </div>\n        </div>\n\n        <div class=\"dock-layout dock-layout-user\">\n          <div class=\"dock-main-top\">\n            <div class=\"dock-chip\">\n              <span class=\"dock-label\">{{mainCharacter.Protection}}</span>\n            </div>\n            <div class=\"dock-chip\">\n              <span class=\"dock-label\">{{mainCharacter.Period}}</span>\n            </div>\n            <div class=\"dock-chip\">\n              <span class=\"dock-label\">{{mainCharacter.Weather}}</span>\n            </div>\n          </div>\n\n          <div class=\"dock-main-hero\">\n            <div class=\"dock-hero-left\">\n              <div class=\"dock-name\">{{mainCharacter}}</div>\n              <div class=\"dock-pill\">\n                <span class=\"tr-line\" data-path=\"MainCharacters.{{mainCharacter}}.Pregnancy\" data-type=\"STRING\">\n                  <span class=\"tr-editable\">{{mainCharacter.Pregnancy}}</span>\n                </span>\n              </div>\n            </div>\n            <div class=\"dock-hero-right\">\n              <div class=\"dock-kv-line\">\n                <span class=\"dock-label\">{{mainCharacter.Conceive}}</span>\n              </div>\n              <div class=\"dock-kv-line\">\n                <span class=\"dock-label\">{{mainCharacter.DurationOfConceive}}</span>\n              </div>\n            </div>\n          </div>\n\n          <div class=\"dock-kv-strip\">\n            <span class=\"dock-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/placeholder-role.svg\"></span>\n            <span class=\"tr-line\" data-path=\"MainCharacters.{{mainCharacter}}.Role\" data-type=\"STRING\">\n              <span class=\"tr-editable\">{{mainCharacter.Role}}</span>\n            </span>\n            <span class=\"dock-divider\">|</span>\n            <span class=\"tr-line\" data-path=\"MainCharacters.{{mainCharacter}}.Income\" data-type=\"STRING\">\n              <span class=\"tr-editable\">{{mainCharacter.Income}}</span>\n            </span>\n          </div>\n\n          <div class=\"dock-vitals\">\n            <div class=\"dock-vital\">\n              <div class=\"dock-vital-label\">HP</div>\n              <div class=\"labeltext hp-line\">{{mainCharacter.HP}}</div>\n            </div>\n            <div class=\"dock-vital\">\n              <div class=\"dock-vital-label\">LEVEL</div>\n              <div class=\"dock-vital-value\">{{mainCharacter.Level}}</div>\n              <div class=\"labeltext exp-line\">{{mainCharacter.Exp}}</div>\n            </div>\n          </div>\n\n          <div class=\"dock-kv-row\">\n            <span class=\"dock-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/location.svg\"></span>\n            <span class=\"tr-line\" data-path=\"MainCharacters.{{mainCharacter}}.Location\" data-type=\"STRING\">\n              <span class=\"tr-editable\">{{mainCharacter.Location}}</span>\n            </span>\n            <span class=\"dock-spacer\"></span>\n            <span class=\"dock-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/injury.svg\"></span>\n            <span class=\"tr-line\" data-path=\"MainCharacters.{{mainCharacter}}.InjuryAilments\" data-type=\"STRING\">\n              <span class=\"tr-editable\">{{mainCharacter.InjuryAilments}}</span>\n            </span>\n          </div>\n\n          <div class=\"dock-stats\">\n            <div class=\"dock-stats-header\">\n              <span class=\"dock-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/stat-1.svg\"></span>\n              <span class=\"dock-stats-title\">ABILITIES</span>\n            </div>\n            <span class=\"tr-line dock-stats-source\" data-path=\"MainCharacters.{{mainCharacter}}.Stats\" data-type=\"STRING\" style=\"display:none;\">\n              <span class=\"tr-editable\">{{mainCharacter.Stats}}</span>\n            </span>\n            <div class=\"dock-stats-pills\">\n              <div class=\"stat-pill\" data-stat-key=\"STR\"><span class=\"stat-key\">STR</span><span class=\"stat-val\" contenteditable=\"true\"></span></div>\n              <div class=\"stat-pill\" data-stat-key=\"END\"><span class=\"stat-key\">END</span><span class=\"stat-val\" contenteditable=\"true\"></span></div>\n              <div class=\"stat-pill\" data-stat-key=\"AGI\"><span class=\"stat-key\">AGI</span><span class=\"stat-val\" contenteditable=\"true\"></span></div>\n              <div class=\"stat-pill\" data-stat-key=\"DEX\"><span class=\"stat-key\">DEX</span><span class=\"stat-val\" contenteditable=\"true\"></span></div>\n              <div class=\"stat-pill\" data-stat-key=\"INT\"><span class=\"stat-key\">INT</span><span class=\"stat-val\" contenteditable=\"true\"></span></div>\n              <div class=\"stat-pill\" data-stat-key=\"CHA\"><span class=\"stat-key\">CHA</span><span class=\"stat-val\" contenteditable=\"true\"></span></div>\n              <div class=\"stat-pill\" data-stat-key=\"PER\"><span class=\"stat-key\">PER</span><span class=\"stat-val\" contenteditable=\"true\"></span></div>\n              <div class=\"stat-pill\" data-stat-key=\"LCK\"><span class=\"stat-key\">LCK</span><span class=\"stat-val\" contenteditable=\"true\"></span></div>\n            </div>\n          </div>\n\n          <div class=\"dock-finance\">\n            <div class=\"dock-finance-left\">\n              <span class=\"dock-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/cash.svg\"></span>\n              <div class=\"dock-finance-title\">CASH</div>\n              <span class=\"tr-line\" data-path=\"MainCharacters.{{mainCharacter}}.Cash\" data-type=\"STRING\">\n                <span class=\"tr-editable\">{{mainCharacter.Cash}}</span>\n              </span>\n            </div>\n            <div class=\"dock-finance-right\">\n              <div class=\"dock-finance-row\">\n                <span class=\"dock-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/placeholder-bank.svg\"></span>\n                <span class=\"tr-line\" data-path=\"MainCharacters.{{mainCharacter}}.PersonalSavings\" data-type=\"STRING\">\n                  <span class=\"tr-editable\">{{mainCharacter.PersonalSavings}}</span>\n                </span>\n              </div>\n              <div class=\"dock-finance-row\">\n                <span class=\"dock-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/piggy-bank.svg\"></span>\n                <span class=\"tr-line\" data-path=\"MainCharacters.{{mainCharacter}}.JointSavings\" data-type=\"STRING\">\n                  <span class=\"tr-editable\">{{mainCharacter.JointSavings}}</span>\n                </span>\n              </div>\n            </div>\n          </div>\n\n          <div class=\"dock-tabs\" data-tabs>\n            <button class=\"dock-tab\" data-tab=\"appearance\">\n              <span class=\"dock-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/characters-main-appearance.svg\"></span>\n              <span class=\"dock-tab-label\">Appearance</span>\n            </button>\n            <button class=\"dock-tab\" data-tab=\"state\">\n              <span class=\"dock-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/posture.svg\"></span>\n              <span class=\"dock-tab-label\">State</span>\n            </button>\n            <button class=\"dock-tab\" data-tab=\"inventory\">\n              <span class=\"dock-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/inventory.svg\"></span>\n              <span class=\"dock-tab-label\">Inventory</span>\n            </button>\n          </div>\n\n          <div class=\"dock-tab-panels\">\n            <div class=\"dock-tab-panel\" data-tab-panel=\"appearance\">\n              <div class=\"dock-panel-row\">\n                <span class=\"dock-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/outfit.svg\"></span>\n                <span class=\"tr-line\" data-path=\"MainCharacters.{{mainCharacter}}.Outfit\" data-type=\"STRING\">\n                  <span class=\"tr-editable\">{{mainCharacter.Outfit}}</span>\n                </span>\n              </div>\n              <div class=\"dock-panel-row\">\n                <span class=\"dock-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/state-of-dress.svg\"></span>\n                <span class=\"tr-line\" data-path=\"MainCharacters.{{mainCharacter}}.StateOfDress\" data-type=\"STRING\">\n                  <span class=\"tr-editable\">{{mainCharacter.StateOfDress}}</span>\n                </span>\n              </div>\n              <div class=\"dock-panel-row\">\n                <span class=\"dock-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/hair-2.svg\"></span>\n                <span class=\"tr-line\" data-path=\"MainCharacters.{{mainCharacter}}.Hair\" data-type=\"STRING\">\n                  <span class=\"tr-editable\">{{mainCharacter.Hair}}</span>\n                </span>\n              </div>\n            </div>\n\n            <div class=\"dock-tab-panel\" data-tab-panel=\"state\">\n              <div class=\"dock-panel-row\">\n                <span class=\"dock-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/posture.svg\"></span>\n                <span class=\"tr-line\" data-path=\"MainCharacters.{{mainCharacter}}.PostureAndInteraction\" data-type=\"STRING\">\n                  <span class=\"tr-editable\">{{mainCharacter.PostureAndInteraction}}</span>\n                </span>\n              </div>\n              <div class=\"dock-panel-row\">\n                <span class=\"dock-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/sensory.svg\"></span>\n                <span class=\"tr-line\" data-path=\"MainCharacters.{{mainCharacter}}.Sensory\" data-type=\"STRING\">\n                  <span class=\"tr-editable\">{{mainCharacter.Sensory}}</span>\n                </span>\n              </div>\n            </div>\n\n            <div class=\"dock-tab-panel\" data-tab-panel=\"inventory\">\n              <div class=\"dock-panel-row\">\n                <span class=\"dock-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/items.svg\"></span>\n                <span class=\"tr-line\" data-path=\"MainCharacters.{{mainCharacter}}.Items\" data-type=\"STRING\">\n                  <span class=\"tr-editable\">{{mainCharacter.Items}}</span>\n                </span>\n              </div>\n              <div class=\"dock-panel-row\">\n                <span class=\"dock-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/weapons.svg\"></span>\n                <span class=\"tr-line\" data-path=\"MainCharacters.{{mainCharacter}}.Weapons\" data-type=\"STRING\">\n                  <span class=\"tr-editable\">{{mainCharacter.Weapons}}</span>\n                </span>\n              </div>\n              <div class=\"dock-panel-row\">\n                <span class=\"dock-ico\" data-svg=\"/scripts/extensions/third-party/SillyTavern-Tracker/icons/ammos-1.svg\"></span>\n                <span class=\"tr-line\" data-path=\"MainCharacters.{{mainCharacter}}.Ammos\" data-type=\"STRING\">\n                  <span class=\"tr-editable\">{{mainCharacter.Ammos}}</span>\n                </span>\n              </div>\n            </div>\n          </div>\n        </div>\n      </article>\n      {{/foreach}}\n    </div>\n\n    <div class=\"dock-cards\" data-panel-type=\"other\">\n      {{#foreach OtherCharacters otherCharacter}}\n      <article class=\"dock-card\" data-panel=\"other:{{otherCharacter}}\">\n        <header class=\"dock-card-hd\">\n          <div class=\"dock-name\">{{otherCharacter}}</div>\n          <div class=\"dock-pill\">\n            HP\n            <span class=\"tr-line\" data-path=\"OtherCharacters.{{otherCharacter}}.HP\" data-type=\"STRING\">\n              <span class=\"tr-editable\">{{otherCharacter.HP}}</span>\n            </span>\n          </div>\n        </header>\n        <div class=\"dock-row\">\n          <div class=\"dock-kv\">\n            <span class=\"dock-label\">Role</span>\n            <span class=\"tr-line\" data-path=\"OtherCharacters.{{otherCharacter}}.Role\" data-type=\"STRING\">\n              <span class=\"tr-editable\">{{otherCharacter.Role}}</span>\n            </span>\n          </div>\n          <div class=\"dock-kv\">\n            <span class=\"dock-label\">Location</span>\n            <span class=\"tr-line\" data-path=\"OtherCharacters.{{otherCharacter}}.Location\" data-type=\"STRING\">\n              <span class=\"tr-editable\">{{otherCharacter.Location}}</span>\n            </span>\n          </div>\n        </div>\n      </article>\n      {{/foreach}}\n    </div>\n\n    <div class=\"dock-enemies\">\n      <div class=\"dock-enemy-block\" data-enemy-panel=\"small\">\n        {{#foreach SmallEnemies smallEnemy}}\n        <article class=\"dock-card dock-card-enemy\">\n          <header class=\"dock-card-hd\">\n            <div class=\"dock-name\">{{smallEnemy}}</div>\n            <div class=\"dock-pill\">\n              EXP\n              <span class=\"tr-line\" data-path=\"SmallEnemies.{{smallEnemy}}.ExpGain\" data-type=\"STRING\">\n                <span class=\"tr-editable\">{{smallEnemy.ExpGain}}</span>\n              </span>\n            </div>\n          </header>\n          <div class=\"dock-row\">\n            <div class=\"dock-kv\">\n              <span class=\"dock-label\">Number</span>\n              <span class=\"tr-line\" data-path=\"SmallEnemies.{{smallEnemy}}.Number\" data-type=\"STRING\">\n                <span class=\"tr-editable\">{{smallEnemy.Number}}</span>\n              </span>\n            </div>\n            <div class=\"dock-kv\">\n              <span class=\"dock-label\">Location</span>\n              <span class=\"tr-line\" data-path=\"SmallEnemies.{{smallEnemy}}.Location\" data-type=\"STRING\">\n                <span class=\"tr-editable\">{{smallEnemy.Location}}</span>\n              </span>\n            </div>\n          </div>\n        </article>\n        {{/foreach}}\n      </div>\n\n      <div class=\"dock-enemy-block\" data-enemy-panel=\"big\">\n        {{#foreach BigEnemies bigEnemy}}\n        <article class=\"dock-card dock-card-enemy\">\n          <header class=\"dock-card-hd\">\n            <div class=\"dock-name\">{{bigEnemy}}</div>\n            <div class=\"dock-pill\">\n              LV\n              <span class=\"tr-line\" data-path=\"BigEnemies.{{bigEnemy}}.Level\" data-type=\"STRING\">\n                <span class=\"tr-editable\">{{bigEnemy.Level}}</span>\n              </span>\n            </div>\n          </header>\n          <div class=\"dock-row\">\n            <div class=\"dock-kv\">\n              <span class=\"dock-label\">HP</span>\n              <span class=\"tr-line\" data-path=\"BigEnemies.{{bigEnemy}}.HP\" data-type=\"STRING\">\n                <span class=\"tr-editable\">{{bigEnemy.HP}}</span>\n              </span>\n            </div>\n            <div class=\"dock-kv\">\n              <span class=\"dock-label\">Type</span>\n              <span class=\"tr-line\" data-path=\"BigEnemies.{{bigEnemy}}.Type\" data-type=\"STRING\">\n                <span class=\"tr-editable\">{{bigEnemy.Type}}</span>\n              </span>\n            </div>\n          </div>\n        </article>\n        {{/foreach}}\n      </div>\n    </div>\n  </section>\n</div>\n",
+    "dockTemplateCss": "#trackerrevamp-dock {\n  height: 100vh;\n  top: 35px;\n  border-radius: 0;\n  max-height: 100vh;\n  background: none;\n  backdrop-filter: none !important;\n}\n\n#trackerrevamp-dock-body {\n   padding: 0;\n}\n\n/* Layout shell */\n.dock-time .tr-line {\n   border-bottom: none !important;\n}\n\n\n.dock-value {\n   height: 100%;\n}\n\n/* Root container */\n.dock-floater {\n  --dock-bg: rgba(0, 0, 0, 0.7);\n  --dock-border: rgba(170, 170, 170, 0.25);\n  --dock-accent: #6bb4ff;\n  display: flex;\n  gap: 14px;\n  color: #e6e6e6;\n  font-family: \"Ubuntu\", \"Times New Roman\", serif;\n}\n\n.trackerrevamp-dock-header {\n  display: none;\n}\n\n/* Left rail */\n.dock-rail {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: 10px;\n  padding: 8px 6px;\n  border-radius: 14px;\n  background: rgba(0, 0, 0, 0.35);\n}\n\n.dock-rail-block {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: 8px;\n}\n\n\n.dock-rail-block.is-hidden {\n  display: none;\n}\n\n.rail-btn {\n  width: 60px;\n  height: 60px;\n  border-radius: 999px;\n  border: 2px solid var(--rail-ring, rgba(255, 255, 255, 0.2));\n  background: rgb(12 12 12 / 59%);\n  color: #fff;\n  font-weight: 700;\n  font-size: 15px;\n  line-height: 1;\n  letter-spacing: 0.4px;\n  cursor: pointer;\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  position: relative;\n  transition: transform 0.2s ease-out, border-color 0.2s ease, box-shadow 0.2s ease;\n}\n\n.rail-btn:active {\n  transform: scale(0.95);\n  transition-duration: 0.1s;\n}\n\n.rail-btn:hover {\n  transform: scale(1.05);\n  border-color: var(--rail-ring-hover, var(--rail-ring, rgba(255, 255, 255, 0.4)));\n  box-shadow: 0 0 0 2px var(--rail-glow, rgba(107, 180, 255, 0.15));\n}\n\n.rail-btn.is-active {\n  transform: scale(1.05);\n  border-color: var(--rail-ring-hover, var(--dock-accent));\n  box-shadow: 0 0 10px 0 var(--rail-ring-hover, var(--dock-accent));\n}\n\n.rail-btn-group {\n  --rail-ring: rgba(162, 200, 145, 0.72);\n  --rail-core: rgba(162, 200, 145, 0.3);\n  --rail-ring-hover: rgba(176, 214, 160, 0.9);\n  --rail-core-hover: rgba(176, 214, 160, 0.4);\n  --rail-glow: rgba(162, 200, 145, 0.45);\n  flex-direction: column;\n  gap: 8px;\n  height: 60px;\n  padding: 0;\n  /* overflow: hidden; -- Removed to prevent clipping hover effects */\n  border-radius: 30px;\n  transition: height 0.35s ease, padding 0.35s ease, background 0.35s ease, border-color 0.35s ease, margin 0.35s ease;\n}\n\n.rail-btn-group.is-open {\n  height: auto;\n  min-height: 60px;\n  padding: 0px 0px 10px;\n  justify-content: flex-start; /* Aligns content to top, preventing upward expansion */\n  border-color: var(--rail-ring, rgba(162, 200, 145, 0.72));\n  background: rgb(12 12 12 / 59%);\n  margin-top: 10px;\n  margin-bottom: 10px;\n}\n\n.rail-btn-enemy  {\n  --rail-ring: rgba(200, 90, 90, 0.85);\n  --rail-core: rgba(200, 90, 90, 0.25);\n  --rail-ring-hover: rgba(220, 120, 120, 0.95);\n  --rail-core-hover: rgba(220, 120, 120, 0.45);\n  --rail-glow: rgba(200, 90, 90, 0.45);\n}\n\n.rail-ico svg {\n  width: 20px;\n  height: 20px;\n  display: block;\n}\n\n.rail-ico svg path { \n   fill: #fff;\n}\n\n.rail-btn-group > .rail-ico {\n  height: 60px;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  transition: height 0.35s ease;\n  position: relative;\n  z-index: 1; /* Ensure icon is on top of the pseudo-element */\n}\n\n.rail-btn-group.is-open > .rail-ico {\n  height: 48px;\n}\n\n.rail-sublist {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: 8px;\n  width: 100%;\n  max-height: 0;\n  opacity: 0;\n  overflow: hidden;\n  transition: max-height 0.3s ease, opacity 0.2s ease 0.1s, margin-top 0.3s ease;\n  position: relative;\n  z-index: 1;\n}\n\n.rail-btn-group.is-open .rail-sublist {\n  max-height: 500px;\n  opacity: 1;\n}\n\n.rail-btn-other {\n  width: 42px;\n  height: 42px;\n  font-size: 13px;\n  flex-shrink: 0;\n}\n\n/************ Main stage *************/\n\n.dock-stage {\n  flex: 1;\n  min-width: 0;\n}\n\n/* Main card layout */\n.dock-card-main .dock-main-top,\n.dock-card-main .dock-main-hero,\n.dock-card-main .dock-main-row,\n.dock-card-main .dock-kv-strip,\n.dock-card-main .dock-vitals,\n.dock-card-main .dock-kv-row,\n.dock-card-main .dock-stats,\n.dock-card-main .dock-finance,\n.dock-card-main .dock-tabs,\n.dock-card-main .dock-tab-panels {\n  margin-top: 12px;\n}\n\n.dock-layout-user {\n  display: none;\n}\n\n.dock-card-main.is-char .dock-layout-user {\n  display: none;\n}\n\n.dock-card-main.is-user .dock-layout-char {\n  display: none;\n}\n\n.dock-card-main.is-user .dock-layout-user {\n  display: block;\n}\n\n.dock-tabs {\n  display: flex;\n  gap: 8px;\n}\n\n.dock-tab {\n  display: inline-flex;\n  align-items: center;\n  gap: 6px;\n}\n\n.dock-tab .dock-tab-label {\n  display: none;\n}\n\n.dock-tab.is-active .dock-tab-label {\n  display: inline;\n}\n\n.dock-tab-panel {\n  display: none;\n}\n\n.dock-tab-panel.is-active {\n  display: block;\n}\n\n/* Stats pills */\n.dock-stats-pills {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 6px;\n}\n\n.stat-pill {\n  display: inline-flex;\n  align-items: center;\n  gap: 6px;\n}\n\n.stat-pill .stat-val {\n  min-width: 24px;\n  outline: none;\n}\n\n/* Meta header */\n.dock-meta {\n   background: rgba(170, 170, 170, 0.1);\n   align-items: center;\n   padding: 0 20px;\n   height: 65px;\n  display: flex;\n  gap: 18px;\n  justify-content: space-between;\n  margin-bottom: 14px;\n  font-size: 1rem;\n  opacity: 0.9;\n}\n\n.dock-label {\n  text-transform: uppercase;\n  font-size: 0.7rem;\n  letter-spacing: 0.12em;\n  opacity: 0.7;\n  margin-right: 6px;\n}\n\n/* Cards */\n.dock-cards {\n  display: flex;\n  flex-direction: column;\n  gap: 16px;\n}\n\n.dock-card {\n  display: none;\n  border: 1px solid var(--dock-border);\n  border-radius: 16px;\n  padding: 14px 18px;\n  background: var(--dock-bg);\n  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);\n  backdrop-filter: blur(50px)\n}\n\n.dock-card.is-active {\n  display: block;\n}\n\n.dock-card-hd {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: 10px;\n  margin-bottom: 10px;\n}\n\n.dock-name {\n  font-size: 1.3rem;\n  font-weight: 600;\n}\n\n.dock-pill {\n  display: inline-flex;\n  align-items: center;\n  gap: 6px;\n  padding: 4px 10px;\n  border-radius: 999px;\n  background: rgba(107, 180, 255, 0.18);\n  font-size: 0.85rem;\n}\n\n.dock-row {\n  display: grid;\n  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));\n  gap: 12px;\n  margin-top: 10px;\n}\n\n.dock-kv {\n  display: flex;\n  flex-direction: column;\n  gap: 4px;\n}\n\n/* Enemies */\n.dock-enemies {\n  margin-top: 18px;\n  display: flex;\n  flex-direction: column;\n  gap: 16px;\n}\n\n.dock-enemy-block {\n  display: none;\n}\n\n.dock-enemy-block.is-open {\n  display: block;\n}\n\n.dock-enemy-block .dock-card {\n  display: block;\n  margin-bottom: 12px;\n}\n\n.dock-enemy-block .dock-card:last-child {\n  margin-bottom: 0;\n}\n\n/* Enemy colors */\n/* small enemies */\n.rail-btn-enemy[data-enemy-toggle=\"small\"] {\n  --rail-ring: rgba(175, 33, 35, 0.72);\n  --rail-core: rgba(175, 33, 35, 0.28);\n  --rail-ring-hover: rgba(210, 70, 70, 0.95);\n  --rail-core-hover: rgba(210, 70, 70, 0.45);\n  --rail-glow: rgba(175, 33, 35, 0.45);\n}\n\n/* big enemies */\n.rail-btn-enemy[data-enemy-toggle=\"big\"] {\n  --rail-ring: rgba(135, 75, 237, 0.72);\n  --rail-core: rgba(135, 75, 237, 0.28);\n  --rail-ring-hover: rgba(170, 120, 245, 0.95);\n  --rail-core-hover: rgba(170, 120, 245, 0.45);\n  --rail-glow: rgba(135, 75, 237, 0.45);\n}\n\n\n.rail-btn::before {\n  content: \"\";\n  position: absolute;\n  inset: 11px;\n  border-radius: 999px;\n  background: var(--rail-core, rgba(255, 255, 255, 0.12));\n  z-index: 0;\n  transition: background-color 0.2s ease;\n}\n\n/* Specific fix for the group's ::before pseudo-element */\n.rail-btn-group::before {\n  inset: auto;\n  top: 11px;\n  left: 11px;\n  width: 34px;\n  height: 34px;\n}\n\n.rail-btn:hover::before,\n.rail-btn.is-active::before {\n  background: var(--rail-core-hover, var(--rail-core, rgba(255, 255, 255, 0.2)));\n}\n\n.rail-btn-other::before,\n.rail-btn-other:hover::before,\n.rail-btn-other.is-active::before {\n  background: transparent;\n}\n\n\n.rail-btn > span,\n.rail-btn > svg,\n.rail-btn > img,\n.rail-btn > .rail-ico {\n  position: relative;\n  z-index: 1;\n}\n\n.dock-enemy-block[data-enemy-panel=\"small\"] .dock-pill { background: rgba(224, 107, 107, 0.3); }\n.dock-enemy-block[data-enemy-panel=\"big\"] .dock-pill { background: rgba(139, 107, 255, 0.3); }\n\n\n\n.dock-card-enemy .dock-pill {\n  background: rgba(180, 80, 80, 0.3);\n}\n\n.dock-floater .tr-line {\n  display: inline-block;\n}\n\n.dock-floater .tr-editable {\n  cursor: text;\n}\n\n/* Icon sizing */\n.dock-ico,\n.dock-ico svg,\n.dock-ico img {\n  width: 30px;\n  height: 30px;\n  display: inline-block;\n}\n\n\n/* HP/EXP bars (reuse Message Tracker styling hooks) */\n.dock-vitals .bar {\n  position: relative;\n  height: 6px;\n  border-radius: 999px;\n  background: rgba(255, 255, 255, 0.12);\n  overflow: hidden;\n}\n\n.dock-vitals .bar span {\n  display: block;\n  height: 100%;\n  background: rgba(107, 180, 255, 0.6);\n}\n\n.dock-vitals .bar.hp.ok span { background: #37c978; }\n.dock-vitals .bar.hp.warn span { background: #f1b54b; }\n.dock-vitals .bar.hp.bad span { background: #e15b5b; }\n",
+    "dockTemplateJs": "() => {\n  const addListener = (listeners, el, type, fn) => {\n    if (!el) return;\n    el.addEventListener(type, fn);\n    listeners.push([el, type, fn]);\n  };\n\n  const setActivePanel = (root, type, name) => {\n    const panels = root.querySelectorAll(`[data-panel^=\"${type}:\"]`);\n    panels.forEach((panel) => {\n      panel.classList.toggle(\"is-active\", panel.dataset.panel === `${type}:${name}`);\n    });\n  };\n\n  const clearPanels = (root, type) => {\n    const panels = root.querySelectorAll(`[data-panel^=\"${type}:\"]`);\n    panels.forEach((panel) => panel.classList.remove(\"is-active\"));\n  };\n\n  const init = ({ root } = {}) => {\n    const scope = root || document.querySelector(\".dock-sample\");\n    if (!scope) return;\n\n    const listeners = [];\n    scope.__dockFloaterListeners = listeners;\n    const svgTargets = Array.from(scope.querySelectorAll(\"[data-svg]\"));\n\n    const mainButtons = Array.from(scope.querySelectorAll(\"[data-main-target]\"));\n    const otherToggle = scope.querySelector(\"[data-other-toggle]\");\n    const otherList = scope.querySelector(\"[data-other-list]\");\n    const otherButtons = Array.from(scope.querySelectorAll(\"[data-other-target]\"));\n    const smallToggle = scope.querySelector('[data-enemy-toggle=\"small\"]');\n    const bigToggle = scope.querySelector('[data-enemy-toggle=\"big\"]');\n    const smallPanel = scope.querySelector('[data-enemy-panel=\"small\"]');\n    const bigPanel = scope.querySelector('[data-enemy-panel=\"big\"]');\n    const statBlocks = Array.from(scope.querySelectorAll(\".dock-stats\"));\n    const tabGroups = Array.from(scope.querySelectorAll(\"[data-tabs]\"));\n\n    const applyInitial = (button) => {\n      const label = button.getAttribute(\"title\")\n        || button.dataset.mainTarget\n        || button.dataset.otherTarget\n        || \"\";\n      const trimmed = String(label).trim();\n      if (!trimmed) return;\n      button.textContent = trimmed[0].toUpperCase();\n    };\n\n    mainButtons.forEach((button) => {\n      applyInitial(button);\n      const label = button.getAttribute(\"title\") || button.dataset.mainTarget || \"\";\n      const name = String(label).trim().toLowerCase();\n      const isJill = name.includes(\"jill\");\n      if (isJill) {\n        button.style.setProperty(\"--rail-ring\", \"rgba(202, 106, 127, 0.72)\");\n        button.style.setProperty(\"--rail-core\", \"rgba(202, 106, 127, 0.28)\");\n        button.style.setProperty(\"--rail-ring-hover\", \"rgba(225, 135, 155, 0.95)\");\n        button.style.setProperty(\"--rail-core-hover\", \"rgba(225, 135, 155, 0.45)\");\n        button.style.setProperty(\"--rail-glow\", \"rgba(202, 106, 127, 0.55)\");\n      } else {\n        button.style.setProperty(\"--rail-ring\", \"rgba(64, 160, 238, 0.72)\");\n        button.style.setProperty(\"--rail-core\", \"rgba(64, 160, 238, 0.28)\");\n        button.style.setProperty(\"--rail-ring-hover\", \"rgba(120, 190, 245, 0.95)\");\n        button.style.setProperty(\"--rail-core-hover\", \"rgba(120, 190, 245, 0.45)\");\n        button.style.setProperty(\"--rail-glow\", \"rgba(64, 160, 238, 0.55)\");\n      }\n    });\n\n    const applyMainCharacterRoles = () => {\n      const userName = typeof window?.name1 === \"string\" ? window.name1.trim() : \"\";\n      const charName = typeof window?.characters?.[window?.this_chid]?.name === \"string\"\n        ? window.characters[window.this_chid].name.trim()\n        : \"\";\n\n      const markRole = (el, name) => {\n        if (!name) return;\n        const normalized = String(name).trim().toLowerCase();\n        if (userName && normalized === userName.toLowerCase()) {\n          el.classList.add(\"is-user\");\n        }\n        if (charName && normalized === charName.toLowerCase()) {\n          el.classList.add(\"is-char\");\n        }\n      };\n\n      mainButtons.forEach((button) => {\n        const label = button.getAttribute(\"title\") || button.dataset.mainTarget || \"\";\n        markRole(button, label);\n      });\n\n      scope.querySelectorAll(\".dock-card-main[data-main-name]\").forEach((card) => {\n        const label = card.getAttribute(\"data-main-name\") || \"\";\n        markRole(card, label);\n      });\n    };\n\n    applyMainCharacterRoles();\n    otherButtons.forEach((button) => {\n      applyInitial(button);\n      const hue = Math.floor(Math.random() * 360);\n      const ring = `hsla(${hue}, 70%, 65%, 0.72)`;\n      const ringHover = `hsla(${hue}, 80%, 75%, 0.9)`;\n      const glow = `hsla(${hue}, 70%, 65%, 0.55)`;\n      button.style.setProperty(\"--rail-ring\", ring);\n      button.style.setProperty(\"--rail-ring-hover\", ringHover);\n      button.style.setProperty(\"--rail-glow\", glow);\n    });\n\n    if (otherToggle) {\n      otherToggle.setAttribute(\"role\", \"button\");\n      otherToggle.setAttribute(\"tabindex\", \"0\");\n    }\n\n    const otherBlock = otherToggle ? otherToggle.closest(\".dock-rail-block\") : null;\n    const smallBlock = smallToggle ? smallToggle.closest(\".dock-rail-block\") : null;\n    const bigBlock = bigToggle ? bigToggle.closest(\".dock-rail-block\") : null;\n\n    const hasMeaningfulLabel = (text) => {\n      const cleaned = String(text || \"\")\n        .replace(/\\(\\s*off(?:-screen)?\\s*\\)/ig, \"\")\n        .replace(/[\\u200B-\\u200D\\uFEFF]/g, \"\")\n        .trim();\n      if (!cleaned) return false;\n      if (cleaned === \"\u2014\") return false;\n      if (/^x$/i.test(cleaned)) return false;\n      if (/^n\\/?a$/i.test(cleaned)) return false;\n      if (/^none$/i.test(cleaned)) return false;\n      if (/^\\{\\{.*\\}\\}$/.test(cleaned)) return false;\n      if (/^<.*>$/.test(cleaned)) return false;\n      if (/character\\s*name/i.test(cleaned)) return false;\n      return true;\n    };\n\n    const otherPanel = scope.querySelector('.dock-cards[data-panel-type=\"other\"]');\n    const hasOtherEntriesFromButtons = otherButtons.some((button) => {\n      const label = button.getAttribute(\"title\") || button.dataset.otherTarget || \"\";\n      return hasMeaningfulLabel(label);\n    });\n    const hasOtherEntriesFromCards = otherPanel\n      ? Array.from(otherPanel.querySelectorAll(\".dock-card .dock-name\")).some((node) =>\n          hasMeaningfulLabel(node.textContent)\n        )\n      : false;\n    const hasOtherEntries = hasOtherEntriesFromButtons || hasOtherEntriesFromCards;\n\n    if (!hasOtherEntries && otherBlock) {\n      otherBlock.classList.add(\"is-hidden\");\n    }\n\n    const hasEnemyEntries = (panel, nameSelector) => {\n      if (!panel) return false;\n      const cards = Array.from(panel.querySelectorAll(\".dock-card\"));\n      return cards.some((card) => {\n        const label = card.querySelector(nameSelector)?.textContent || \"\";\n        return hasMeaningfulLabel(label);\n      });\n    };\n\n    if (!hasEnemyEntries(smallPanel, \".dock-name, .dock-enemy-title, .small-name, .name\") && smallBlock) {\n      smallBlock.classList.add(\"is-hidden\");\n    }\n\n    if (!hasEnemyEntries(bigPanel, \".dock-name, .dock-enemy-title, .quad-name, .name\") && bigBlock) {\n      bigBlock.classList.add(\"is-hidden\");\n    }\n\n    if (smallPanel) smallPanel.classList.remove(\"is-open\");\n    if (bigPanel) bigPanel.classList.remove(\"is-open\");\n    if (otherToggle) otherToggle.classList.remove(\"is-open\");\n\n    const deactivateMainButtons = () => {\n      mainButtons.forEach((btn) => btn.classList.remove(\"is-active\"));\n      clearPanels(scope, \"main\");\n    };\n    \n    const deactivateOtherButtons = () => {\n      otherButtons.forEach((btn) => btn.classList.remove(\"is-active\"));\n      if (otherToggle) otherToggle.classList.remove(\"is-active\");\n      clearPanels(scope, \"other\");\n    };\n\n    const deactivateEnemyButtons = () => {\n        if (smallToggle) smallToggle.classList.remove(\"is-active\");\n        if (bigToggle) bigToggle.classList.remove(\"is-active\");\n        if (smallPanel) smallPanel.classList.remove(\"is-open\");\n        if (bigPanel) bigPanel.classList.remove(\"is-open\");\n    };\n\n    mainButtons.forEach((button) => {\n      addListener(listeners, button, \"click\", () => {\n        deactivateEnemyButtons();\n        deactivateMainButtons();\n        deactivateOtherButtons();\n        if (otherToggle) otherToggle.classList.remove(\"is-open\");\n\n        button.classList.add(\"is-active\");\n        setActivePanel(scope, \"main\", button.dataset.mainTarget);\n      });\n    });\n\n    otherButtons.forEach((button) => {\n      addListener(listeners, button, \"click\", (event) => {\n        event.stopPropagation();\n        deactivateEnemyButtons();\n        deactivateMainButtons();\n        deactivateOtherButtons();\n\n        button.classList.add(\"is-active\");\n        if (otherToggle) {\n          otherToggle.classList.add(\"is-active\");\n          otherToggle.classList.add(\"is-open\");\n        }\n        setActivePanel(scope, \"other\", button.dataset.otherTarget);\n      });\n    });\n\n    addListener(listeners, otherToggle, \"click\", () => {\n      const willBeOpen = !otherToggle.classList.contains(\"is-open\");\n\n      if (willBeOpen) {\n        deactivateEnemyButtons();\n        deactivateMainButtons();\n        otherToggle.classList.add(\"is-open\");\n\n        if (otherButtons.length > 0) {\n            otherButtons[0].click();\n        }\n      } else {\n        otherToggle.classList.remove(\"is-open\");\n        deactivateOtherButtons();\n      }\n    });\n\n    const enemyClickHandler = (toggle, panel) => {\n        deactivateMainButtons();\n        deactivateOtherButtons();\n        if (otherToggle) otherToggle.classList.remove(\"is-open\");\n\n        if (!panel) return;\n        const nextState = !panel.classList.contains(\"is-open\");\n        panel.classList.toggle(\"is-open\", nextState);\n        toggle.classList.toggle(\"is-active\", nextState);\n    };\n\n    addListener(listeners, smallToggle, \"click\", () => enemyClickHandler(smallToggle, smallPanel));\n    addListener(listeners, bigToggle, \"click\", () => enemyClickHandler(bigToggle, bigPanel));\n\n    if (mainButtons.length > 0) {\n      mainButtons[0].click();\n    } else if (otherButtons.length > 0) {\n      otherButtons[0].click();\n    }\n\n    const renderBarFromText = (el, kind) => {\n      if (!el || el.__barized) return;\n      const t = (el.dataset.raw || el.textContent || \"\").trim();\n      const m = t.match(/(\\d+)\\s*\\/\\s*(\\d+)/);\n      if (!m) return;\n      const cur = +m[1], max = +m[2];\n      const pct = Math.max(0, Math.min(100, (cur / max) * 100));\n      el.dataset.raw = t;\n      el.innerHTML = `<div class=\"labeltext\">${t}</div>`;\n      const bar = document.createElement(\"div\");\n      bar.className = \"bar \" + (kind === \"hp\" ? \"hp\" : \"exp\");\n      const fill = document.createElement(\"span\");\n      fill.style.width = pct + \"%\";\n      bar.appendChild(fill);\n      if (kind === \"hp\") {\n        bar.classList.add(pct < 30 ? \"bad\" : pct < 60 ? \"warn\" : \"ok\");\n      }\n      el.appendChild(bar);\n      el.__barized = true;\n    };\n\n    const initNumericBars = () => {\n      scope.querySelectorAll(\".hp-line\").forEach((el) => renderBarFromText(el, \"hp\"));\n      scope.querySelectorAll(\".exp-line\").forEach((el) => renderBarFromText(el, \"exp\"));\n    };\n\n    svgTargets.forEach((el) => {\n      if (el.__svgApplied) return;\n      const url = el.getAttribute(\"data-svg\");\n      if (!url) return;\n      fetch(url)\n        .then((res) => res.text())\n        .then((text) => {\n          if (text.trim().startsWith(\"<svg\")) {\n            el.innerHTML = text;\n          } else {\n            el.innerHTML = `<img src=\"${url}\" alt=\"\">`;\n          }\n          el.__svgApplied = true;\n        })\n        .catch(() => {\n          el.innerHTML = `<img src=\"${url}\" alt=\"\">`;\n          el.__svgApplied = true;\n        });\n    });\n\n    initNumericBars();\n\n    const parseStats = (text) => {\n      const map = {};\n      const regex = /\\\\b(STR|END|AGI|DEX|INT|CHA|PER|LCK)\\\\s*[:=]\\\\s*(\\\\d+)/gi;\n      let match;\n      while ((match = regex.exec(text || \"\"))) {\n        map[match[1].toUpperCase()] = match[2];\n      }\n      return map;\n    };\n\n    const buildStatsString = (order, map) => {\n      return order\n        .map((key) => `${key}: ${map[key] || \"\"}`.trim())\n        .join(\" | \");\n    };\n\n    const commitTrLine = (lineEl, value) => {\n      if (!lineEl) return;\n      lineEl.dispatchEvent(new MouseEvent(\"click\", { bubbles: true }));\n      setTimeout(() => {\n        const input = lineEl.querySelector(\"textarea.tr-input\");\n        if (!input) return;\n        input.value = value;\n        input.dispatchEvent(new KeyboardEvent(\"keydown\", { key: \"Enter\", bubbles: true }));\n      }, 0);\n    };\n\n    statBlocks.forEach((block) => {\n      const sourceLine = block.querySelector(\".dock-stats-source\");\n      const editable = sourceLine?.querySelector(\".tr-editable\");\n      const raw = editable ? editable.textContent : \"\";\n      const map = parseStats(raw);\n      const pills = Array.from(block.querySelectorAll(\".stat-pill\"));\n      const order = pills.map((pill) => pill.dataset.statKey);\n\n      pills.forEach((pill) => {\n        const key = pill.dataset.statKey;\n        const valEl = pill.querySelector(\".stat-val\");\n        if (!valEl) return;\n        valEl.textContent = map[key] || \"\";\n        const update = () => {\n          const next = String(valEl.textContent || \"\").replace(/[^0-9]/g, \"\");\n          valEl.textContent = next;\n          map[key] = next;\n          const nextString = buildStatsString(order, map);\n          commitTrLine(sourceLine, nextString);\n        };\n        valEl.addEventListener(\"blur\", update);\n        valEl.addEventListener(\"keydown\", (ev) => {\n          if (ev.key === \"Enter\") {\n            ev.preventDefault();\n            update();\n            valEl.blur();\n          }\n        });\n      });\n    });\n\n    tabGroups.forEach((group) => {\n      const tabs = Array.from(group.querySelectorAll(\".dock-tab\"));\n      if (tabs.length === 0) return;\n      const card = group.closest(\".dock-card\");\n      const panels = card ? Array.from(card.querySelectorAll(\".dock-tab-panel\")) : [];\n      const setActive = (name) => {\n        tabs.forEach((tab) => tab.classList.toggle(\"is-active\", name && tab.dataset.tab === name));\n        panels.forEach((panel) => panel.classList.toggle(\"is-active\", name && panel.dataset.tabPanel === name));\n      };\n      tabs.forEach((tab) => {\n        tab.addEventListener(\"click\", () => {\n          const name = tab.dataset.tab;\n          const isActive = tab.classList.contains(\"is-active\");\n          if (isActive) {\n            setActive(null);\n          } else {\n            setActive(name);\n          }\n        });\n      });\n    });\n  };\n\n  const cleanup = () => {\n    const scope = document.querySelector(\".dock-sample\");\n    const listeners = scope ? scope.__dockFloaterListeners : null;\n    if (!listeners) return;\n    listeners.forEach(([el, type, fn]) => el.removeEventListener(type, fn));\n    scope.__dockFloaterListeners = [];\n  };\n\n  return { init, cleanup };\n}\n",
+    "trackerDef": {
+      "field-0": {
+        "name": "Time",
+        "type": "STRING",
+        "presence": "DYNAMIC",
+        "scope": "UNIVERSAL",
+        "prompt": "Update the in-world time by realistically reflecting how long the latest message would take if it occurred in real life.\n\nUse this logic:\n- For **brief dialogue or short reactions** (1\u20132 lines, low impact): add **a few seconds** (between 1s\u201315s).\n- For **dense or emotional dialogue**, dramatic pauses, or multi-line exchanges: add **between 1\u20134 minutes**.\n- For **physical activity** (walking, getting dressed, working, traveling, etc.): add **between several minutes to an hour**, based on effort and complexity.\n- For **prolonged or multi-step actions** (e.g., showering, fighting, briefing, waiting, cleaning up): add **between 10 minutes to multiple hours** depending on what's implied.\n- If the message **implies or states a time transition** (e.g., \"later,\" \"the sun sets,\", \"a few minutes\", \"by the time evening rolls in\"): apply **a significant time jump** \u2014 even **several hours** if appropriate.\n\nRules:\n- **Stack the time realistically** \u2014 don\u2019t choose just one category if multiple things happen. Dialogue + action + passage of time = cumulative duration.\n- **Use irregular intervals**. Avoid predictable jumps. Example: `38s`, `1m47s`, `6m09s`, `2h18m`.\n- If unsure, ask: \u201cIf I were watching this unfold in real time, how much would actually pass?\u201d\n\nReturn only the updated time in this format:  \n`HH:MM:SS AM/PM | \ud83c\udf04 Morning / \u2600\ufe0f Afternoon / \ud83c\udf07 Evening / \ud83c\udf06 Night / \ud83c\udf19 Late Night\u2014 MM/DD/YYYY (Day Name) `\nBase your calculation on `{{time}}` and `{{getvar::today}}`, unless the message clearly overrides it.",
+        "defaultValue": "<Updated time if changed>",
+        "exampleValues": [
+          "",
+          "",
+          "",
+          ""
+        ],
+        "nestedFields": {}
+      },
+      "field-1": {
+        "name": "CharMain",
+        "type": "FOR_EACH_OBJECT",
+        "presence": "DYNAMIC",
+        "scope": "CHAR",
+        "prompt": "For {{char}} update the following details:",
+        "defaultValue": "<char>",
+        "exampleValues": [
+          "{{char}}",
+          "",
+          "",
+          ""
+        ],
+        "nestedFields": {
+          "field-2": {
+            "name": "Affection",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "CHAR",
+            "prompt": "{{char}}\u2019s affection value toward {{user}}, from -999 to +999.\nChange only when {{char}}\u2019s feelings are directly affected by interaction or events involving {{user}}.",
+            "defaultValue": "<Update if changed>",
+            "exampleValues": [
+              "+5",
+              "+385",
+              "",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-3": {
+            "name": "Relationship",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "CHAR",
+            "prompt": "Very brief label describing {{char}} and {{user}}\u2019s romantic relationship status.\nExamples: Acquaintances, Friends, Dating, Engaged, Married, Situationship.\nUpdate only when the relationship status itself changes.",
+            "defaultValue": "<Current relationship status if no update is needed>",
+            "exampleValues": [
+              "Acquaintances",
+              "Dating",
+              "",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-4": {
+            "name": "RelationshipDate",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "CHAR",
+            "prompt": "The calendar date when the current romantic relationship status began,\nor the date {{char}} and {{user}} first met if not romantically involved.",
+            "defaultValue": "<Update if changed>",
+            "exampleValues": [
+              "August 11th 2025",
+              "February 17th 2021",
+              "",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-5": {
+            "name": "Duration",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "CHAR",
+            "prompt": "Length of time since the current relationship status began.\nFormat examples: 3d, 2w1d, 5m, 1y2m.\nUpdate only when a new day begins.",
+            "defaultValue": "<Update if changed>",
+            "exampleValues": [
+              "4d",
+              "1y3w5d",
+              "",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-6": {
+            "name": "Weather",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "CHAR",
+            "prompt": "Describe the current weather or conditions concisely. Reflect natural changes over time such as shifts in cloud cover, temperature, precipitation, or lighting (e.g., sunset glow, fog rolling in). If the character moves to a new city or region, or a significant amount of time passes, update the weather accordingly. Assume realistic progression based on prior conditions even if not explicitly stated in the scene. Keep it brief and atmospheric.",
+            "defaultValue": "<Updated weather if changed>",
+            "exampleValues": [
+              "Heavy rain, distant thunder",
+              "Light drizzle, grey overcast sky",
+              "Golden sunset, scattered clouds",
+              "Hot and humid, buzzing with cicadas"
+            ],
+            "nestedFields": {}
+          },
+          "field-7": {
+            "name": "Devotion",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "CHAR",
+            "prompt": "Very brief descriptor of the depth of emotional bond between {{char}} and {{user}}.\nExamples: Unfamiliar, Intrigued, Growing fond, Crush, In love, Deeply devoted.\nUpdate only when emotional bond meaningfully changes.",
+            "defaultValue": "<Update if changed>",
+            "exampleValues": [
+              "Unfamiliar",
+              "Crush",
+              "",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-8": {
+            "name": "Arousal",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "CHAR",
+            "prompt": "Numeric arousal level of {{char}}, from 0\u2013100.\nBased only on mood, intimacy, or physical stimulation involving {{user}}.\nDo not change if the scene is not intimate or suggestive.",
+            "defaultValue": "<Update if changed>",
+            "exampleValues": [
+              "0",
+              "48",
+              "",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-9": {
+            "name": "Kaomoji",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "CHAR",
+            "prompt": "ASCII / kaomoji representing {{char}}\u2019s current mood. No emojis.",
+            "defaultValue": "<Update if changed>",
+            "exampleValues": [
+              "(\u2741\u00b4\u25e1`\u2741)",
+              "(\u0e50\u0954\u02c3\u0336\u15dc\u02c2\u0336\u0e50\u0953)",
+              "",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-10": {
+            "name": "Emotion",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "CHAR",
+            "prompt": "Exactly **one word** describing {{char}}\u2019s dominant emotional state.\nExamples: Calm, Tense, Affectionate, Irritated, Protective.",
+            "defaultValue": "<Update if changed>",
+            "exampleValues": [
+              "Smitten",
+              "Amused",
+              "",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-11": {
+            "name": "Genitals",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "CHAR",
+            "prompt": "One-word physical state only.\nAllowed values: Soft, Semi-hard, Hard, Sensitive, Spent.\nNo descriptions here.",
+            "defaultValue": "<Update if changed>",
+            "exampleValues": [
+              "Soft",
+              "Semi-hard",
+              "",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-12": {
+            "name": "Protection",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "CHAR",
+            "prompt": "Value only: ON or OFF.\nRepresents whether protection (condom, contraceptive use) is currently in effect on the respective character.",
+            "defaultValue": "<Update if changed>",
+            "exampleValues": [
+              "ON",
+              "OFF",
+              "",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-13": {
+            "name": "State",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "CHAR",
+            "prompt": "One short sentence describing **genital/arousal state only**.\nMust NOT describe posture, fatigue, sweat, pain, emotions, or unrelated physical condition.\nMust mention protection or pull-out state if relevant.",
+            "defaultValue": "<Update if changed>",
+            "exampleValues": [
+              "\"Inside her, throbbing hard\"",
+              "\"Pulled out, skin slick, shallow breath\"",
+              "",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-14": {
+            "name": "Thoughts",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "CHAR",
+            "prompt": "One single-sentence internal thought of {{char}} only.\nMust reflect what {{char}} would realistically be thinking about in the current scene.\nIf {{char}} is off-screen, write a fitting internal thought based on context.",
+            "defaultValue": "<Update thoughts if changed>",
+            "exampleValues": [
+              "\"I won't let her endure this on her own.\"",
+              "\"She thinks her flaws would scare me away. Cute.\"",
+              "",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-15": {
+            "name": "Exp",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "CHAR",
+            "prompt": "Track the character\u2019s current experience points (EXP). EXP is gained through combat encounters, tactical actions, mission completions, personal growth, training, and significant narrative milestones.\n\nRequired EXP for next level = (lastLevel + currentLevel) \u00d7 100\n\nAwarding EXP from enemies:\n1. Identify each enemy defeated and note its base EXP value.\n2. For each enemy:\n   a) Count the total number of characters who directly damaged or contributed to killing it.\n   b) Divide the base EXP by that number.\n   c) Award that amount to each contributing character.\n3. Repeat for all enemies defeated in the encounter.\n4. Add all awarded EXP amounts to the character\u2019s currentEXP.\n\nExample:\n- Licker worth 300 EXP killed only by Jill \u2192 Jill gets 300 EXP.\n- Another Licker worth 300 EXP killed by Jill and Leon \u2192 300 \u00f7 2 = 150 EXP to each.\n- Jill total: 300 + 150 = 450 EXP gained; Leon total: 150 EXP gained.\n\nLeveling up:\n- When currentEXP \u2265 requiredEXP:\n   a) Increase Level by 1.\n   b) Subtract requiredEXP from currentEXP (carry over leftover EXP).\n   c) Recalculate requiredEXP for the new level.\n\nRules:\n- Always perform the division step before awarding EXP.\n- Always calculate totals after all enemies in the encounter have been processed.\n- Never award more than the base EXP for an enemy.\n\nFormat EXP as: `[currentEXP]/[requiredEXP]`",
+            "defaultValue": "<Updated Experience if changed>",
+            "exampleValues": [
+              "7380/8000",
+              "4640/5900",
+              "",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-16": {
+            "name": "Level",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "CHAR",
+            "prompt": "Track the character\u2019s current level, representing their accumulated combat experience, tactical proficiency, leadership skills, and resilience.\n\nThe character\u2019s level only increases when their EXP reaches or surpasses the required threshold defined by the following formula:\nlevelUpEXP = (lastLevel + currentLevel) \u00d7 100\n\nUpon leveling up:\n- Increase level by exactly 1. Never skip levels.\n- Reset EXP to 0, carrying over excess EXP to the new level only if applicable.\n\nDo not guess or estimate. Always base level adjustments strictly on EXP thresholds being crossed.\n",
+            "defaultValue": "<Updated level if changed>",
+            "exampleValues": [
+              "32",
+              "45",
+              "",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-17": {
+            "name": "Stats",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "CHAR",
+            "prompt": "Track the character's core attributes in the following compact format:  \n`STR: X | AGI: X | END: X | DEX: X | CHA: X | INT: X | PER: X | LCK: X`\n\nAbbreviations:\n- STR (Strength): Physical power, melee force\n- AGI (Agility): Speed, reflex, flexibility\n- END (Endurance): Stamina, pain resistance, recovery rate\n- DEX (Dexterity): Aim precision, fine motor control\n- CHA (Charisma): Leadership, persuasion, emotional influence\n- INT (Intelligence): Strategy, logic, tactical thinking\n- PER (Perception): Awareness, observation, detection\n- LCK (Luck): Random chance, critical hits, good fortune\n\nDistribute starting stats based on the character\u2019s natural strengths and background.\nFor example:\n- {{user}} (e.g. Jill) may have low END due to anemia, but excels in INT, AGI, DEX, and CHA due to her leadership role, quick thinking, and field expertise.\n- Leon may be strong in END, DEX, CHA (top stats), STR, PER, INT (secondary stats), and AGI & LCK for lower stats due to his combat experience and resilience.\n\nWhen leveling up, grant **+5 stat points total**. Distribute them across **1 to 3 stats** depending on recent actions and character progression. Always prioritize stats that align with the character\u2019s natural skillset and recent experiences.\n\nWhen a stat increases, briefly show the change like: `INT: 42 (+2)` and remove the (+X) in the next update.\n",
+            "defaultValue": "<Current stats if update is not needed>",
+            "exampleValues": [
+              "STR: 38 | AGI: 20 | END: 33 | DEX: 21 | CHA: 39 | INT: 40 | PER: 29 | LCK: 20",
+              "STR: 28 | AGI: 35 (+1) | END: 24 | DEX: 33 (+1) | CHA: 37 (+1) | INT: 42 (+2) | PER: 31 | LCK: 26",
+              "",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-18": {
+            "name": "HP",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "CHAR",
+            "prompt": "Track the character\u2019s current HP (health points) and maximum HP.\n\nMax HP is based on the character\u2019s current Level and Endurance (END) stat.\nUse the following general formula:\nMax HP = (Level \u00d7 10) + (END \u00d7 5)\n\nReduce current HP logically when the character:\n- Takes damage (e.g., gunshots, melee attacks, explosions)\n- Suffers significant illness or injury\n- Experiences severe physical exhaustion or fatigue\n\nRestore HP gradually through rest, food, medical treatment, or healing items.\nReplenish HP back to full HP after full rest.\nDo not reset HP to maximum unless explicitly healed. \nUpon leveling up, if character's HP was full before the level up, keep the new HP to full HP too.\n \nHP cannot fall below 0\u2014if HP reaches 0, mark the character clearly as incapacitated, unconscious, or near death.\n\nAlways format HP clearly as: `HP: [currentHP]/[maxHP]`",
+            "defaultValue": "<Updated HP if changed>",
+            "exampleValues": [
+              "154/850",
+              "63/281",
+              "",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-19": {
+            "name": "Role",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "CHAR",
+            "prompt": "Roles/ rank of the character within their group and include the organization/ group they belong to.\nE.g.: \nIf they're a captain, the role could be \"BTF HQ - Bravo Team BOW Analyst\" or \"DSO - SOU Agent\". If they don't belong to any organization/ group, (e.g.: unemployed, a full-time parent, etc), mark as so.\nUse this format when relevant:\n`[Group/ Organization name] \u2014 [Role/ Position/ Rank/ Status]`",
+            "defaultValue": "<Current roles if update is not needed>",
+            "exampleValues": [
+              "\"BTF HQ Bravo Team \u2014 Second-in-command\"",
+              "\"BTF - R&D Head Department\"",
+              "\"Full-time parent\"",
+              "\"Unemployed\""
+            ],
+            "nestedFields": {}
+          },
+          "field-20": {
+            "name": "InjuryAilments",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "CHAR",
+            "prompt": "Track the character\u2019s current injuries, physical ailments, or health conditions. Always include:\n- Type of wound, ailment, or condition\n- Affected body part(s) if relevant\n- Age of injury or condition (in days or hours). Update only when a new day passes. Use \"0d\" only for injuries <24h old.\n- Healing or recovery status (e.g., fresh, bleeding, improving, scabbing, healing steadily, nearly recovered)\n\nExpand creatively and realistically:\n- Infer possible side effects or ailments from recent events, even if not explicitly stated.\n   Examples:\n   \u2022 Exposure to cold rain or snow \u2192 risk of fever, chills, or cold symptoms.\n   \u2022 Prolonged hunger or dehydration \u2192 dizziness, weakness, or stomach pain.\n   \u2022 Eating spoiled/contaminated food \u2192 nausea, stomach cramps, diarrhea.\n   \u2022 Overexertion with low END \u2192 pulled muscles, shortness of breath, fatigue.\n   \u2022 Poorly treated wound \u2192 risk of infection, swelling, fever.\n   \u2022 Lack of sleep \u2192 headaches, slower reaction, reduced focus.\n   \u2022 Excessive stress or trauma \u2192 tremors, panic spells, fatigue.\n\nUpdate logically:\n- Wounds and conditions worsen, stabilize, or improve over time depending on rest, treatment, and context.\n- If an injury was listed as \"1d\" and a day passes, update it to \"2d.\"\n- Once a wound is fully healed, mark it as **(fully healed)** once, then remove it on the next update.\n\nIf multiple injuries or ailments exist, combine them in a natural, readable sentence.  \nIf the character is currently healthy:  \n**None (healthy)**",
+            "defaultValue": "<Current injury/ ailments status if no update is needed>",
+            "exampleValues": [
+              "Gunshot wound on right thigh (4d, wound closing), sore throat (1d, mild)",
+              "Knife wound on left ribs (2d, scabbing), fever (new, likely from infection), dizziness after overexertion",
+              "Bruised knuckles (1d, tender), pregnancy nausea (occasional), muscle aches from prior fight",
+              "None (healthy)"
+            ],
+            "nestedFields": {}
+          },
+          "field-21": {
+            "name": "Hair",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "CHAR",
+            "prompt": "Describe style only. Reflect natural changes over time, even if not mentioned. For example, wet hair after a shower should dry and become disheveled or styled over time. Account for sleep, wind, movement, or grooming between scenes. Be concise.",
+            "defaultValue": "<Updated hair description if changed>",
+            "exampleValues": [
+              "[\"Shoulder-length blonde hair, styled straight\", \"Short black hair, neatly combed\", \"Long curly brown hair, pulled back into a low bun\"]",
+              "[\"Short brown hair, damp with sweat\", \"Medium-length red hair, tied up in a high ponytail\"]",
+              "",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-22": {
+            "name": "Outfit",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "CHAR",
+            "prompt": "**IMPORTANT!** List the complete outfit. For on-screen characters, outfit should stay the same until changed for a new one. Reflect natural outfit changes over time for off-screen characters, even if not explicitly stated. Factor in time of day, location, activity, and weather. For example, if they are at home or in a private room, assume shoes have been removed and they are barefoot or in indoor wear. If they are preparing to leave or have entered a public space, assume appropriate shoes are worn. Update logically as time and context change, including shifts to sleepwear, casual wear, or professional attire as appropriate. Keep the description realistic and concise.",
+            "defaultValue": "<Full outfit description, even if removed including color, fabric, and style details; **always include underwear and accessories if present. If underwear is intentionally missing, specify clearly**>",
+            "exampleValues": [
+              "[\"Navy blue blazer over a white silk blouse; Gray pencil skirt; Black leather belt; Sheer black stockings; Black leather pumps; Pearl necklace; Silver wristwatch; White lace balconette bra; White lace hipster panties matching the bra\", \"Dark gray suit; Light blue dress shirt; Navy tie with silver stripes; Black leather belt; Black dress shoes; Black socks; White cotton crew-neck undershirt; Black cotton boxer briefs\", \"Cream-colored blouse with ruffled collar; Black slacks; Brown leather belt; Brown ankle boots; Gold hoop earrings; Beige satin push-up bra; Beige satin bikini panties matching the bra\"]",
+              "[\"Gray moisture-wicking t-shirt; Black athletic shorts; White ankle socks; Gray running shoes; Black sports watch; Blue compression boxer briefs\", \"Black sports tank top; Purple athletic leggings; Black athletic sneakers; White ankle socks; Fitness tracker bracelet; Black racerback sports bra; Black seamless athletic bikini briefs matching the bra\"]",
+              "",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-23": {
+            "name": "StateOfDress",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "CHAR",
+            "prompt": "Describe how put-together, disheveled, or casual the character currently appears. Reflect natural changes over time or scene context, even if not explicitly mentioned. For example, after hours of activity, clothes may appear rumpled or loosened. If the character is at home or relaxing, assume some layers like jackets, shoes, or accessories have been removed. Mention discarded clothing and where it was placed if relevant. Keep the tone appropriate to the setting, and concise.",
+            "defaultValue": "<Current state of dress if no update is needed. Note location where discarded outfit items are placed if character is undressed>",
+            "exampleValues": [
+              "[\"Professionally dressed, neat appearance\", \"Professionally dressed, attentive\", \"Professionally dressed, organized\"]",
+              "[\"Workout attire, lightly perspiring\", \"Workout attire, energized\"]",
+              "[\"Shirt and sandals removed, placed on beach towel\", \"Sundress and hat removed, placed on beach chair\"]",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-24": {
+            "name": "PostureAndInteraction",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "CHAR",
+            "prompt": "Describe physical posture, position relative to others or objects, and interactions. Reflect natural changes over time or scene context, even if not explicitly mentioned. Exclude sensory input.\nIf the character is off-screen, infer a realistic and current state based on location (e.g., resting, sitting, walking). Keep it clean and simple.",
+            "defaultValue": "<Current posture and interaction if no update is needed>",
+            "exampleValues": [
+              "Sitting upright at the conference table, arms crossed.",
+              "Leaning against the doorway, scanning the room.",
+              "Lying in bed, blanket pulled up to chest.",
+              "Resting on the infirmary cot, glancing at the monitor."
+            ],
+            "nestedFields": {}
+          },
+          "field-25": {
+            "name": "Location",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "CHAR",
+            "prompt": "Provide the character\u2019s current, specific location in the format: \"Specific Place, Building, City, State\". Include details like rooms, landmarks, or areas when relevant. Even if not explicitly stated, update the location logically based on the scene, time progression, and character status. For example, if the character is no longer required to stay in a temporary area like an infirmary or hallway, assume they have moved to a more reasonable location such as their room, the cafeteria, or another relevant area. Reflect realistic movement even when the character is off-screen.",
+            "defaultValue": "<Updated location if changed>",
+            "exampleValues": [
+              "The Whispering Gallery, Grand Central Terminal, New York, NY",
+              "The British Library Reading Room, British Library, London, England",
+              "Fushimi Inari Shrine's Thousand Torii Gates, Fushimi Inari Taisha, Kyoto, Japan",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-26": {
+            "name": "Cash",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "CHAR",
+            "prompt": "List the current amount of physical cash the character is carrying, including the currency type and where it's stored (e.g., wallet, pocket, bag). Adjust the amount automatically based on contextual spending (e.g., food, transport, minor purchases) or unexpected loss. Ensure the pricing is realistic \u2014 e.g., a coffee costs around $3, lunch $10\u2013$20, a cab ride $20\u2013$40. Also reflect realistic behavior: people rarely carry large sums casually (e.g., $10\u2013$50 is common in pockets, $100\u2013$200 in wallets or bags). If the character withdraws money from a bank/ ATM, or receives money, increase their cash accordingly. Always update the location of the cash if their outfit or bag changes.",
+            "defaultValue": "<Updated cash if changed>",
+            "exampleValues": [
+              "$240 (wallet)",
+              "\u00a335 (small bills, tucked inside backpack)",
+              "$15 (jeans pocket)",
+              "$0 (lost wallet during escape)"
+            ],
+            "nestedFields": {}
+          },
+          "field-27": {
+            "name": "Sensory",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "CHAR",
+            "prompt": "Describe what the character is currently seeing, hearing, smelling, and physically feeling in a single, compact sentence. Focus only on real-time physical sensations related to the environment (e.g., touch, temperature, sounds, sights) while speaking or interacting. Avoid emotional states or inner thoughts. Keep it simple and factual.\nIf the character is off-screen, infer likely ambient sensations based on their location (e.g., \u201cdim lights, muffled hallway sounds, stiff pillow under head\u201d).\nStick to **factual, real-time input**. No storytelling.",
+            "defaultValue": "<Updated sensory if changed>",
+            "exampleValues": [
+              "Hearing muffled hallway chatter, feeling chair\u2019s firm back under shoulders.",
+              "Smelling faint disinfectant, seeing white ceiling tiles, feeling blanket\u2019s warmth.",
+              "Watching Feldman speak, hearing rustle of paper, feeling tension in chest.",
+              "Smelling coffee, hearing distant typing, feeling cool air on arms."
+            ],
+            "nestedFields": {}
+          },
+          "field-28": {
+            "name": "Items",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "CHAR",
+            "prompt": "List all non-weapon items the character is currently carrying, including objects in pockets, bags, or hands. These can include phones, wallets, keys, gadgets, documents, trinkets, etc.\n\nUpdate naturally based on context:\n- Remove items that are dropped, lost, or stashed away.\n- Add items the character picks up, even if it's implied (e.g., grabbing gear before leaving a room).\n- Relocate items logically if the outfit changes (e.g., jacket removed, bag set down).\n- Remove irrelevant or outdated items.\n\nAvoid duplicate items. Focus only on what\u2019s actively carried or used. Be concise but specific.",
+            "defaultValue": "<Updated other items if changed>",
+            "exampleValues": [
+              "Phone in left thigh pocket, wallet in jacket, BTF-issued ID clipped to belt, notepad in hand",
+              "Map case in backpack, tactical goggles on forehead, ration pack in utility pouch",
+              "None",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-29": {
+            "name": "Weapons",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "CHAR",
+            "prompt": "List all weapons the character is currently carrying or has equipped. This includes firearms, blades, grenades, and other combat gear. For each weapon, specify its placement on the body or gear using parentheses. Separate each entry with a semicolon.\n\nUpdate dynamically and logically based on context:\n- If the character visits the armory, gears up, or is implied to arm themselves, add appropriate weapons.\n- If the character unequips, drops, or stores a weapon, remove it.\n- Adjust placements when clothing or tactical gear changes (e.g., jacket removed).\n* Do **not** include ammo counts \u2014 list only weapon type and **body/gear placement**.\n\n**Format:**\n`[Weapon] ([body/gear placement]); [Weapon] ([body/gear placement]); \u2026`",
+            "defaultValue": "<Updated weapons if changed>",
+            "exampleValues": [
+              "Handgun (holstered on right hip); Combat knife (left pocket); Assault rifle (slung across back); Flashbang (clipped to vest)",
+              "None (disarmed for the scene)",
+              "",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-30": {
+            "name": "Ammos",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "CHAR",
+            "prompt": "Track all ammunition currently in the character\u2019s possession. Use a clean and concise bracket-based format to show loaded counts, spare magazines, and carried throwables.\n\nFollow this format:\n- For loaded weapons: WeaponName (currentLoaded/maximumCapacity)\n- For spare magazines or extras: ItemName (X left)\n- If ammo is depleted: None\n\nUpdate dynamically and logically:\n- Reduce loaded ammo when shots are fired, even if the number isn\u2019t explicitly stated.\n- Deduct throwable items (e.g., grenades) only when used (thrown) or discarded.\n- Replenish ammo/mags only if the character is explicitly or implicitly seen reloading or resupplying.\n- Do not exaggerate quantities or list unavailable weapons' ammo.\n- Match ammo types to the weapons listed in the \"Weapons\" field.\n- Use real-world magazine capacities per weapon type (e.g., Handgun = 15 rounds, Shotgun = 6 shells, SMG = 30 rounds, etc.)\n\nKeep it brief, accurate, and grounded in realism.",
+            "defaultValue": "<Updated ammos if changed>",
+            "exampleValues": [
+              "Handgun (6/15), Assault rifle (30/30); Flashbangs (2); Rifle ammo magazine (2); Flashbang (1)",
+              "None (no weapons equipped or ammo depleted)",
+              "",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-31": {
+            "name": "Income",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "CHAR",
+            "prompt": "List the character\u2019s monthly income with currency and source. Base the amount on their role or occupation, and include additional sources of income if applicable (e.g., freelance work, bonuses). Income should remain stable unless the character changes jobs, receives a promotion/demotion, or loses a role. Express in the format: [$X / month]",
+            "defaultValue": "<Update income if there's a change>",
+            "exampleValues": [
+              "$7,000 / month",
+              "$5,500 / month",
+              "$0 / month ",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-32": {
+            "name": "PersonalSavings",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "CHAR",
+            "prompt": "Track the character\u2019s personal bank balance only.\n\nPersonal savings are used strictly for:\n- Individual income (salary, bonuses, personal rewards)\n- Personal expenses (food, transport, hobbies, personal gear, subscriptions)\n- Transfers into joint savings (if applicable)\n- Personal cash withdrawals\n\nRules:\n- On the 1st day of the month, add the character\u2019s income to personal savings unless explicitly deposited into joint savings.\n- Subtract personal purchases or personal bills directly from this balance.\n- If money is transferred to a joint account, deduct it from personal savings.\n- Do not subtract shared expenses (rent, utilities, shared groceries) from personal savings unless explicitly stated.\n\nFormat strictly as:\n`$X`",
+            "defaultValue": "<Update personal savings if changed>",
+            "exampleValues": [
+              "$15,000",
+              "$32,000",
+              "",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-33": {
+            "name": "JointSavings",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "CHAR",
+            "prompt": "Track the shared joint bank balance, if a joint account exists.\n\nJoint savings are used strictly for shared or household-related expenses.\nThe joint account may be divided into sub-accounts:\n- \ud83d\udcb8 Expenses (rent, utilities, groceries, shared purchases)\n- \ud83c\udfe0 Emergency / House Savings (long-term safety net, housing-related savings)\n- \ud83c\udf7c Baby Savings (child-related expenses and future needs)\n\nRules:\n- Only shared income contributions (agreed salary splits or transfers from personal savings) are added here.\n- Rent, utilities, groceries, and other shared expenses are deducted only from \ud83d\udcb8 Expenses.\n- Money moved between sub-accounts must be subtracted from the source and added to the destination.\n- Do not subtract personal purchases from joint savings.\n- Do not add personal income here unless explicitly transferred.\n\nFormat strictly as:\n`$Y (\ud83d\udcb8: $A | \ud83c\udfe0: $B | \ud83c\udf7c: $C)`\n\nwith $Y being the total of $A + $B + $C",
+            "defaultValue": "<Update joint savings if changed>",
+            "exampleValues": [
+              "$55,000 (\ud83d\udcb8: $15,500 | \ud83c\udfe0: $10,000 | \ud83c\udf7c: $30,000)",
+              "$100,000 (\ud83d\udcb8: $20,000 | \ud83c\udfe0: $40,000 | \ud83c\udf7c: $40,000)",
+              "",
+              ""
+            ],
+            "nestedFields": {}
+          }
+        }
+      },
+      "field-34": {
+        "name": "UserMain",
+        "type": "FOR_EACH_OBJECT",
+        "presence": "DYNAMIC",
+        "scope": "USER",
+        "prompt": "For {{user}} update the following details:",
+        "defaultValue": "<User>",
+        "exampleValues": [
+          "{{user}}",
+          "",
+          "",
+          ""
+        ],
+        "nestedFields": {
+          "field-35": {
+            "name": "Weather",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "USER",
+            "prompt": "Describe the current weather or conditions concisely. Reflect natural changes over time such as shifts in cloud cover, temperature, precipitation, or lighting (e.g., sunset glow, fog rolling in). If the character moves to a new city or region, or a significant amount of time passes, update the weather accordingly. Assume realistic progression based on prior conditions even if not explicitly stated in the scene. Keep it brief and atmospheric.\n",
+            "defaultValue": "<Updated weather if changed>",
+            "exampleValues": [
+              "Heavy rain, distant thunder",
+              "Light drizzle, grey overcast sky",
+              "Golden sunset, scattered clouds",
+              "Hot and humid, buzzing with cicadas"
+            ],
+            "nestedFields": {}
+          },
+          "field-36": {
+            "name": "Protection",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "USER",
+            "prompt": "Value only: ON or OFF.\nRepresents whether protection (contraceptive use) is currently in effect on the respective character.",
+            "defaultValue": "<Update if changed>",
+            "exampleValues": [
+              "ON",
+              "OFF",
+              "",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-37": {
+            "name": "Period",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "USER",
+            "prompt": "Track menstrual cycle status of {{user}}\nExamples:\n- Period (Day 2)\n- Period due in 3d\n- Ovulating\n- Cycle suppressed\nUpdate only when time passes or status changes.",
+            "defaultValue": "<Update if changed>",
+            "exampleValues": [
+              "Period (day 2)",
+              "Period due in 3d",
+              "",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-38": {
+            "name": "Conceive",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "USER",
+            "prompt": "Indicate whether conception is possible or occurred.\nExamples:\n- No conception\n- Possible conception window\n- Conceived (date)",
+            "defaultValue": "<Update if changed>",
+            "exampleValues": [
+              "No conception",
+              "Conceived (April 3rd 2024)",
+              "",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-39": {
+            "name": "DurationOfConceive",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "USER",
+            "prompt": "If conception has occurred, track time since conception/ pregnancy started.\nFormat: 2d, 1w4d, etc.\nIf not applicable, mark it with -",
+            "defaultValue": "<Update if changed>",
+            "exampleValues": [
+              "1d",
+              "8m1d",
+              "",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-40": {
+            "name": "Pregnancy",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "USER",
+            "prompt": "Current pregnancy status.\nExamples:\n- Not pregnant\n- Pregnant\n- Postpartum (2w)\nUpdate progression only as time advances.",
+            "defaultValue": "<Update if changed>",
+            "exampleValues": [
+              "Not Pregnant",
+              "Pregnant",
+              "Postpartum (1w3d)",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-41": {
+            "name": "Exp",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "USER",
+            "prompt": "Track the character\u2019s current experience points (EXP). EXP is gained through combat encounters, tactical actions, mission completions, personal growth, training, and significant narrative milestones.\n\nRequired EXP for next level = (lastLevel + currentLevel) \u00d7 100\n\nAwarding EXP from enemies:\n1. Identify each enemy defeated and note its base EXP value.\n2. For each enemy:\n   a) Count the total number of characters who directly damaged or contributed to killing it.\n   b) Divide the base EXP by that number.\n   c) Award that amount to each contributing character.\n3. Repeat for all enemies defeated in the encounter.\n4. Add all awarded EXP amounts to the character\u2019s currentEXP.\n\nExample:\n- Licker worth 300 EXP killed only by Jill \u2192 Jill gets 300 EXP.\n- Another Licker worth 300 EXP killed by Jill and Leon \u2192 300 \u00f7 2 = 150 EXP to each.\n- Jill total: 300 + 150 = 450 EXP gained; Leon total: 150 EXP gained.\n\nLeveling up:\n- When currentEXP \u2265 requiredEXP:\n   a) Increase Level by 1.\n   b) Subtract requiredEXP from currentEXP (carry over leftover EXP).\n   c) Recalculate requiredEXP for the new level.\n\nRules:\n- Always perform the division step before awarding EXP.\n- Always calculate totals after all enemies in the encounter have been processed.\n- Never award more than the base EXP for an enemy.\n\nFormat EXP as: `[currentEXP]/[requiredEXP]`",
+            "defaultValue": "<Updated Experience if changed>",
+            "exampleValues": [
+              "7380/8000",
+              "4640/5900",
+              "",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-42": {
+            "name": "Level",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "USER",
+            "prompt": "Track the character\u2019s current level, representing their accumulated combat experience, tactical proficiency, leadership skills, and resilience.\n\nThe character\u2019s level only increases when their EXP reaches or surpasses the required threshold defined by the following formula:\nlevelUpEXP = (lastLevel + currentLevel) \u00d7 100\n\nUpon leveling up:\n- Increase level by exactly 1. Never skip levels.\n- Reset EXP to 0, carrying over excess EXP to the new level only if applicable.\n\nDo not guess or estimate. Always base level adjustments strictly on EXP thresholds being crossed.\n",
+            "defaultValue": "<Updated level if changed>",
+            "exampleValues": [
+              "32",
+              "45",
+              "",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-43": {
+            "name": "Stats",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "USER",
+            "prompt": "Track the character's core attributes in the following compact format:  \n`STR: X | AGI: X | END: X | DEX: X | CHA: X | INT: X | PER: X | LCK: X`\n\nAbbreviations:\n- STR (Strength): Physical power, melee force\n- AGI (Agility): Speed, reflex, flexibility\n- END (Endurance): Stamina, pain resistance, recovery rate\n- DEX (Dexterity): Aim precision, fine motor control\n- CHA (Charisma): Leadership, persuasion, emotional influence\n- INT (Intelligence): Strategy, logic, tactical thinking\n- PER (Perception): Awareness, observation, detection\n- LCK (Luck): Random chance, critical hits, good fortune\n\nDistribute starting stats based on the character\u2019s natural strengths and background.\nFor example:\n- {{user}} (e.g. Jill) may have low END due to anemia, but excels in INT, AGI, DEX, and CHA due to her leadership role, quick thinking, and field expertise.\n- Leon may be strong in END, DEX, CHA (top stats), STR, PER, INT (secondary stats), and AGI & LCK for lower stats due to his combat experience and resilience.\n\nWhen leveling up, grant **+5 stat points total**. Distribute them across **1 to 3 stats** depending on recent actions and character progression. Always prioritize stats that align with the character\u2019s natural skillset and recent experiences.\n\nWhen a stat increases, briefly show the change like: `INT: 42 (+2)` and remove the (+X) in the next update.\n",
+            "defaultValue": "<Current stats if update is not needed>",
+            "exampleValues": [
+              "STR: 38 | AGI: 20 | END: 33 | DEX: 21 | CHA: 39 | INT: 40 | PER: 29 | LCK: 20",
+              "STR: 28 | AGI: 35 (+1) | END: 24 | DEX: 33 (+1) | CHA: 37 (+1) | INT: 42 (+2) | PER: 31 | LCK: 26",
+              "",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-44": {
+            "name": "HP",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "USER",
+            "prompt": "Track the character\u2019s current HP (health points) and maximum HP.\n\nMax HP is based on the character\u2019s current Level and Endurance (END) stat.\nUse the following general formula:\nMax HP = (Level \u00d7 10) + (END \u00d7 5)\n\nReduce current HP logically when the character:\n- Takes damage (e.g., gunshots, melee attacks, explosions)\n- Suffers significant illness or injury\n- Experiences severe physical exhaustion or fatigue\n\nRestore HP gradually through rest, food, medical treatment, or healing items.\nReplenish HP back to full HP after full rest.\nDo not reset HP to maximum unless explicitly healed. \nUpon leveling up, if character's HP was full before the level up, keep the new HP to full HP too.\n \nHP cannot fall below 0\u2014if HP reaches 0, mark the character clearly as incapacitated, unconscious, or near death.\n\nAlways format HP clearly as: `HP: [currentHP]/[maxHP]`",
+            "defaultValue": "<Updated HP if changed>",
+            "exampleValues": [
+              "154/850",
+              "63/281",
+              "",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-45": {
+            "name": "Role",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "USER",
+            "prompt": "Roles/ rank of the character within their group and include the organization/ group they belong to.\nE.g.: \nIf they're a captain, the role could be \"BTF HQ - Bravo Team BOW Analyst\" or \"DSO - SOU Agent\". If they don't belong to any organization/ group, (e.g.: unemployed, a full-time parent, etc), mark as so.\nUse this format when relevant:\n`[Group/ Organization name] \u2014 [Role/ Position/ Rank/ Status]`",
+            "defaultValue": "<Current roles if update is not needed>",
+            "exampleValues": [
+              "\"BTF HQ Bravo Team \u2014 Second-in-command\"",
+              "\"BTF - R&D Head Department\"",
+              "\"Full-time parent\"",
+              "\"Unemployed\""
+            ],
+            "nestedFields": {}
+          },
+          "field-46": {
+            "name": "InjuryAilments",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "USER",
+            "prompt": "Track the character\u2019s current injuries, physical ailments, or health conditions. Always include:\n- Type of wound, ailment, or condition\n- Affected body part(s) if relevant\n- Age of injury or condition (in days or hours). Update only when a new day passes. Use \"0d\" only for injuries <24h old.\n- Healing or recovery status (e.g., fresh, bleeding, improving, scabbing, healing steadily, nearly recovered)\n\nExpand creatively and realistically:\n- Infer possible side effects or ailments from recent events, even if not explicitly stated.\n   Examples:\n   \u2022 Exposure to cold rain or snow \u2192 risk of fever, chills, or cold symptoms.\n   \u2022 Prolonged hunger or dehydration \u2192 dizziness, weakness, or stomach pain.\n   \u2022 Eating spoiled/contaminated food \u2192 nausea, stomach cramps, diarrhea.\n   \u2022 Overexertion with low END \u2192 pulled muscles, shortness of breath, fatigue.\n   \u2022 Poorly treated wound \u2192 risk of infection, swelling, fever.\n   \u2022 Lack of sleep \u2192 headaches, slower reaction, reduced focus.\n   \u2022 Excessive stress or trauma \u2192 tremors, panic spells, fatigue.\n\nUpdate logically:\n- Wounds and conditions worsen, stabilize, or improve over time depending on rest, treatment, and context.\n- If an injury was listed as \"1d\" and a day passes, update it to \"2d.\"\n- Once a wound is fully healed, mark it as **(fully healed)** once, then remove it on the next update.\n\nIf multiple injuries or ailments exist, combine them in a natural, readable sentence.  \nIf the character is currently healthy:  \n**None (healthy)**",
+            "defaultValue": "<Current injury/ ailments status if no update is needed>",
+            "exampleValues": [
+              "Gunshot wound on right thigh (4d, wound closing), sore throat (1d, mild)",
+              "Knife wound on left ribs (2d, scabbing), fever (new, likely from infection), dizziness after overexertion",
+              "Bruised knuckles (1d, tender), pregnancy nausea (occasional), muscle aches from prior fight",
+              "None (healthy)"
+            ],
+            "nestedFields": {}
+          },
+          "field-47": {
+            "name": "Hair",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "USER",
+            "prompt": "Describe style only. Reflect natural changes over time, even if not mentioned. For example, wet hair after a shower should dry and become disheveled or styled over time. Account for sleep, wind, movement, or grooming between scenes. Be concise.",
+            "defaultValue": "<Updated hair description if changed>",
+            "exampleValues": [
+              "[\"Shoulder-length blonde hair, styled straight\", \"Short black hair, neatly combed\", \"Long curly brown hair, pulled back into a low bun\"]",
+              "[\"Short brown hair, damp with sweat\", \"Medium-length red hair, tied up in a high ponytail\"]",
+              "",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-48": {
+            "name": "Outfit",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "USER",
+            "prompt": "**IMPORTANT!** List the complete outfit. For on-screen characters, outfit should stay the same until changed for a new one. Reflect natural outfit changes over time for off-screen characters, even if not explicitly stated. Factor in time of day, location, activity, and weather. For example, if they are at home or in a private room, assume shoes have been removed and they are barefoot or in indoor wear. If they are preparing to leave or have entered a public space, assume appropriate shoes are worn. Update logically as time and context change, including shifts to sleepwear, casual wear, or professional attire as appropriate. Keep the description realistic and concise.",
+            "defaultValue": "<Full outfit description, even if removed including color, fabric, and style details; **always include underwear and accessories if present. If underwear is intentionally missing, specify clearly**>",
+            "exampleValues": [
+              "[\"Navy blue blazer over a white silk blouse; Gray pencil skirt; Black leather belt; Sheer black stockings; Black leather pumps; Pearl necklace; Silver wristwatch; White lace balconette bra; White lace hipster panties matching the bra\", \"Dark gray suit; Light blue dress shirt; Navy tie with silver stripes; Black leather belt; Black dress shoes; Black socks; White cotton crew-neck undershirt; Black cotton boxer briefs\", \"Cream-colored blouse with ruffled collar; Black slacks; Brown leather belt; Brown ankle boots; Gold hoop earrings; Beige satin push-up bra; Beige satin bikini panties matching the bra\"]",
+              "[\"Gray moisture-wicking t-shirt; Black athletic shorts; White ankle socks; Gray running shoes; Black sports watch; Blue compression boxer briefs\", \"Black sports tank top; Purple athletic leggings; Black athletic sneakers; White ankle socks; Fitness tracker bracelet; Black racerback sports bra; Black seamless athletic bikini briefs matching the bra\"]",
+              "",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-49": {
+            "name": "StateOfDress",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "USER",
+            "prompt": "Describe how put-together, disheveled, or casual the character currently appears. Reflect natural changes over time or scene context, even if not explicitly mentioned. For example, after hours of activity, clothes may appear rumpled or loosened. If the character is at home or relaxing, assume some layers like jackets, shoes, or accessories have been removed. Mention discarded clothing and where it was placed if relevant. Keep the tone appropriate to the setting, and concise.",
+            "defaultValue": "<Current state of dress if no update is needed. Note location where discarded outfit items are placed if character is undressed>",
+            "exampleValues": [
+              "[\"Professionally dressed, neat appearance\", \"Professionally dressed, attentive\", \"Professionally dressed, organized\"]",
+              "[\"Workout attire, lightly perspiring\", \"Workout attire, energized\"]",
+              "[\"Shirt and sandals removed, placed on beach towel\", \"Sundress and hat removed, placed on beach chair\"]",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-50": {
+            "name": "PostureAndInteraction",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "USER",
+            "prompt": "Describe physical posture, position relative to others or objects, and interactions. Reflect natural changes over time or scene context, even if not explicitly mentioned. Exclude sensory input.\nIf the character is off-screen, infer a realistic and current state based on location (e.g., resting, sitting, walking). Keep it clean and simple.",
+            "defaultValue": "<Current posture and interaction if no update is needed>",
+            "exampleValues": [
+              "Sitting upright at the conference table, arms crossed.",
+              "Leaning against the doorway, scanning the room.",
+              "Lying in bed, blanket pulled up to chest.",
+              "Resting on the infirmary cot, glancing at the monitor."
+            ],
+            "nestedFields": {}
+          },
+          "field-51": {
+            "name": "Location",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "USER",
+            "prompt": "Provide the character\u2019s current, specific location in the format: \"Specific Place, Building, City, State\". Include details like rooms, landmarks, or areas when relevant. Even if not explicitly stated, update the location logically based on the scene, time progression, and character status. For example, if the character is no longer required to stay in a temporary area like an infirmary or hallway, assume they have moved to a more reasonable location such as their room, the cafeteria, or another relevant area. Reflect realistic movement even when the character is off-screen.",
+            "defaultValue": "<Updated location if changed>",
+            "exampleValues": [
+              "The Whispering Gallery, Grand Central Terminal, New York, NY",
+              "The British Library Reading Room, British Library, London, England",
+              "Fushimi Inari Shrine's Thousand Torii Gates, Fushimi Inari Taisha, Kyoto, Japan",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-52": {
+            "name": "Cash",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "USER",
+            "prompt": "List the current amount of physical cash the character is carrying, including the currency type and where it's stored (e.g., wallet, pocket, bag). Adjust the amount automatically based on contextual spending (e.g., food, transport, minor purchases) or unexpected loss. Ensure the pricing is realistic \u2014 e.g., a coffee costs around $3, lunch $10\u2013$20, a cab ride $20\u2013$40. Also reflect realistic behavior: people rarely carry large sums casually (e.g., $10\u2013$50 is common in pockets, $100\u2013$200 in wallets or bags). If the character withdraws money from a bank/ ATM, or receives money, increase their cash accordingly. Always update the location of the cash if their outfit or bag changes.",
+            "defaultValue": "<Updated cash if changed>",
+            "exampleValues": [
+              "$240 (wallet)",
+              "\u00a335 (small bills, tucked inside backpack)",
+              "$15 (jeans pocket)",
+              "$0 (lost wallet during escape)"
+            ],
+            "nestedFields": {}
+          },
+          "field-53": {
+            "name": "Sensory",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "USER",
+            "prompt": "Describe what the character is currently seeing, hearing, smelling, and physically feeling in a single, compact sentence. Focus only on real-time physical sensations related to the environment (e.g., touch, temperature, sounds, sights) while speaking or interacting. Avoid emotional states or inner thoughts. Keep it simple and factual.\nIf the character is off-screen, infer likely ambient sensations based on their location (e.g., \u201cdim lights, muffled hallway sounds, stiff pillow under head\u201d).\nStick to **factual, real-time input**. No storytelling.",
+            "defaultValue": "<Updated sensory if changed>",
+            "exampleValues": [
+              "Hearing muffled hallway chatter, feeling chair\u2019s firm back under shoulders.",
+              "Smelling faint disinfectant, seeing white ceiling tiles, feeling blanket\u2019s warmth.",
+              "Watching Feldman speak, hearing rustle of paper, feeling tension in chest.",
+              "Smelling coffee, hearing distant typing, feeling cool air on arms."
+            ],
+            "nestedFields": {}
+          },
+          "field-54": {
+            "name": "Items",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "USER",
+            "prompt": "List all non-weapon items the character is currently carrying, including objects in pockets, bags, or hands. These can include phones, wallets, keys, gadgets, documents, trinkets, etc.\n\nUpdate naturally based on context:\n- Remove items that are dropped, lost, or stashed away.\n- Add items the character picks up, even if it's implied (e.g., grabbing gear before leaving a room).\n- Relocate items logically if the outfit changes (e.g., jacket removed, bag set down).\n- Remove irrelevant or outdated items.\n\nAvoid duplicate items. Focus only on what\u2019s actively carried or used. Be concise but specific.",
+            "defaultValue": "<Updated other items if changed>",
+            "exampleValues": [
+              "Phone in left thigh pocket, wallet in jacket, BTF-issued ID clipped to belt, notepad in hand",
+              "Map case in backpack, tactical goggles on forehead, ration pack in utility pouch",
+              "None",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-55": {
+            "name": "Weapons",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "USER",
+            "prompt": "List all weapons the character is currently carrying or has equipped. This includes firearms, blades, grenades, and other combat gear. For each weapon, specify its placement on the body or gear using parentheses. Separate each entry with a semicolon.\n\nUpdate dynamically and logically based on context:\n- If the character visits the armory, gears up, or is implied to arm themselves, add appropriate weapons.\n- If the character unequips, drops, or stores a weapon, remove it.\n- Adjust placements when clothing or tactical gear changes (e.g., jacket removed).\n* Do **not** include ammo counts \u2014 list only weapon type and **body/gear placement**.\n\n**Format:**\n`[Weapon] ([body/gear placement]); [Weapon] ([body/gear placement]); \u2026`",
+            "defaultValue": "<Updated weapons if changed>",
+            "exampleValues": [
+              "Handgun (holstered on right hip); Combat knife (left pocket); Assault rifle (slung across back); Flashbang (clipped to vest)",
+              "None (disarmed for the scene)",
+              "",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-56": {
+            "name": "Ammos",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "USER",
+            "prompt": "Track all ammunition currently in the character\u2019s possession. Use a clean and concise bracket-based format to show loaded counts, spare magazines, and carried throwables.\n\nFollow this format:\n- For loaded weapons: WeaponName (currentLoaded/maximumCapacity)\n- For spare magazines or extras: ItemName (X left)\n- If ammo is depleted: None\n\nUpdate dynamically and logically:\n- Reduce loaded ammo when shots are fired, even if the number isn\u2019t explicitly stated.\n- Deduct throwable items (e.g., grenades) only when used (thrown) or discarded.\n- Replenish ammo/mags only if the character is explicitly or implicitly seen reloading or resupplying.\n- Do not exaggerate quantities or list unavailable weapons' ammo.\n- Match ammo types to the weapons listed in the \"Weapons\" field.\n- Use real-world magazine capacities per weapon type (e.g., Handgun = 15 rounds, Shotgun = 6 shells, SMG = 30 rounds, etc.)\n\nKeep it brief, accurate, and grounded in realism.",
+            "defaultValue": "<Updated ammos if changed>",
+            "exampleValues": [
+              "Handgun (6/15), Assault rifle (30/30); Flashbangs (2); Rifle ammo magazine (2); Flashbang (1)",
+              "None (no weapons equipped or ammo depleted)",
+              "",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-57": {
+            "name": "Income",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "USER",
+            "prompt": "List the character\u2019s monthly income with currency and source. Base the amount on their role or occupation, and include additional sources of income if applicable (e.g., freelance work, bonuses). Income should remain stable unless the character changes jobs, receives a promotion/demotion, or loses a role. Express in the format: [$X / month]",
+            "defaultValue": "<Update income if there's a change>",
+            "exampleValues": [
+              "$7,000 / month",
+              "$5,500 / month",
+              "$0 / month ",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-58": {
+            "name": "PersonalSavings",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "USER",
+            "prompt": "Track the character\u2019s personal bank balance only.\n\nPersonal savings are used strictly for:\n- Individual income (salary, bonuses, personal rewards)\n- Personal expenses (food, transport, hobbies, personal gear, subscriptions)\n- Transfers into joint savings (if applicable)\n- Personal cash withdrawals\n\nRules:\n- On the 1st day of the month, add the character\u2019s income to personal savings unless explicitly deposited into joint savings.\n- Subtract personal purchases or personal bills directly from this balance.\n- If money is transferred to a joint account, deduct it from personal savings.\n- Do not subtract shared expenses (rent, utilities, shared groceries) from personal savings unless explicitly stated.\n\nFormat strictly as:\n`$X`",
+            "defaultValue": "<Update personal savings if changed>",
+            "exampleValues": [
+              "$15,000",
+              "$32,000",
+              "",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-59": {
+            "name": "JointSavings",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "USER",
+            "prompt": "Track the shared joint bank balance, if a joint account exists.\n\nJoint savings are used strictly for shared or household-related expenses.\nThe joint account may be divided into sub-accounts:\n- \ud83d\udcb8 Expenses (rent, utilities, groceries, shared purchases)\n- \ud83c\udfe0 Emergency / House Savings (long-term safety net, housing-related savings)\n- \ud83c\udf7c Baby Savings (child-related expenses and future needs)\n\nRules:\n- Only shared income contributions (agreed salary splits or transfers from personal savings) are added here.\n- Rent, utilities, groceries, and other shared expenses are deducted only from \ud83d\udcb8 Expenses.\n- Money moved between sub-accounts must be subtracted from the source and added to the destination.\n- Do not subtract personal purchases from joint savings.\n- Do not add personal income here unless explicitly transferred.\n\nFormat strictly as:\n`$Y (\ud83d\udcb8: $A | \ud83c\udfe0: $B | \ud83c\udf7c: $C)`\n\nwith $Y being the total of $A + $B + $C",
+            "defaultValue": "<Update joint savings if changed>",
+            "exampleValues": [
+              "$55,000 (\ud83d\udcb8: $15,500 | \ud83c\udfe0: $10,000 | \ud83c\udf7c: $30,000)",
+              "$100,000 (\ud83d\udcb8: $20,000 | \ud83c\udfe0: $40,000 | \ud83c\udf7c: $40,000)",
+              "",
+              ""
+            ],
+            "nestedFields": {}
+          }
+        }
+      },
+      "field-60": {
+        "name": "OtherCharacters",
+        "type": "FOR_EACH_OBJECT",
+        "presence": "DYNAMIC",
+        "scope": "UNIVERSAL",
+        "prompt": "List all present NPCs who are NOT {{char}} or {{user}}. Use canonical names when known. If unknown, use a brief, stable descriptor (e.g., \u201cFacility Engineer (grey coveralls)\u201d). \nAdd when character enter the scene.\nKeep character if:\n- They're still in the scene\n- They have injuries even if they leave the scene (in this case, put (off) after their name)\n- They were originally off screen but is now back in the scene (in this case, remove the (off) tag from their name)\n\nRemove character when:\n- They're no longer relevant to current scene/ leave the scene and have no injury. \n- They're (off) character and is now healthy/ have no injury.\n\nNever duplicate/alias an existing NPC. For each character, update the following details:",
+        "defaultValue": "<Character Name>",
+        "exampleValues": [
+          "[\"Civilian A\", \"James Miller\", \"Dr. Hamilton\"]",
+          "[\"Daniel Lee (off)\", \"Lost 8 years old girl\"]",
+          "[\"Liam Johnson\", \"Emily Clark\"]",
+          ""
+        ],
+        "nestedFields": {
+          "field-61": {
+            "name": "Relationship",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "BOTH",
+            "prompt": "Very brief label describing the character's companionship status with {{user}}.\nExamples: Acquaintances, Friends, Coworker, Superior, Enemy.\nUpdate only when the relationship status itself changes.",
+            "defaultValue": "<Current relationship status if no update is needed>",
+            "exampleValues": [
+              "Close friends",
+              "Superior",
+              "",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-62": {
+            "name": "Thoughts",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "UNIVERSAL",
+            "prompt": "One single-sentence internal thought of the character.\nMust reflect what they would realistically be thinking about in the current scene.\nIf character is off-screen, write a fitting internal thought based on context.",
+            "defaultValue": "<Updated if changed>",
+            "exampleValues": [
+              "\"God, I'm starving... I wonder what they have at the mess hall today.\"",
+              "\"They're at it again. Get a room already.\"",
+              "",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-63": {
+            "name": "Role",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "UNIVERSAL",
+            "prompt": "Roles/ rank of the character within their group.\nE.g.: \nIf they're a Civilian, the role could be \"Civilian \u2014 Kidnapped civilian\" or \"Civilian \u2014 House owner\".\nIf they're member of an organization, the role could be \"BTF HQ Bravo Team \u2014 Second-in-command\" or \"DSO \u2014 Representatives\"\nIf they don't belong to any organization/ group, (e.g.: unemployed, a full-time parent, etc), mark as so.\n\nUse this format when relevant:\n`[Group/ Organization name] \u2014 [Role/ Position/ Rank/ Status]`",
+            "defaultValue": "<Current roles if update is not needed>",
+            "exampleValues": [
+              "\"BTF HQ Bravo Team \u2014 Second-in-command\"",
+              "\"Civilian \u2014 Injured civilian\"",
+              "\"Civilian \u2014 Lost kid\"",
+              "\"BTF - R&D Head Department\""
+            ],
+            "nestedFields": {}
+          },
+          "field-64": {
+            "name": "Income",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "UNIVERSAL",
+            "prompt": "List the character\u2019s monthly income with currency and source. Base the amount on their role or occupation, and include additional sources of income if applicable (e.g., freelance work, bonuses). Income should remain stable unless the character changes jobs, receives a promotion/demotion, or loses a role. Express in the format: [$X / month]",
+            "defaultValue": "<Update income if there's a change>",
+            "exampleValues": [
+              "$8,200 / month",
+              "$4,500 / month",
+              "",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-65": {
+            "name": "Exp",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "UNIVERSAL",
+            "prompt": "Track the character\u2019s current level, representing their accumulated combat experience, tactical proficiency, leadership skills, and resilience.\n\nRequired EXP for next level = (lastLevel + currentLevel) \u00d7 100\n\nAwarding EXP from enemies:\n1. Identify each enemy defeated and note its base EXP value.\n2. For each enemy:\n   a) Count the total number of characters who directly damaged or contributed to killing it.\n   b) Divide the base EXP by that number.\n   c) Award that amount to each contributing character.\n3. Repeat for all enemies defeated in the encounter.\n4. Add all awarded EXP amounts to the character\u2019s currentEXP.\n\nExample:\n- Licker worth 300 EXP killed only by Jill \u2192 Jill gets 300 EXP.\n- Another Licker worth 300 EXP killed by Jill and Leon \u2192 300 \u00f7 2 = 150 EXP to each.\n- Jill total: 300 + 150 = 450 EXP gained; Leon total: 150 EXP gained.\n\nLeveling up:\n- When currentEXP \u2265 requiredEXP:\n   a) Increase Level by 1.\n   b) Subtract requiredEXP from currentEXP (carry over leftover EXP).\n   c) Recalculate requiredEXP for the new level.\n\nRules:\n- Always perform the division step before awarding EXP.\n- Always calculate totals after all enemies in the encounter have been processed.\n- Never award more than the base EXP for an enemy.\n\nFormat EXP as: `[currentEXP]/[requiredEXP]`",
+            "defaultValue": "<Updated Experience if changed>",
+            "exampleValues": [
+              "1500/6000",
+              "2250/7800",
+              "",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-66": {
+            "name": "Level",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "UNIVERSAL",
+            "prompt": "Track the character\u2019s current level, representing their accumulated combat experience, tactical proficiency, leadership skills, and resilience.\n\nThe character\u2019s level only increases when their EXP reaches or surpasses the required threshold defined by the following formula:\nlevelUpEXP = (lastLevel + currentLevel) \u00d7 100\n\nUpon leveling up:\n- Increase level by exactly 1. Never skip levels.\n- Reset EXP to 0, carrying over excess EXP to the new level only if applicable.\n\nDo not guess or estimate. Always base level adjustments strictly on EXP thresholds being crossed.\n",
+            "defaultValue": "<Updated level if changed>",
+            "exampleValues": [
+              "29",
+              "46",
+              "",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-67": {
+            "name": "HP",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "UNIVERSAL",
+            "prompt": "Track the character\u2019s current HP (health points) and maximum HP.\n\nDetermine max HP based on their role, rank, and physical condition.  \nUse this general approximation:  \n- Civilian / Non\u2011combatant: 200\u2013350\n- Rookie Agent / Light combatant: 350\u2013450\n- Experienced Agent / Officer: 450\u2013600\n- Elite / Veteran (e.g., Team Captain, Second-in-command/ Lieteunant, Spec Ops, etc): 600\u2013800\n\nReduce current HP when the character:\n- Takes damage (e.g., gunshots, melee attacks, explosions)\n- Suffers significant illness, injury, poison, or infection\n- Experiences severe physical exhaustion or overexertion\n\nAllow gradual HP recovery if:\n- Medical aid, rest, eating food, time away from battle\n- Implied off-screen healing if absent from the scene\n- They\u2019ve had time to rest or received implied treatment\n\nBehind-the-scenes healing or HP loss is allowed *if plausible to the timeline or off-screen activity* \u2014 but don\u2019t exaggerate or use it to reset to full HP unless clearly justified.\n\nIf HP reaches 0, mark character as incapacitated, unconscious, or near-death.  \nDo not exceed max HP.\n\n**Format HP as:** `[currentHP]/[maxHP]`",
+            "defaultValue": "<Updated HP if changed>",
+            "exampleValues": [
+              "670/700",
+              "340/340",
+              "0/120",
+              "180/250"
+            ],
+            "nestedFields": {}
+          },
+          "field-68": {
+            "name": "InjuryAilments",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "UNIVERSAL",
+            "prompt": "Track the character\u2019s current injuries, physical ailments, or health conditions. Always include:\n- Type of wound, ailment, or condition\n- Affected body part(s) if relevant\n- Age of injury or condition (in days or hours). Update only when a new day passes. Use \"0d\" only for injuries <24h old.\n- Healing or recovery status (e.g., fresh, bleeding, improving, scabbing, healing steadily, nearly recovered)\n\nExpand creatively and realistically:\n- Infer possible side effects or ailments from recent events, even if not explicitly stated.\n   Examples:\n   \u2022 Exposure to cold rain or snow \u2192 risk of fever, chills, or cold symptoms.\n   \u2022 Prolonged hunger or dehydration \u2192 dizziness, weakness, or stomach pain.\n   \u2022 Eating spoiled/contaminated food \u2192 nausea, stomach cramps, diarrhea.\n   \u2022 Overexertion with low END \u2192 pulled muscles, shortness of breath, fatigue.\n   \u2022 Poorly treated wound \u2192 risk of infection, swelling, fever.\n   \u2022 Lack of sleep \u2192 headaches, slower reaction, reduced focus.\n   \u2022 Excessive stress or trauma \u2192 tremors, panic spells, fatigue.\n\nUpdate logically:\n- Wounds and conditions worsen, stabilize, or improve over time depending on rest, treatment, and context.\n- If an injury was listed as \"1d\" and a day passes, update it to \"2d.\"\n- Once a wound is fully healed, mark it as **(fully healed)** once, then remove it on the next update.\n\nIf multiple injuries or ailments exist, combine them in a natural, readable sentence.  \nIf the character is currently healthy:  \n**None (healthy)**",
+            "defaultValue": "<Current injury/ ailments status if no update is needed>",
+            "exampleValues": [
+              "Gunshot wound on right thigh (4d, wound closing), sore throat (1d, mild)",
+              "Knife wound on left ribs (2d, scabbing), fever (new, likely from infection), dizziness after overexertion",
+              "Bruised knuckles (1d, tender), pregnancy nausea (occasional), muscle aches from prior fight",
+              "Knife wound on left side (10d, closed up and healing steadily), bruises on back (fully healed)"
+            ],
+            "nestedFields": {}
+          },
+          "field-69": {
+            "name": "Hair",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "UNIVERSAL",
+            "prompt": "Describe style only. Reflect natural changes over time, even if not mentioned. For example, wet hair after a shower should dry and become disheveled or styled over time. Account for sleep, wind, movement, or grooming between scenes. Be concise.",
+            "defaultValue": "<Updated hair description if changed>",
+            "exampleValues": [
+              "[\"Shoulder-length blonde hair, styled straight\", \"Short black hair, neatly combed\", \"Long curly brown hair, pulled back into a low bun\"]",
+              "[\"Short brown hair, damp with sweat\", \"Medium-length red hair, tied up in a high ponytail\"]",
+              "[\"Short sandy blonde hair, slightly tousled\", \"Long wavy brown hair, loose and flowing\"]",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-70": {
+            "name": "Outfit",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "UNIVERSAL",
+            "prompt": "**IMPORTANT!** List the complete outfit. For on-screen characters, outfit should stay the same until changed for a new one. Reflect natural outfit changes over time for off-screen characters, even if not explicitly stated. Factor in time of day, location, activity, and weather. For example, if they are at home or in a private room, assume shoes have been removed and they are barefoot or in indoor wear. If they are preparing to leave or have entered a public space, assume appropriate shoes are worn. Update logically as time and context change, including shifts to sleepwear, casual wear, or professional attire as appropriate. Keep the description realistic and concise.",
+            "defaultValue": "<Full outfit description, even if removed including color, fabric, and style details; **always include underwear and accessories if present. If underwear is intentionally missing, specify clearly**>",
+            "exampleValues": [
+              "[\"Navy blue blazer over a white silk blouse; Gray pencil skirt; Black leather belt; Sheer black stockings; Black leather pumps; Pearl necklace; Silver wristwatch; White lace balconette bra; White lace hipster panties matching the bra\", \"Dark gray suit; Light blue dress shirt; Navy tie with silver stripes; Black leather belt; Black dress shoes; Black socks; White cotton crew-neck undershirt; Black cotton boxer briefs\", \"Cream-colored blouse with ruffled collar; Black slacks; Brown leather belt; Brown ankle boots; Gold hoop earrings; Beige satin push-up bra; Beige satin bikini panties matching the bra\"]",
+              "[\"Gray moisture-wicking t-shirt; Black athletic shorts; White ankle socks; Gray running shoes; Black sports watch; Blue compression boxer briefs\", \"Black sports tank top; Purple athletic leggings; Black athletic sneakers; White ankle socks; Fitness tracker bracelet; Black racerback sports bra; Black seamless athletic bikini briefs matching the bra\"]",
+              "[\"Light blue short-sleeve shirt; Khaki shorts; Brown leather sandals; Silver wristwatch; Blue plaid cotton boxer shorts\", \"White sundress over a red halter bikini; Straw hat; Brown flip-flops; Gold anklet; Red halter bikini top; Red tie-side bikini bottoms matching the top\"]",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-71": {
+            "name": "StateOfDress",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "UNIVERSAL",
+            "prompt": "Describe how put-together, disheveled, or casual the character currently appears. Reflect natural changes over time or scene context, even if not explicitly mentioned. For example, after hours of activity, clothes may appear rumpled or loosened. If the character is at home or relaxing, assume some layers like jackets, shoes, or accessories have been removed. Mention discarded clothing and where it was placed if relevant. Keep the tone appropriate to the setting, and concise.",
+            "defaultValue": "<Current state of dress if no update is needed. Note location where discarded outfit items are placed if character is undressed>",
+            "exampleValues": [
+              "[\"Professionally dressed, neat appearance\", \"Professionally dressed, attentive\", \"Professionally dressed, organized\"]",
+              "[\"Workout attire, lightly perspiring\", \"Workout attire, energized\"]",
+              "[\"Shirt and sandals removed, placed on beach towel\", \"Sundress and hat removed, placed on beach chair\"]",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-72": {
+            "name": "PostureAndInteraction",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "UNIVERSAL",
+            "prompt": "Describe physical posture, position relative to others or objects, and interactions. Reflect natural changes over time or scene context, even if not explicitly mentioned. Exclude sensory input.\nIf the character is off-screen, infer a realistic and current state based on location (e.g., resting, sitting, walking). Keep it clean and simple.",
+            "defaultValue": "<Current posture and interaction if no update is needed>",
+            "exampleValues": [
+              "Sitting upright at the conference table, arms crossed.",
+              "Leaning against the doorway, scanning the room.",
+              "Lying in bed, blanket pulled up to chest.",
+              "Resting on the infirmary cot, glancing at the monitor."
+            ],
+            "nestedFields": {}
+          },
+          "field-73": {
+            "name": "Location",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "UNIVERSAL",
+            "prompt": "Provide the character\u2019s current, specific location in the format: \"Specific Place, Building, City, State\". Include details like rooms, landmarks, or areas when relevant. Even if not explicitly stated, update the location logically based on the scene, time progression, and character status. For example, if the character is no longer required to stay in a temporary area like an infirmary or hallway, assume they have moved to a more reasonable location such as their room, the cafeteria, or another relevant area. Reflect realistic movement even when the character is off-screen.",
+            "defaultValue": "<Updated location if changed>",
+            "exampleValues": [
+              "The Whispering Gallery, Grand Central Terminal, New York, NY",
+              "The British Library Reading Room, British Library, London, England",
+              "Fushimi Inari Shrine's Thousand Torii Gates, Fushimi Inari Taisha, Kyoto, Japan",
+              ""
+            ],
+            "nestedFields": {}
+          },
+          "field-74": {
+            "name": "Weather",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "UNIVERSAL",
+            "prompt": "Describe the current weather or conditions concisely. Reflect natural changes over time such as shifts in cloud cover, temperature, precipitation, or lighting (e.g., sunset glow, fog rolling in). If the character moves to a new city or region, or a significant amount of time passes, update the weather accordingly. Assume realistic progression based on prior conditions even if not explicitly stated in the scene. Keep it brief and atmospheric.",
+            "defaultValue": "<Updated weather if changed>",
+            "exampleValues": [
+              "Heavy rain, distant thunder",
+              "Light drizzle, grey overcast sky",
+              "Golden sunset, scattered clouds",
+              "Hot and humid, buzzing with cicadas"
+            ],
+            "nestedFields": {}
+          },
+          "field-75": {
+            "name": "Cash",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "UNIVERSAL",
+            "prompt": "List the current amount of physical cash the character is carrying, including the currency type and where it's stored (e.g., wallet, pocket, bag). Adjust the amount automatically based on contextual spending (e.g., food, transport, minor purchases) or unexpected loss. Ensure the pricing is realistic \u2014 e.g., a coffee costs around $3, lunch $10\u2013$20, a cab ride $20\u2013$40. Also reflect realistic behavior: people rarely carry large sums casually (e.g., $10\u2013$50 is common in pockets, $100\u2013$200 in wallets or bags). If the character withdraws money from a bank/ ATM, or receives money, increase their cash accordingly. Always update the location of the cash if their outfit or bag changes.",
+            "defaultValue": "<Updated cash if changed>",
+            "exampleValues": [
+              "$240 (wallet)",
+              "\u00a335 (small bills, tucked inside backpack)",
+              "$15 (jeans pocket)",
+              "$0 (lost wallet during escape)"
+            ],
+            "nestedFields": {}
+          },
+          "field-76": {
+            "name": "Sensory",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "UNIVERSAL",
+            "prompt": "Describe what the character is currently seeing, hearing, smelling, and physically feeling in a single, compact sentence. Focus only on real-time physical sensations related to the environment (e.g., touch, temperature, sounds, sights) while speaking or interacting. Avoid emotional states or inner thoughts. Keep it simple and factual.\nIf the character is off-screen, infer likely ambient sensations based on their location (e.g., \u201cdim lights, muffled hallway sounds, stiff pillow under head\u201d).\nStick to **factual, real-time input**. No storytelling.",
+            "defaultValue": "<Updated sensory if changed>",
+            "exampleValues": [
+              "Hearing muffled hallway chatter, feeling chair\u2019s firm back under shoulders.",
+              "Smelling faint disinfectant, seeing white ceiling tiles, feeling blanket\u2019s warmth.",
+              "Watching Feldman speak, hearing rustle of paper, feeling tension in chest.",
+              "Smelling coffee, hearing distant typing, feeling cool air on arms."
+            ],
+            "nestedFields": {}
+          },
+          "field-77": {
+            "name": "Items",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "UNIVERSAL",
+            "prompt": "List all non-weapon items the character is currently carrying, including objects in pockets, bags, or hands. These can include phones, wallets, keys, gadgets, documents, trinkets, etc.\n\nUpdate naturally based on context:\n- Remove items that are dropped, lost, or stashed away.\n- Add items the character picks up, even if it's implied (e.g., grabbing gear before leaving a room).\n- Relocate items logically if the outfit changes (e.g., jacket removed, bag set down).\n- Remove irrelevant or outdated items.\n\nAvoid duplicate items. Focus only on what\u2019s actively carried or used. Be concise but specific.",
+            "defaultValue": "<Updated other items if changed>",
+            "exampleValues": [
+              "Phone in left thigh pocket, wallet in jacket, BTF-issued ID clipped to belt, notepad in hand",
+              "Map case in backpack, tactical goggles on forehead, ration pack in utility pouch",
+              "None",
+              ""
+            ],
+            "nestedFields": {}
+          }
+        }
+      },
+      "field-78": {
+        "name": "SmallEnemies",
+        "type": "FOR_EACH_OBJECT",
+        "presence": "DYNAMIC",
+        "scope": "UNIVERSAL",
+        "prompt": "Categorize as **Small Enemies** if they are regular humans or low-level threats.\nThese include:\n- Basic enemy (e.g. Robbers, terrorists, militia, or civilian combatants)\n- Basic infected or zombies  (e.g. Crimson Heads, zombie dogs, zombies, etc)\n- Hostile cultists or villagers (e.g. chainsaw mutants, ganados, etc)\n- Weak mutants or early-stage infected\n\nTraits:\n- Common in number\n- Can be killed with conventional means (e.g., headshots, melee)\n- Pose danger in groups but weak individually\n\nUse this category if the enemy is a minor threat or easily handled. \nMaintain this list per turn:\n- ADD small enemies that appear or newly matter.\n- REMOVE a group entirely when ANY of these is true:\n  \u2022 Number <= 0 (eliminated)\n  \u2022 The protagonists have escaped and the group is NOT pursuing / out of encounter range\n    (e.g., different area/vehicle/altitude) \u2192 drop on the **next** turn\n  \u2022 The group is otherwise no longer relevant to the current scene\n\nRelevance rule: keep only groups directly interacting, within obvious line-of-sight,\nactively closing distance, or likely to intercept in the next scene. Otherwise, omit.\nRemove character when number is 0.\n\nFor each present Small enemies, update the following details:",
+        "defaultValue": "<Small Enemy name>",
+        "exampleValues": [
+          "[\"Blackwood Facility Security Guard\"]",
+          "[\"Robber\"]",
+          "[\"Hostile cultists\"]",
+          "[\"Horde of Zombies\"]"
+        ],
+        "nestedFields": {
+          "field-79": {
+            "name": "Number",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "UNIVERSAL",
+            "prompt": "Track how many small enemies are currently present.\nInclude a short description of the type (e.g., zombies, soldiers, civilians).\nUse natural phrasing like \u201c3 infected\u201d, \u201ca squad of 5\u201d, \u201c6 enemies\u201d and the exact number. Avoid using vague number like \"multiple\".\n\nUpdate the count logically as enemies are killed, flee, or reinforcements arrive. \nOnce the number hits 0, remove the enemy.",
+            "defaultValue": "<Updated number if changed>",
+            "exampleValues": [
+              "5 men",
+              "1 man",
+              "1 army (30 people)",
+              "horde (26 zombies)"
+            ],
+            "nestedFields": {}
+          },
+          "field-80": {
+            "name": "Appearance",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "UNIVERSAL",
+            "prompt": "Briefly describe the visual details of the small enemies.\n- Mention key features only: mask, outfit, body type, weapon, posture, etc.\n- Keep it to one brief sentence per enemy type if there are multiple variants.\n- Only note details relevant to identification, threat level, or combat.",
+            "defaultValue": "<Current appearance if update is not needed>",
+            "exampleValues": [
+              "Wearing black ski masks, average build, carrying pistols",
+              "Emaciated corpses in tattered hospital gowns ",
+              "Tall male in military gear, face partially covered, wielding a machete  ",
+              "Armored in makeshift metal plates, glowing red eyes"
+            ],
+            "nestedFields": {}
+          },
+          "field-81": {
+            "name": "Location",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "UNIVERSAL",
+            "prompt": "Describe the current positioning of the small enemies relative to {{char}} and {{user}}, including distance.\n- Mention where the enemies are located spatially: front, flanks, rear, above, below, etc.\n- Always include approximate distance (in meters) from {{char}} and/or {{user}}.\n- Keep it to 1\u20132 short, tactical sentences.",
+            "defaultValue": "<Updated location if changed>",
+            "exampleValues": [
+              "Flanking both sides, 8\u201310 meters from {{char}} ",
+              "Directly ahead of {{user}}, roughly 12 meters away",
+              "Grouped behind cover 15 meters southwest of {{char}}",
+              "Creeping up from behind, 5 meters from {{user}}\u2019s position"
+            ],
+            "nestedFields": {}
+          },
+          "field-82": {
+            "name": "ExpGain",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "UNIVERSAL",
+            "prompt": "Track the experience points (EXP) gained from defeating small enemies. EXP should be awarded based on enemy type, difficulty, and quantity.\n\nUse the following general guidelines:\n- Basic enemies such as zombies and cerberus grant 60\u2013100 EXP.\n- Mutated or enhanced small enemies such as Crimson Heads or mutant zombie dogs grant 100\u2013200 EXP.\n- Mid-tier enemies like Lickers, Hunters, or Revenants grant 250\u2013400 EXP.\n\nMultiply the EXP gain per enemy of the exact same type by how many of them.\nExample: If there are 4 Crimson Heads, calculate EXP as 4 \u00d7 [EXP value for Crimson Heads].\n\nDo not apply additional bonuses unless explicitly instructed. Adjust EXP only based on enemy difficulty and narrative importance. Ensure EXP awarded is meaningful in relation to the current level progression.",
+            "defaultValue": "<Experience that can be gained>",
+            "exampleValues": [
+              "80 EXP",
+              "140 EXP",
+              "200 EXP",
+              "70 EXP"
+            ],
+            "nestedFields": {}
+          }
+        }
+      },
+      "field-83": {
+        "name": "BigEnemies",
+        "type": "FOR_EACH_OBJECT",
+        "presence": "DYNAMIC",
+        "scope": "UNIVERSAL",
+        "prompt": "Categorize as **Big Enemies** if they are bio-engineered, mutated, or significantly stronger than a human.\nThese include:\n- Elite Enemy (e.g. Garradors, Chainsaw mutants, j'avo variants, etc)\n- Large B.O.W.s (e.g., El Gigante, G-mutants, verdugo, etc)\n- Boss-tier enemies or enhanced foes requiring tactics to defeat (Nemesis, Birkin forms, Jack Baker, etc)\n- Mutated humans with superhuman abilities (Albert Wesker, etc)\n- Final boss or story-critical B.O.W. (Super tyrant, Alpha Nemesis,etc) \n\nTraits:\n- High HP and damage potential\n- Often unique or rare\n- May have phases, abilities, or regeneration\n\nUse this category if the enemy poses a major threat even alone.\n\nMaintain this list per turn:\n- ADD big enemie(s) that appear or newly matter.\n- REMOVE an enemy entirely when ANY of these is true:\n  \u2022 HP is 0 (defeated)\n  \u2022 The protagonists have escaped and the enemy is NOT pursuing / cannot realistically\n    re-engage from the new state (e.g., left behind, sealed off, different vehicle/altitude)\n    \u2192 drop on the **next** turn\n  \u2022 The enemy is otherwise no longer relevant to the current scene\n\nRelevance rule: keep only if present, pursuing, or about to re\u2011enter the encounter.\nIf none qualify, output an empty list (no placeholder).\nFor each remaining enemy, update the following details:",
+        "defaultValue": "<Big Enemy name>",
+        "exampleValues": [
+          "Tyrant T-078",
+          "Alpha Licker",
+          "Alpha Nemesis",
+          "Giant Leech B.O.W."
+        ],
+        "nestedFields": {
+          "field-84": {
+            "name": "Level",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "UNIVERSAL",
+            "prompt": "Assign a level based on the enemy's strength, mutation severity, combat behavior, and threat potential.\n\nUse this scale:\n- 10\u201320: Lesser BOWs (e.g., Lickers, Lycans, Molded)\n- 21\u201335: Enhanced BOWs or specialized units (e.g., Hunters, Regenerators, Garradors)\n- 36\u201350: Tyrant-class, Alpha Nemesis, custom high-level BOWs\n- 51+: Prototype bosses, advanced mutations, major antagonists\n\nLevels help define combat prowess and survivability. Use the context of the scene to determine placement.\n",
+            "defaultValue": "<Current level if update is not needed>",
+            "exampleValues": [
+              "14",
+              "26",
+              "33",
+              "49"
+            ],
+            "nestedFields": {}
+          },
+          "field-85": {
+            "name": "HP",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "UNIVERSAL",
+            "prompt": "Set the enemy\u2019s HP relative to its level and toughness. These enemies are highly durable and difficult to bring down.\n\nUse these suggested ranges:\n- Level 10\u201320: 300\u2013500 HP  \n- Level 21\u201335: 510\u2013800 HP  \n- Level 36\u201350: 810\u20131300 HP  \n- Level 51+: 1400\u20132500+ HP  \n\nReduce HP when taking damage. If the enemy has regeneration or mutation phases, note that separately.\n\nFormat HP: ` [currentHP]/[maxHP]`\n\nOnce HP hits 0, remove the enemy **on the next round**.",
+            "defaultValue": "<Updated HP if changed>",
+            "exampleValues": [
+              "348/500",
+              "625/750",
+              "1290/1300",
+              "1832/2000"
+            ],
+            "nestedFields": {}
+          },
+          "field-86": {
+            "name": "Type",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "UNIVERSAL",
+            "prompt": "Identify the enemy\u2019s classification or genetic type.\n\nExamples include:\n- Tyrant  \n- Alpha Nemesis  \n- Licker  \n- Hunter  \n- Garrador  \n- Regenerator  \n- Molded  \n- Las Plagas  \n- Custom BOW  \n- Prototype BOW  \n- Mutant Human (heavily transformed)\n\nOnly include enemies that require abnormal effort or special tactics to defeat.",
+            "defaultValue": "<Current type if update is not needed>",
+            "exampleValues": [
+              "Licker",
+              "Prototype BOW",
+              "Mutant Human",
+              "Alpha Nemesis"
+            ],
+            "nestedFields": {}
+          },
+          "field-87": {
+            "name": "Location",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "UNIVERSAL",
+            "prompt": "Describe the current positioning of the small enemies relative to {{char}} and {{user}}, including distance.\n- Mention where the enemies are located spatially: front, flanks, rear, above, below, etc.\n- Always include approximate distance (in meters) from {{char}} and/or {{user}}.\n- Keep it to 1\u20132 short, tactical sentences.",
+            "defaultValue": "<Updated location if changed>",
+            "exampleValues": [
+              "Charging toward Jill from 15 meters away while flanked by debris",
+              "Clinging upside-down to ceiling 7 meters above Leon, directly above Jill",
+              "Charging toward Jill from 15 meters away while flanked by debris",
+              "Standing 10 meters ahead of Jill and Leon, blocking the hallway exit"
+            ],
+            "nestedFields": {}
+          },
+          "field-88": {
+            "name": "Appearance",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "UNIVERSAL",
+            "prompt": "Describe the enemy\u2019s physical appearance in 1\u20132 sentences.\n\nAlways include:\n- Height in meters\n- Size/build (e.g., thin, bulky, massive)\n- Notable physical traits (e.g., claws, split tongue, armor, boils, glowing eyes, etc.)\n- Unique or grotesque features if present\n\nKeep it concise but vivid.",
+            "defaultValue": "<Current appearance if update is not needed>",
+            "exampleValues": [
+              "Stands 2.8 meters tall, with a massive, hunchbacked frame, long bone claws, and decayed skin stretched over exposed muscle.",
+              "About 3.2 meters tall, bloated and malformed with a thick torso, several sharp tendrils sprouting from its spine",
+              "2.5 meters, wiry build with glowing red eyes, obsidian skin texture, and blade-like growths along its forearms",
+              "Roughly 3 meters tall, heavily armored with chitin plates, a mutated left arm resembling a crab claw"
+            ],
+            "nestedFields": {}
+          },
+          "field-89": {
+            "name": "Ailments",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "UNIVERSAL",
+            "prompt": "List any current physical ailments or status conditions affecting the enemy.\n\nUse simple, short phrases (e.g., \u201cStunned\u201d, \u201cPoisoned\u201d, \u201cBleeding on right leg\u201d, \u201cFrozen temporarily\u201d).\n\nIf none, write: **None**",
+            "defaultValue": "<Updated ailment if changed>",
+            "exampleValues": [
+              "None",
+              "Stunned, Bleeding on lower torso",
+              "Frozen temporarily, Burned (right arm)",
+              "Posioned, Bleeding (face), Unconscious"
+            ],
+            "nestedFields": {}
+          },
+          "field-90": {
+            "name": "Ability",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "UNIVERSAL",
+            "prompt": "List the enemy\u2019s combat-related traits, powers, or mutations.\n\nEach point should be a short, single-sentence ability.  \nAvoid fluff.\n\nInclude traits like regeneration, acid spit, enhanced speed, immunity, etc.\n",
+            "defaultValue": "<Current abilities if update is not needed>",
+            "exampleValues": [
+              "Rapid tissue regeneration, Acidic saliva that melts armor, Resistant to headshots",
+              "Superhuman agility, Can cloak temporarily in darkness",
+              "Emits sonic shrieks to disorient, Regrows limbs over time",
+              "Hardened exoskeleton protects vital organs, Unaffected by pain"
+            ],
+            "nestedFields": {}
+          },
+          "field-91": {
+            "name": "ExpGain",
+            "type": "STRING",
+            "presence": "DYNAMIC",
+            "scope": "UNIVERSAL",
+            "prompt": "Track the experience points (EXP) gained from defeating big enemies. EXP should be awarded based on enemy type and difficulty.\n\nUse the following general guidelines:\n- Elite enemy defeated (garradors, chainsaw mutants, j\u2019avo variants): 500\u2013700 EXP  \n- Large B.O.W. defeated (el gigante, G-mutants, verdugo): 800\u20131000 EXP  \n- Major boss defeated (nemesis, birkin forms, jack baker): 1200\u20131800 EXP  \n- Final boss or story-critical B.O.W. defeated (super tyrant, alpha nemesis): 2000\u20133000 EXP\n\nDo not apply additional bonuses unless explicitly instructed. Adjust EXP only based on enemy difficulty and narrative importance. Ensure EXP awarded is meaningful in relation to the current level progression.",
+            "defaultValue": "<Exp that can be gained>",
+            "exampleValues": [
+              "850 EXP",
+              "710 EXP",
+              "1500 EXP",
+              "2700 EXP"
+            ],
+            "nestedFields": {}
+          }
+        }
+      }
+    }
+  }
+}
