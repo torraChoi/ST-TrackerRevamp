@@ -155,6 +155,19 @@ export class TrackerPromptMaker {
 			.on("click", () => this.clearSelection());
 		buttonsWrapper.append(deselectBtn);
 
+		const moveTargetWrapper = $('<div class="move-target-wrapper"></div>');
+		const moveTargetLabel = $('<label class="move-target-label">Move To</label>');
+		this.moveTargetSelect = $('<select class="move-target-select"></select>');
+		const moveTargetBtn = makeIconButton("Mv", "Move To")
+			.prop("disabled", true)
+			.on("click", () => {
+				const targetId = this.moveTargetSelect.val() || null;
+				this.moveSelectedFieldsToTarget(targetId);
+			});
+		this.moveButtons = { moveTargetBtn };
+		moveTargetWrapper.append(moveTargetLabel, this.moveTargetSelect, moveTargetBtn);
+		buttonsWrapper.append(moveTargetWrapper);
+
 		const navTitle = $('<div class="prompt-maker-nav-title">Navigator</div>');
 		const navShell = $('<div class="prompt-maker-nav-shell"></div>');
 		this.navContainer = $('<div class="prompt-maker-nav"></div>');
@@ -406,13 +419,21 @@ export class TrackerPromptMaker {
 		const buttonsWrapper = $('<div class="buttons-wrapper"></div>');
 
 		// Add Nested Field Button
-		const addNestedFieldBtn = $('<button class="menu_button interactable">Add Nested Field</button>')
-			.on("click", () => {
-				this.addField(null, fieldId);
+		const addNestedFieldBtn = $('<button class="menu_button interactable add-nested-field">Add Nested Field</button>')
+			.on("click", (event) => {
+				event.preventDefault();
+				event.stopPropagation();
+				const parentWrapper = $(event.currentTarget).closest(".field-wrapper");
+				const parentId = parentWrapper.attr("data-field-id");
+				if (!parentId) return;
+				this.addField(null, parentId);
 				// After adding a nested field, make it sortable
-				const nestedFieldData = this.getFieldDataById(fieldId).nestedFields;
-				this.makeFieldsSortable(nestedFieldsContainer, nestedFieldData);
+				const nestedFieldData = this.getFieldDataById(parentId).nestedFields;
+				const container = parentWrapper.find("> .nested-fields-container");
+				this.makeFieldsSortable(container, nestedFieldData);
 				this.rebuildBackendObjectFromDOM();
+				this.syncBackendObject();
+				this.updateBulkButtonsState();
 			})
 			.hide(); // Initially hidden
 
@@ -547,6 +568,9 @@ export class TrackerPromptMaker {
 		this.bulkButtons.bulkDeleteBtn.prop("disabled", !hasSelection);
 		this.bulkButtons.bulkMoveUpBtn.prop("disabled", !hasSelection);
 		this.bulkButtons.bulkMoveDownBtn.prop("disabled", !hasSelection);
+		if (this.moveButtons?.moveTargetBtn) {
+			this.moveButtons.moveTargetBtn.prop("disabled", !hasSelection);
+		}
 
 		if (this.clipboardButtons) {
 			const hasActive = this.getActiveFieldId() !== null;
@@ -572,6 +596,7 @@ export class TrackerPromptMaker {
 		if (item.length) {
 			item.text(label);
 		}
+		this.refreshMoveTargetOptions();
 	}
 
 	selectFieldFromNav(fieldId, event) {
@@ -679,6 +704,7 @@ export class TrackerPromptMaker {
 		if (this.navContainer.disableSelection) {
 			this.navContainer.disableSelection();
 		}
+		this.refreshMoveTargetOptions();
 	}
 
 	applyNavOrderFromSidebar() {
@@ -745,6 +771,79 @@ export class TrackerPromptMaker {
 			grouped.get(parentContainer).push(fieldId);
 		});
 		return grouped;
+	}
+
+	getTopLevelFieldOptions() {
+		const options = [];
+		this.fieldsContainer.children(".field-wrapper").each((_, el) => {
+			const wrapper = $(el);
+			const fieldId = wrapper.attr("data-field-id");
+			const name = wrapper.find("> .name-dynamic-type-wrapper .field-name-wrapper input").val() || "Untitled";
+			if (fieldId) options.push({ id: fieldId, label: name });
+		});
+		return options;
+	}
+
+	refreshMoveTargetOptions() {
+		if (!this.moveTargetSelect) return;
+		const previous = this.moveTargetSelect.val();
+		this.moveTargetSelect.empty();
+		this.moveTargetSelect.append('<option value="">Top level</option>');
+		this.getTopLevelFieldOptions().forEach((opt) => {
+			const option = $("<option></option>").val(opt.id).text(opt.label);
+			this.moveTargetSelect.append(option);
+		});
+		if (previous && this.moveTargetSelect.find(`option[value="${previous}"]`).length) {
+			this.moveTargetSelect.val(previous);
+		}
+	}
+
+	isFieldDescendant(ancestorId, descendantId) {
+		if (!ancestorId || !descendantId) return false;
+		const ancestor = this.element.find(`[data-field-id="${ancestorId}"]`);
+		if (!ancestor.length) return false;
+		return ancestor.find(`[data-field-id="${descendantId}"]`).length > 0;
+	}
+
+	moveSelectedFieldsToTarget(targetParentId = null) {
+		if (this.selectedFieldIds.size === 0) return;
+		const selectedIds = this.getSelectedFieldIdsOrdered();
+		if (targetParentId && this.selectedFieldIds.has(targetParentId)) {
+			toastr.error("Cannot move a field into itself.");
+			return;
+		}
+		if (targetParentId) {
+			const targetData = this.getFieldDataById(targetParentId);
+			if (!targetData || !TrackerPromptMaker.NESTING_FIELD_TYPES.includes(targetData.type)) {
+				toastr.error("Target field does not support nested fields.");
+				return;
+			}
+			if (selectedIds.some((fieldId) => this.isFieldDescendant(fieldId, targetParentId))) {
+				toastr.error("Cannot move a field into its own descendant.");
+				return;
+			}
+		}
+
+		const targetContainer = targetParentId
+			? this.element.find(`[data-field-id="${targetParentId}"] > .nested-fields-container`)
+			: this.fieldsContainer;
+		if (!targetContainer.length) return;
+
+		selectedIds.forEach((fieldId) => {
+			const wrapper = this.element.find(`[data-field-id="${fieldId}"]`);
+			if (wrapper.length) {
+				targetContainer.append(wrapper);
+			}
+		});
+
+		this.element
+			.find(".field-wrapper")
+			.filter((_, el) => this.selectedFieldIds.has($(el).attr("data-field-id")))
+			.attr("data-keep-selected", "1");
+
+		this.rebuildBackendObjectFromDOM();
+		this.syncBackendObject();
+		this.updateBulkButtonsState();
 	}
 
 	copySelectedField() {
@@ -986,7 +1085,7 @@ export class TrackerPromptMaker {
 			fieldData.type = type || "STRING";
 			debug(`Selected field type: ${type} for field ID: ${fieldId}`);
 			const fieldWrapper = this.element.find(`[data-field-id="${fieldId}"]`);
-			const addNestedFieldBtn = fieldWrapper.find(".menu_button:contains('Add Nested Field')");
+			const addNestedFieldBtn = fieldWrapper.find(".add-nested-field");
 			const collapseToggle = fieldWrapper.find(".collapse-toggle");
 			const isNestingType = TrackerPromptMaker.NESTING_FIELD_TYPES.includes(type);
 			addNestedFieldBtn.toggle(isNestingType);

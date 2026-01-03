@@ -1,102 +1,50 @@
-<div class="dock-meta">
-  <div class="dock-time">
-    <span class="tr-line" data-path="Time" data-type="STRING">
-      <span class="tr-editable dock-value">{{Time}}</span>
-    </span>
+ <div class="dock-meta">
+    <div class="dock-time">
+      <span class="tr-line" data-path="Time" data-type="STRING">
+        <span class="tr-editable dock-value">{{Time}}</span>
+      </span>
+    </div>
+    <div class="trackerrevamp-dock-actions">
+      <span data-dock-indicator="regen" class="trackerrevamp-dock-regen-indicator"></span>
+      <button class="menu_button" data-dock-action="regenerate" title="Regenerate tracker">⟳</button>
+      <button class="menu_button" data-dock-action="toggle-og" title="Show/Hide OG tracker">🛠</button>
+      <button class="menu_button" data-dock-action="toggle-side" title="Toggle side">⇄</button>
+      <button class="menu_button" data-dock-action="close" title="Close">×</button>
+    </div>
   </div>
-  <div class="trackerrevamp-dock-actions">
-    <span
-      data-dock-indicator="regen"
-      class="trackerrevamp-dock-regen-indicator"
-    ></span>
-    <button
-      class="menu_button"
-      data-dock-action="regenerate"
-      title="Regenerate tracker"
-    >
-      ⟳
-    </button>
-    <button
-      class="menu_button"
-      data-dock-action="toggle-og"
-      title="Show/Hide OG tracker"
-    >
-      🛠
-    </button>
-    <button
-      class="menu_button"
-      data-dock-action="toggle-side"
-      title="Toggle side"
-    >
-      ⇄
-    </button>
-    <button class="menu_button" data-dock-action="close" title="Close">
-      ×
-    </button>
-  </div>
-</div>
 
 <div class="dock-sample dock-floater">
-  <aside class="dock-rail">
+    <aside class="dock-rail">
     <div class="dock-rail-block dock-rail-main">
       {{#foreach MainCharacters mainCharacter}}
-      <button
-        class="rail-btn rail-btn-main"
-        data-main-target="{{mainCharacter}}"
-        title="{{mainCharacter}}"
-      >
+      <button class="rail-btn rail-btn-main" data-main-target="{{mainCharacter}}" title="{{mainCharacter}}">
         {{_key|substring(0,1)|toUpperCase()}}
       </button>
       {{/foreach}}
     </div>
 
     <div class="dock-rail-block dock-rail-others">
-      <div
-        class="rail-btn rail-btn-group"
-        data-other-toggle
-        title="Other Characters"
-      >
-        <span
-          class="rail-ico"
-          data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/other-characters.svg"
-        ></span>
+      <div class="rail-btn rail-btn-group" data-other-toggle title="Other Characters">
+        <span class="rail-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/other-characters.svg"></span>
         <div class="rail-sublist" data-other-list>
-          {{#foreach OtherCharacters otherCharacter}}
-          <button
-            class="rail-btn rail-btn-other"
-            data-other-target="{{otherCharacter}}"
-            title="{{otherCharacter}}"
-          >
-            {{_key|substring(0,1)|toUpperCase()}}
-          </button>
-          {{/foreach}}
+        {{#foreach OtherCharacters otherCharacter}}
+        <button class="rail-btn rail-btn-other" data-other-target="{{otherCharacter}}" title="{{otherCharacter}}">
+          {{_key|substring(0,1)|toUpperCase()}}
+        </button>
+        {{/foreach}}
         </div>
       </div>
     </div>
 
     <div class="dock-rail-block dock-rail-enemy">
-      <button
-        class="rail-btn rail-btn-enemy"
-        data-enemy-toggle="small"
-        title="Small Enemies"
-      >
-        <span
-          class="rail-ico"
-          data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/enemies.svg"
-        ></span>
+      <button class="rail-btn rail-btn-enemy" data-enemy-toggle="small" title="Small Enemies">
+        <span class="rail-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/enemies.svg"></span>
       </button>
     </div>
 
     <div class="dock-rail-block dock-rail-enemy">
-      <button
-        class="rail-btn rail-btn-enemy"
-        data-enemy-toggle="big"
-        title="Big Enemies"
-      >
-        <span
-          class="rail-ico"
-          data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/big-enemies.svg"
-        ></span>
+      <button class="rail-btn rail-btn-enemy" data-enemy-toggle="big" title="Big Enemies">
+        <span class="rail-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/big-enemies.svg"></span>
       </button>
     </div>
   </aside>
@@ -109,11 +57,7 @@
           <div class="dock-name">{{mainCharacter}}</div>
           <div class="dock-pill">
             LV
-            <span
-              class="tr-line"
-              data-path="MainCharacters.{{mainCharacter}}.Level"
-              data-type="STRING"
-            >
+            <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.Level" data-type="STRING">
               <span class="tr-editable">{{mainCharacter.Level}}</span>
             </span>
           </div>
@@ -121,21 +65,13 @@
         <div class="dock-row">
           <div class="dock-kv">
             <span class="dock-label">HP</span>
-            <span
-              class="tr-line"
-              data-path="MainCharacters.{{mainCharacter}}.HP"
-              data-type="STRING"
-            >
+            <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.HP" data-type="STRING">
               <span class="tr-editable">{{mainCharacter.HP}}</span>
             </span>
           </div>
           <div class="dock-kv">
             <span class="dock-label">EXP</span>
-            <span
-              class="tr-line"
-              data-path="MainCharacters.{{mainCharacter}}.Exp"
-              data-type="STRING"
-            >
+            <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.Exp" data-type="STRING">
               <span class="tr-editable">{{mainCharacter.Exp}}</span>
             </span>
           </div>
@@ -143,21 +79,13 @@
         <div class="dock-row">
           <div class="dock-kv">
             <span class="dock-label">Role</span>
-            <span
-              class="tr-line"
-              data-path="MainCharacters.{{mainCharacter}}.Role"
-              data-type="STRING"
-            >
+            <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.Role" data-type="STRING">
               <span class="tr-editable">{{mainCharacter.Role}}</span>
             </span>
           </div>
           <div class="dock-kv">
             <span class="dock-label">Location</span>
-            <span
-              class="tr-line"
-              data-path="MainCharacters.{{mainCharacter}}.Location"
-              data-type="STRING"
-            >
+            <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.Location" data-type="STRING">
               <span class="tr-editable">{{mainCharacter.Location}}</span>
             </span>
           </div>
@@ -165,7 +93,7 @@
       </article>
       {{/foreach}}
     </div>
-
+    <!-- Other Characters Panel -->
     <div class="dock-cards" data-panel-type="other">
       {{#foreach OtherCharacters otherCharacter}}
       <article class="dock-card" data-panel="other:{{otherCharacter}}">
@@ -173,11 +101,7 @@
           <div class="dock-name">{{otherCharacter}}</div>
           <div class="dock-pill">
             HP
-            <span
-              class="tr-line"
-              data-path="OtherCharacters.{{otherCharacter}}.HP"
-              data-type="STRING"
-            >
+            <span class="tr-line" data-path="OtherCharacters.{{otherCharacter}}.HP" data-type="STRING">
               <span class="tr-editable">{{otherCharacter.HP}}</span>
             </span>
           </div>
@@ -185,21 +109,13 @@
         <div class="dock-row">
           <div class="dock-kv">
             <span class="dock-label">Role</span>
-            <span
-              class="tr-line"
-              data-path="OtherCharacters.{{otherCharacter}}.Role"
-              data-type="STRING"
-            >
+            <span class="tr-line" data-path="OtherCharacters.{{otherCharacter}}.Role" data-type="STRING">
               <span class="tr-editable">{{otherCharacter.Role}}</span>
             </span>
           </div>
           <div class="dock-kv">
             <span class="dock-label">Location</span>
-            <span
-              class="tr-line"
-              data-path="OtherCharacters.{{otherCharacter}}.Location"
-              data-type="STRING"
-            >
+            <span class="tr-line" data-path="OtherCharacters.{{otherCharacter}}.Location" data-type="STRING">
               <span class="tr-editable">{{otherCharacter.Location}}</span>
             </span>
           </div>
@@ -216,11 +132,7 @@
             <div class="dock-name">{{smallEnemy}}</div>
             <div class="dock-pill">
               EXP
-              <span
-                class="tr-line"
-                data-path="SmallEnemies.{{smallEnemy}}.ExpGain"
-                data-type="STRING"
-              >
+              <span class="tr-line" data-path="SmallEnemies.{{smallEnemy}}.ExpGain" data-type="STRING">
                 <span class="tr-editable">{{smallEnemy.ExpGain}}</span>
               </span>
             </div>
@@ -228,21 +140,13 @@
           <div class="dock-row">
             <div class="dock-kv">
               <span class="dock-label">Number</span>
-              <span
-                class="tr-line"
-                data-path="SmallEnemies.{{smallEnemy}}.Number"
-                data-type="STRING"
-              >
+              <span class="tr-line" data-path="SmallEnemies.{{smallEnemy}}.Number" data-type="STRING">
                 <span class="tr-editable">{{smallEnemy.Number}}</span>
               </span>
             </div>
             <div class="dock-kv">
               <span class="dock-label">Location</span>
-              <span
-                class="tr-line"
-                data-path="SmallEnemies.{{smallEnemy}}.Location"
-                data-type="STRING"
-              >
+              <span class="tr-line" data-path="SmallEnemies.{{smallEnemy}}.Location" data-type="STRING">
                 <span class="tr-editable">{{smallEnemy.Location}}</span>
               </span>
             </div>
@@ -250,7 +154,7 @@
         </article>
         {{/foreach}}
       </div>
-
+      
       <div class="dock-enemy-block" data-enemy-panel="big">
         {{#foreach BigEnemies bigEnemy}}
         <article class="dock-card dock-card-enemy">
@@ -258,11 +162,7 @@
             <div class="dock-name">{{bigEnemy}}</div>
             <div class="dock-pill">
               LV
-              <span
-                class="tr-line"
-                data-path="BigEnemies.{{bigEnemy}}.Level"
-                data-type="STRING"
-              >
+              <span class="tr-line" data-path="BigEnemies.{{bigEnemy}}.Level" data-type="STRING">
                 <span class="tr-editable">{{bigEnemy.Level}}</span>
               </span>
             </div>
@@ -270,21 +170,13 @@
           <div class="dock-row">
             <div class="dock-kv">
               <span class="dock-label">HP</span>
-              <span
-                class="tr-line"
-                data-path="BigEnemies.{{bigEnemy}}.HP"
-                data-type="STRING"
-              >
+              <span class="tr-line" data-path="BigEnemies.{{bigEnemy}}.HP" data-type="STRING">
                 <span class="tr-editable">{{bigEnemy.HP}}</span>
               </span>
             </div>
             <div class="dock-kv">
               <span class="dock-label">Type</span>
-              <span
-                class="tr-line"
-                data-path="BigEnemies.{{bigEnemy}}.Type"
-                data-type="STRING"
-              >
+              <span class="tr-line" data-path="BigEnemies.{{bigEnemy}}.Type" data-type="STRING">
                 <span class="tr-editable">{{bigEnemy.Type}}</span>
               </span>
             </div>
@@ -295,96 +187,3 @@
     </div>
   </section>
 </div>
-<script>
-  (function () {
-    const dock = document.getElementById("trackerrevamp-dock");
-    if (!dock) return;
-
-    dock.addEventListener("click", (e) => {
-      const btn = e.target.closest(".rail-btn");
-      if (!btn) return;
-
-      // 1. Handle Group Toggle (Drawer)
-      if (btn.hasAttribute("data-other-toggle")) {
-        btn.classList.toggle("is-open");
-        return;
-      }
-
-      const isMain = btn.hasAttribute("data-main-target");
-      const isOther = btn.hasAttribute("data-other-target");
-      const isEnemy = btn.hasAttribute("data-enemy-toggle");
-
-      if (!isMain && !isOther && !isEnemy) return;
-
-      // Helper to clear characters
-      const clearCharacters = () => {
-        dock
-          .querySelectorAll(
-            ".rail-btn-main.is-active, .rail-btn-other.is-active"
-          )
-          .forEach((el) => el.classList.remove("is-active"));
-        dock
-          .querySelectorAll(
-            '.dock-card[data-panel^="main:"].is-active, .dock-card[data-panel^="other:"].is-active'
-          )
-          .forEach((el) => el.classList.remove("is-active"));
-      };
-
-      // Helper to clear enemies
-      const clearEnemies = () => {
-        dock
-          .querySelectorAll(".rail-btn-enemy.is-active")
-          .forEach((el) => el.classList.remove("is-active"));
-        dock
-          .querySelectorAll(".dock-enemy-block.is-open")
-          .forEach((el) => el.classList.remove("is-open"));
-      };
-
-      // 2. Enemy Logic: Additive between small/big, Exclusive vs Chars
-      if (isEnemy) {
-        // Check if any character is currently active
-        const charActive = dock.querySelector(
-          '.dock-card[data-panel^="main:"].is-active, .dock-card[data-panel^="other:"].is-active'
-        );
-
-        if (charActive) {
-          // If switching from Character to Enemy, clear everything
-          clearCharacters();
-          clearEnemies();
-        }
-
-        // Toggle the specific enemy
-        const type = btn.getAttribute("data-enemy-toggle");
-        const block = dock.querySelector(
-          `.dock-enemy-block[data-enemy-panel="${type}"]`
-        );
-
-        if (block) {
-          const isActive = btn.classList.toggle("is-active");
-          block.classList.toggle("is-open", isActive);
-        }
-        return;
-      }
-
-      // 3. Character Logic: Mutually Exclusive
-      if (isMain || isOther) {
-        // Clear everything (Enemies AND other Characters)
-        clearCharacters();
-        clearEnemies();
-
-        // Activate clicked button
-        btn.classList.add("is-active");
-
-        // Activate corresponding card
-        const prefix = isMain ? "main" : "other";
-        const target = isMain
-          ? btn.getAttribute("data-main-target")
-          : btn.getAttribute("data-other-target");
-        const card = dock.querySelector(
-          `.dock-card[data-panel="${prefix}:${target}"]`
-        );
-        if (card) card.classList.add("is-active");
-      }
-    });
-  })();
-</script>

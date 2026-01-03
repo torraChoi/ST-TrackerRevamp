@@ -11,6 +11,7 @@
    padding: 0;
 }
 
+/* Layout shell */
 .dock-time .tr-line {
    border-bottom: none !important;
 }
@@ -20,9 +21,10 @@
    height: 100%;
 }
 
+/* Root container */
 .dock-floater {
-  --dock-bg: rgba(12, 12, 12, 0.75);
-  --dock-border: rgba(255, 255, 255, 0.12);
+  --dock-bg: rgba(0, 0, 0, 0.7);
+  --dock-border: rgba(170, 170, 170, 0.25);
   --dock-accent: #6bb4ff;
   display: flex;
   gap: 14px;
@@ -34,6 +36,7 @@
   display: none;
 }
 
+/* Left rail */
 .dock-rail {
   display: flex;
   flex-direction: column;
@@ -176,11 +179,89 @@
   flex-shrink: 0;
 }
 
+/************ Main stage *************/
+
 .dock-stage {
   flex: 1;
   min-width: 0;
 }
 
+/* Main card layout */
+.dock-card-main .dock-main-top,
+.dock-card-main .dock-main-hero,
+.dock-card-main .dock-main-row,
+.dock-card-main .dock-kv-strip,
+.dock-card-main .dock-vitals,
+.dock-card-main .dock-kv-row,
+.dock-card-main .dock-stats,
+.dock-card-main .dock-finance,
+.dock-card-main .dock-tabs,
+.dock-card-main .dock-tab-panels {
+  margin-top: 12px;
+}
+
+.dock-layout-user {
+  display: none;
+}
+
+.dock-card-main.is-char .dock-layout-user {
+  display: none;
+}
+
+.dock-card-main.is-user .dock-layout-char {
+  display: none;
+}
+
+.dock-card-main.is-user .dock-layout-user {
+  display: block;
+}
+
+.dock-tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.dock-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dock-tab .dock-tab-label {
+  display: none;
+}
+
+.dock-tab.is-active .dock-tab-label {
+  display: inline;
+}
+
+.dock-tab-panel {
+  display: none;
+}
+
+.dock-tab-panel.is-active {
+  display: block;
+}
+
+/* Stats pills */
+.dock-stats-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.stat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stat-pill .stat-val {
+  min-width: 24px;
+  outline: none;
+}
+
+/* Meta header */
 .dock-meta {
    background: rgba(170, 170, 170, 0.1);
    align-items: center;
@@ -202,6 +283,7 @@
   margin-right: 6px;
 }
 
+/* Cards */
 .dock-cards {
   display: flex;
   flex-direction: column;
@@ -215,6 +297,7 @@
   padding: 14px 18px;
   background: var(--dock-bg);
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(50px)
 }
 
 .dock-card.is-active {
@@ -257,6 +340,7 @@
   gap: 4px;
 }
 
+/* Enemies */
 .dock-enemies {
   margin-top: 18px;
   display: flex;
@@ -281,6 +365,7 @@
   margin-bottom: 0;
 }
 
+/* Enemy colors */
 /* small enemies */
 .rail-btn-enemy[data-enemy-toggle="small"] {
   --rail-ring: rgba(175, 33, 35, 0.72);
@@ -355,3 +440,32 @@
 .dock-floater .tr-editable {
   cursor: text;
 }
+
+/* Icon sizing */
+.dock-ico,
+.dock-ico svg,
+.dock-ico img {
+  width: 30px;
+  height: 30px;
+  display: inline-block;
+}
+
+
+/* HP/EXP bars (reuse Message Tracker styling hooks) */
+.dock-vitals .bar {
+  position: relative;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+
+.dock-vitals .bar span {
+  display: block;
+  height: 100%;
+  background: rgba(107, 180, 255, 0.6);
+}
+
+.dock-vitals .bar.hp.ok span { background: #37c978; }
+.dock-vitals .bar.hp.warn span { background: #f1b54b; }
+.dock-vitals .bar.hp.bad span { background: #e15b5b; }

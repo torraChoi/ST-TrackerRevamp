@@ -33,26 +33,8 @@
     const bigToggle = scope.querySelector('[data-enemy-toggle="big"]');
     const smallPanel = scope.querySelector('[data-enemy-panel="small"]');
     const bigPanel = scope.querySelector('[data-enemy-panel="big"]');
-
-    const isPlaceholderName = (value) => {
-      const text = String(value || "").trim();
-      if (!text) return true;
-      const lowered = text.toLowerCase();
-      if (lowered === "—" || lowered === "x" || lowered === "none" || lowered === "n/a") {
-        return true;
-      }
-      return text.startsWith("<") && text.endsWith(">");
-    };
-
-    const hasNamedCards = (panel) => {
-      if (!panel) return false;
-      const cards = Array.from(panel.querySelectorAll(".dock-card"));
-      if (cards.length === 0) return false;
-      return cards.some((card) => {
-        const nameEl = card.querySelector(".dock-name");
-        return nameEl && !isPlaceholderName(nameEl.textContent);
-      });
-    };
+    const statBlocks = Array.from(scope.querySelectorAll(".dock-stats"));
+    const tabGroups = Array.from(scope.querySelectorAll("[data-tabs]"));
 
     const applyInitial = (button) => {
       const label = button.getAttribute("title")
@@ -83,6 +65,36 @@
         button.style.setProperty("--rail-glow", "rgba(64, 160, 238, 0.55)");
       }
     });
+
+    const applyMainCharacterRoles = () => {
+      const userName = typeof window?.name1 === "string" ? window.name1.trim() : "";
+      const charName = typeof window?.characters?.[window?.this_chid]?.name === "string"
+        ? window.characters[window.this_chid].name.trim()
+        : "";
+
+      const markRole = (el, name) => {
+        if (!name) return;
+        const normalized = String(name).trim().toLowerCase();
+        if (userName && normalized === userName.toLowerCase()) {
+          el.classList.add("is-user");
+        }
+        if (charName && normalized === charName.toLowerCase()) {
+          el.classList.add("is-char");
+        }
+      };
+
+      mainButtons.forEach((button) => {
+        const label = button.getAttribute("title") || button.dataset.mainTarget || "";
+        markRole(button, label);
+      });
+
+      scope.querySelectorAll(".dock-card-main[data-main-name]").forEach((card) => {
+        const label = card.getAttribute("data-main-name") || "";
+        markRole(card, label);
+      });
+    };
+
+    applyMainCharacterRoles();
     otherButtons.forEach((button) => {
       applyInitial(button);
       const hue = Math.floor(Math.random() * 360);
@@ -103,20 +115,52 @@
     const smallBlock = smallToggle ? smallToggle.closest(".dock-rail-block") : null;
     const bigBlock = bigToggle ? bigToggle.closest(".dock-rail-block") : null;
 
-    const realOtherButtons = otherButtons.filter((button) => {
-      const label = button.getAttribute("title") || button.dataset.otherTarget || "";
-      return !isPlaceholderName(label);
-    });
+    const hasMeaningfulLabel = (text) => {
+      const cleaned = String(text || "")
+        .replace(/\(\s*off(?:-screen)?\s*\)/ig, "")
+        .replace(/[\u200B-\u200D\uFEFF]/g, "")
+        .trim();
+      if (!cleaned) return false;
+      if (cleaned === "—") return false;
+      if (/^x$/i.test(cleaned)) return false;
+      if (/^n\/?a$/i.test(cleaned)) return false;
+      if (/^none$/i.test(cleaned)) return false;
+      if (/^\{\{.*\}\}$/.test(cleaned)) return false;
+      if (/^<.*>$/.test(cleaned)) return false;
+      if (/character\s*name/i.test(cleaned)) return false;
+      return true;
+    };
 
-    if (realOtherButtons.length === 0 && otherBlock) {
+    const otherPanel = scope.querySelector('.dock-cards[data-panel-type="other"]');
+    const hasOtherEntriesFromButtons = otherButtons.some((button) => {
+      const label = button.getAttribute("title") || button.dataset.otherTarget || "";
+      return hasMeaningfulLabel(label);
+    });
+    const hasOtherEntriesFromCards = otherPanel
+      ? Array.from(otherPanel.querySelectorAll(".dock-card .dock-name")).some((node) =>
+          hasMeaningfulLabel(node.textContent)
+        )
+      : false;
+    const hasOtherEntries = hasOtherEntriesFromButtons || hasOtherEntriesFromCards;
+
+    if (!hasOtherEntries && otherBlock) {
       otherBlock.classList.add("is-hidden");
     }
 
-    if (!hasNamedCards(smallPanel) && smallBlock) {
+    const hasEnemyEntries = (panel, nameSelector) => {
+      if (!panel) return false;
+      const cards = Array.from(panel.querySelectorAll(".dock-card"));
+      return cards.some((card) => {
+        const label = card.querySelector(nameSelector)?.textContent || "";
+        return hasMeaningfulLabel(label);
+      });
+    };
+
+    if (!hasEnemyEntries(smallPanel, ".dock-name, .dock-enemy-title, .small-name, .name") && smallBlock) {
       smallBlock.classList.add("is-hidden");
     }
 
-    if (!hasNamedCards(bigPanel) && bigBlock) {
+    if (!hasEnemyEntries(bigPanel, ".dock-name, .dock-enemy-title, .quad-name, .name") && bigBlock) {
       bigBlock.classList.add("is-hidden");
     }
 
@@ -207,6 +251,32 @@
       otherButtons[0].click();
     }
 
+    const renderBarFromText = (el, kind) => {
+      if (!el || el.__barized) return;
+      const t = (el.dataset.raw || el.textContent || "").trim();
+      const m = t.match(/(\d+)\s*\/\s*(\d+)/);
+      if (!m) return;
+      const cur = +m[1], max = +m[2];
+      const pct = Math.max(0, Math.min(100, (cur / max) * 100));
+      el.dataset.raw = t;
+      el.innerHTML = `<div class="labeltext">${t}</div>`;
+      const bar = document.createElement("div");
+      bar.className = "bar " + (kind === "hp" ? "hp" : "exp");
+      const fill = document.createElement("span");
+      fill.style.width = pct + "%";
+      bar.appendChild(fill);
+      if (kind === "hp") {
+        bar.classList.add(pct < 30 ? "bad" : pct < 60 ? "warn" : "ok");
+      }
+      el.appendChild(bar);
+      el.__barized = true;
+    };
+
+    const initNumericBars = () => {
+      scope.querySelectorAll(".hp-line").forEach((el) => renderBarFromText(el, "hp"));
+      scope.querySelectorAll(".exp-line").forEach((el) => renderBarFromText(el, "exp"));
+    };
+
     svgTargets.forEach((el) => {
       if (el.__svgApplied) return;
       const url = el.getAttribute("data-svg");
@@ -225,6 +295,88 @@
           el.innerHTML = `<img src="${url}" alt="">`;
           el.__svgApplied = true;
         });
+    });
+
+    initNumericBars();
+
+    const parseStats = (text) => {
+      const map = {};
+      const regex = /\\b(STR|END|AGI|DEX|INT|CHA|PER|LCK)\\s*[:=]\\s*(\\d+)/gi;
+      let match;
+      while ((match = regex.exec(text || ""))) {
+        map[match[1].toUpperCase()] = match[2];
+      }
+      return map;
+    };
+
+    const buildStatsString = (order, map) => {
+      return order
+        .map((key) => `${key}: ${map[key] || ""}`.trim())
+        .join(" | ");
+    };
+
+    const commitTrLine = (lineEl, value) => {
+      if (!lineEl) return;
+      lineEl.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      setTimeout(() => {
+        const input = lineEl.querySelector("textarea.tr-input");
+        if (!input) return;
+        input.value = value;
+        input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+      }, 0);
+    };
+
+    statBlocks.forEach((block) => {
+      const sourceLine = block.querySelector(".dock-stats-source");
+      const editable = sourceLine?.querySelector(".tr-editable");
+      const raw = editable ? editable.textContent : "";
+      const map = parseStats(raw);
+      const pills = Array.from(block.querySelectorAll(".stat-pill"));
+      const order = pills.map((pill) => pill.dataset.statKey);
+
+      pills.forEach((pill) => {
+        const key = pill.dataset.statKey;
+        const valEl = pill.querySelector(".stat-val");
+        if (!valEl) return;
+        valEl.textContent = map[key] || "";
+        const update = () => {
+          const next = String(valEl.textContent || "").replace(/[^0-9]/g, "");
+          valEl.textContent = next;
+          map[key] = next;
+          const nextString = buildStatsString(order, map);
+          commitTrLine(sourceLine, nextString);
+        };
+        valEl.addEventListener("blur", update);
+        valEl.addEventListener("keydown", (ev) => {
+          if (ev.key === "Enter") {
+            ev.preventDefault();
+            update();
+            valEl.blur();
+          }
+        });
+      });
+    });
+
+    tabGroups.forEach((group) => {
+      const tabs = Array.from(group.querySelectorAll(".dock-tab"));
+      if (tabs.length === 0) return;
+      const card = group.closest(".dock-card");
+      const panels = card ? Array.from(card.querySelectorAll(".dock-tab-panel")) : [];
+      const setActive = (name) => {
+        tabs.forEach((tab) => tab.classList.toggle("is-active", name && tab.dataset.tab === name));
+        panels.forEach((panel) => panel.classList.toggle("is-active", name && panel.dataset.tabPanel === name));
+      };
+      tabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+          const name = tab.dataset.tab;
+          const isActive = tab.classList.contains("is-active");
+          if (isActive) {
+            setActive(null);
+          } else {
+            setActive(name);
+          }
+        });
+      });
     });
   };
 
