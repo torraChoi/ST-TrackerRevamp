@@ -166,13 +166,12 @@ export class TrackerPromptMaker {
 			});
 		this.moveButtons = { moveTargetBtn };
 		moveTargetWrapper.append(moveTargetLabel, this.moveTargetSelect, moveTargetBtn);
-		buttonsWrapper.append(moveTargetWrapper);
 
 		const navTitle = $('<div class="prompt-maker-nav-title">Navigator</div>');
 		const navShell = $('<div class="prompt-maker-nav-shell"></div>');
 		this.navContainer = $('<div class="prompt-maker-nav"></div>');
 		navShell.append(navTitle, this.navContainer);
-		sidebar.append(buttonsWrapper, navShell);
+		sidebar.append(buttonsWrapper, moveTargetWrapper, navShell);
 	}
 
 	/**

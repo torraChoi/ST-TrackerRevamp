@@ -304,10 +304,32 @@
   justify-content: center;
 }
 .tracker-prompt-maker .prompt-maker-sidebar .buttons-wrapper {
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   justify-content: flex-start;
   gap: 6px;
   margin-top: 10px;
+}
+
+.tracker-prompt-maker .prompt-maker-sidebar .move-target-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.tracker-prompt-maker .prompt-maker-sidebar .move-target-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.8;
+}
+
+.tracker-prompt-maker .prompt-maker-sidebar .move-target-select {
+  width: 100%;
+}
+
+.tracker-prompt-maker .prompt-maker-sidebar .move-target-wrapper .icon-button {
+  align-self: flex-start;
 }
 .tracker-prompt-maker .buttons-wrapper button {
   white-space: nowrap;
