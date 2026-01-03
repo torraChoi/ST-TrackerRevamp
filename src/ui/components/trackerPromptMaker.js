@@ -166,6 +166,7 @@ export class TrackerPromptMaker {
 			});
 		this.moveButtons = { moveTargetBtn };
 		moveTargetWrapper.append(moveTargetLabel, this.moveTargetSelect, moveTargetBtn);
+		this.refreshMoveTargetOptions();
 
 		const navTitle = $('<div class="prompt-maker-nav-title">Navigator</div>');
 		const navShell = $('<div class="prompt-maker-nav-shell"></div>');
@@ -461,6 +462,7 @@ export class TrackerPromptMaker {
 		} else {
 			this.fieldsContainer.append(fieldWrapper);
 		}
+		this.refreshMoveTargetOptions();
 
 		debug(`Added field with ID: ${fieldId}`);
 
