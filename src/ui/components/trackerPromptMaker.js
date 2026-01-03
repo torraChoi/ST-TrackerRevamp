@@ -809,8 +809,11 @@ export class TrackerPromptMaker {
 	moveSelectedFieldsToTarget(targetParentId = null) {
 		if (this.selectedFieldIds.size === 0) return;
 		const selectedIds = this.getSelectedFieldIdsOrdered();
-		if (targetParentId && this.selectedFieldIds.has(targetParentId)) {
-			toastr.error("Cannot move a field into itself.");
+		const moveIds = targetParentId
+			? selectedIds.filter((fieldId) => fieldId !== targetParentId)
+			: selectedIds.slice();
+		if (moveIds.length === 0) {
+			toastr.error("Select a field to move.");
 			return;
 		}
 		if (targetParentId) {
@@ -819,7 +822,7 @@ export class TrackerPromptMaker {
 				toastr.error("Target field does not support nested fields.");
 				return;
 			}
-			if (selectedIds.some((fieldId) => this.isFieldDescendant(fieldId, targetParentId))) {
+			if (moveIds.some((fieldId) => this.isFieldDescendant(fieldId, targetParentId))) {
 				toastr.error("Cannot move a field into its own descendant.");
 				return;
 			}
@@ -830,7 +833,7 @@ export class TrackerPromptMaker {
 			: this.fieldsContainer;
 		if (!targetContainer.length) return;
 
-		selectedIds.forEach((fieldId) => {
+		moveIds.forEach((fieldId) => {
 			const wrapper = this.element.find(`[data-field-id="${fieldId}"]`);
 			if (wrapper.length) {
 				targetContainer.append(wrapper);
