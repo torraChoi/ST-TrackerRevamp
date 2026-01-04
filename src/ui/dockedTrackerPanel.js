@@ -1286,6 +1286,17 @@ function installDockEditing() {
     input.style.fontSize = cs.fontSize;
     input.style.lineHeight = cs.lineHeight;
     input.style.fontFamily = cs.fontFamily;
+    if (lineEl.closest(".dock-time")) {
+      const resize = () => {
+        input.style.width = "1px";
+        const next = Math.max(160, input.scrollWidth + 12);
+        input.style.width = `${next}px`;
+      };
+      input.style.whiteSpace = "nowrap";
+      input.style.overflow = "hidden";
+      input.addEventListener("input", resize);
+      setTimeout(resize, 0);
+    }
 
     // mount it
     editable.dataset.editing = "1";
