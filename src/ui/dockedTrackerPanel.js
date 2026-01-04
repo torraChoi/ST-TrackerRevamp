@@ -1,6 +1,7 @@
 import { TrackerInterface } from './trackerInterface.js';
 import { extensionSettings } from "../../index.js";
 import { TrackerContentRenderer } from "./components/trackerContentRenderer.js";
+import { saveTracker } from "../trackerDataHandler.js";
 
 
 let isMirroringActive = false;
@@ -685,7 +686,10 @@ function removeTrackerEntry(entryPath) {
   if (!(entry in bucket)) return false;
   delete bucket[entry];
 
-  ti.onSave(tracker);
+  const updated = saveTracker(tracker, extensionSettings.trackerDef, ti.mesId, true);
+  if (updated) {
+    ti.tracker = updated;
+  }
   scheduleDockRefresh("remove-entry");
   return true;
 }
