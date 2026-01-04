@@ -670,6 +670,26 @@ function coerceValueByType(type, raw) {
   return v;
 }
 
+function removeTrackerEntry(entryPath) {
+  const { ti, tracker } = getTrackerAndSchema();
+  if (!ti || !tracker || !entryPath) return false;
+
+  const parts = String(entryPath).split(".");
+  if (parts.length < 2) return false;
+
+  const group = parts[0];
+  const entry = parts[1];
+  const bucket = tracker[group];
+  if (!bucket || typeof bucket !== "object") return false;
+
+  if (!(entry in bucket)) return false;
+  delete bucket[entry];
+
+  ti.onSave(tracker);
+  scheduleDockRefresh("remove-entry");
+  return true;
+}
+
 
 function renderDockFromTracker(tracker, schema) {
   if (!tracker || !schema) {
@@ -1092,6 +1112,7 @@ export function ensureDock(side = "right") {
   dockEl.className = "trackerrevamp-dock";
   dockEl.dataset.side = side;
   lastDockRenderFingerprint = "";
+  dockEl.__removeTrackerEntry = removeTrackerEntry;
 
   dockEl.innerHTML = `
     <div class="trackerrevamp-dock-header">

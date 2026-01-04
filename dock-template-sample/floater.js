@@ -112,6 +112,29 @@
       );
     };
 
+    const addRemoveButtons = () => {
+      scope
+        .querySelectorAll(".dock-card-enemy, .dock-card-other")
+        .forEach((card) => {
+          if (card.querySelector(".dock-card-remove")) return;
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "dock-card-remove";
+          btn.setAttribute("aria-label", "Remove card");
+          btn.textContent = "×";
+          card.appendChild(btn);
+        });
+    };
+
+    const getEntryPathFromCard = (card) => {
+      if (!card) return "";
+      const line = card.querySelector("[data-path]");
+      const path = line?.getAttribute("data-path") || "";
+      const parts = path.split(".");
+      if (parts.length < 2) return "";
+      return `${parts[0]}.${parts[1]}`;
+    };
+
     const getTrackerMessageLabel = () => {
       const raw = trackerHeader?.textContent || "";
       const match = String(raw).match(/message\s*(\d+)/i);
@@ -460,6 +483,39 @@
       });
       scope.__dockMetaObserver = metaObserver;
     }
+
+    addRemoveButtons();
+    addListener(listeners, scope, "click", (event) => {
+      const btn = event.target.closest(".dock-card-remove");
+      if (!btn) return;
+      event.preventDefault();
+      event.stopPropagation();
+      const card = btn.closest(".dock-card");
+      if (!card) return;
+      const entryPath = getEntryPathFromCard(card);
+      if (
+        entryPath &&
+        hostDock &&
+        typeof hostDock.__removeTrackerEntry === "function"
+      ) {
+        hostDock.__removeTrackerEntry(entryPath);
+      }
+      const enemyBlock = card.closest(".dock-enemy-block");
+      card.remove();
+      if (!enemyBlock) return;
+      if (enemyBlock.querySelectorAll(".dock-card").length > 0) return;
+      enemyBlock.classList.remove("is-open");
+      const panelName = enemyBlock.getAttribute("data-enemy-panel");
+      if (!panelName) return;
+      const toggle = scope.querySelector(
+        `[data-enemy-toggle="${panelName}"]`
+      );
+      if (toggle) {
+        toggle.classList.remove("is-active");
+        const block = toggle.closest(".dock-rail-block");
+        if (block) block.classList.add("is-hidden");
+      }
+    });
 
     const renderBarFromText = (el, kind) => {
       if (!el || el.__barized) return;
