@@ -8,7 +8,10 @@
   const setActivePanel = (root, type, name) => {
     const panels = root.querySelectorAll(`[data-panel^="${type}:"]`);
     panels.forEach((panel) => {
-      panel.classList.toggle("is-active", panel.dataset.panel === `${type}:${name}`);
+      panel.classList.toggle(
+        "is-active",
+        panel.dataset.panel === `${type}:${name}`
+      );
     });
   };
 
@@ -17,30 +20,112 @@
     panels.forEach((panel) => panel.classList.remove("is-active"));
   };
 
-  const init = ({ root } = {}) => {
+  const init = ({ root, dockEl } = {}) => {
     const scope = root || document.querySelector(".dock-sample");
     if (!scope) return;
 
     const listeners = [];
     scope.__dockFloaterListeners = listeners;
     const svgTargets = Array.from(scope.querySelectorAll("[data-svg]"));
+    const hostDock =
+      dockEl ||
+      scope.closest("#trackerrevamp-dock") ||
+      document.querySelector("#trackerrevamp-dock");
+    const dockRail = scope.querySelector(".dock-rail");
+    const dockStage = scope.querySelector(".dock-stage");
+    const dockBody =
+      hostDock?.querySelector("#trackerrevamp-dock-body") || null;
 
-    const mainButtons = Array.from(scope.querySelectorAll("[data-main-target]"));
+    const mainButtons = Array.from(
+      scope.querySelectorAll("[data-main-target]")
+    );
     const otherToggle = scope.querySelector("[data-other-toggle]");
     const otherList = scope.querySelector("[data-other-list]");
-    const otherButtons = Array.from(scope.querySelectorAll("[data-other-target]"));
+    const otherButtons = Array.from(
+      scope.querySelectorAll("[data-other-target]")
+    );
     const smallToggle = scope.querySelector('[data-enemy-toggle="small"]');
     const bigToggle = scope.querySelector('[data-enemy-toggle="big"]');
     const smallPanel = scope.querySelector('[data-enemy-panel="small"]');
     const bigPanel = scope.querySelector('[data-enemy-panel="big"]');
     const statBlocks = Array.from(scope.querySelectorAll(".dock-stats"));
     const tabGroups = Array.from(scope.querySelectorAll("[data-tabs]"));
+    const drawerHandle = (() => {
+      if (!hostDock) return null;
+      let handle = hostDock.querySelector(".dock-drawer-handle");
+      if (!handle) {
+        handle = document.createElement("button");
+        handle.type = "button";
+        handle.className = "dock-drawer-handle";
+        handle.setAttribute("aria-label", "Toggle dock drawer");
+        hostDock.appendChild(handle);
+      }
+      return handle;
+    })();
+
+    const syncDrawerHandle = () => {
+      if (!hostDock || !drawerHandle || !dockStage || !dockRail) return;
+      drawerHandle.classList.toggle(
+        "is-left",
+        hostDock.classList.contains("is-left")
+      );
+      drawerHandle.classList.toggle(
+        "is-right",
+        hostDock.classList.contains("is-right")
+      );
+      drawerHandle.classList.toggle(
+        "is-collapsed",
+        hostDock.classList.contains("is-collapsed")
+      );
+
+      const isCollapsed = hostDock.classList.contains("is-collapsed");
+      const isLeft = hostDock.classList.contains("is-left");
+      const stageRect = dockStage.getBoundingClientRect();
+      const railRect = dockRail.getBoundingClientRect();
+
+      const edgeX = isLeft
+        ? isCollapsed
+          ? railRect.right
+          : stageRect.right
+        : isCollapsed
+        ? railRect.left
+        : stageRect.left;
+
+      const centerY = railRect.top + railRect.height / 2;
+
+      drawerHandle.style.left = `${edgeX}px`;
+      drawerHandle.style.top = `${centerY}px`;
+    };
+
+    if (hostDock && drawerHandle) {
+      addListener(listeners, drawerHandle, "click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        hostDock.classList.toggle("is-collapsed");
+        syncDrawerHandle();
+      });
+
+      addListener(listeners, dockStage, "transitionend", syncDrawerHandle);
+
+      const observer = new MutationObserver(syncDrawerHandle);
+      observer.observe(hostDock, {
+        attributes: true,
+        attributeFilter: ["class", "data-side"],
+      });
+      scope.__dockFloaterObserver = observer;
+      if (dockBody) {
+        addListener(listeners, dockBody, "scroll", syncDrawerHandle);
+      }
+      addListener(listeners, window, "resize", syncDrawerHandle);
+      syncDrawerHandle();
+    }
 
     const applyInitial = (button) => {
-      const label = button.getAttribute("title")
-        || button.dataset.mainTarget
-        || button.dataset.otherTarget
-        || "";
+      const label =
+        button.getAttribute("title") ||
+        button.dataset.mainTarget ||
+        button.dataset.otherTarget ||
+        "";
       const trimmed = String(label).trim();
       if (!trimmed) return;
       button.textContent = trimmed[0].toUpperCase();
@@ -48,29 +133,44 @@
 
     mainButtons.forEach((button) => {
       applyInitial(button);
-      const label = button.getAttribute("title") || button.dataset.mainTarget || "";
+      const label =
+        button.getAttribute("title") || button.dataset.mainTarget || "";
       const name = String(label).trim().toLowerCase();
       const isJill = name.includes("jill");
       if (isJill) {
         button.style.setProperty("--rail-ring", "rgba(202, 106, 127, 0.72)");
         button.style.setProperty("--rail-core", "rgba(202, 106, 127, 0.28)");
-        button.style.setProperty("--rail-ring-hover", "rgba(225, 135, 155, 0.95)");
-        button.style.setProperty("--rail-core-hover", "rgba(225, 135, 155, 0.45)");
+        button.style.setProperty(
+          "--rail-ring-hover",
+          "rgba(225, 135, 155, 0.95)"
+        );
+        button.style.setProperty(
+          "--rail-core-hover",
+          "rgba(225, 135, 155, 0.45)"
+        );
         button.style.setProperty("--rail-glow", "rgba(202, 106, 127, 0.55)");
       } else {
         button.style.setProperty("--rail-ring", "rgba(64, 160, 238, 0.72)");
         button.style.setProperty("--rail-core", "rgba(64, 160, 238, 0.28)");
-        button.style.setProperty("--rail-ring-hover", "rgba(120, 190, 245, 0.95)");
-        button.style.setProperty("--rail-core-hover", "rgba(120, 190, 245, 0.45)");
+        button.style.setProperty(
+          "--rail-ring-hover",
+          "rgba(120, 190, 245, 0.95)"
+        );
+        button.style.setProperty(
+          "--rail-core-hover",
+          "rgba(120, 190, 245, 0.45)"
+        );
         button.style.setProperty("--rail-glow", "rgba(64, 160, 238, 0.55)");
       }
     });
 
     const applyMainCharacterRoles = () => {
-      const userName = typeof window?.name1 === "string" ? window.name1.trim() : "";
-      const charName = typeof window?.characters?.[window?.this_chid]?.name === "string"
-        ? window.characters[window.this_chid].name.trim()
-        : "";
+      const userName =
+        typeof window?.name1 === "string" ? window.name1.trim() : "";
+      const charName =
+        typeof window?.characters?.[window?.this_chid]?.name === "string"
+          ? window.characters[window.this_chid].name.trim()
+          : "";
 
       const markRole = (el, name) => {
         if (!name) return;
@@ -84,14 +184,17 @@
       };
 
       mainButtons.forEach((button) => {
-        const label = button.getAttribute("title") || button.dataset.mainTarget || "";
+        const label =
+          button.getAttribute("title") || button.dataset.mainTarget || "";
         markRole(button, label);
       });
 
-      scope.querySelectorAll(".dock-card-main[data-main-name]").forEach((card) => {
-        const label = card.getAttribute("data-main-name") || "";
-        markRole(card, label);
-      });
+      scope
+        .querySelectorAll(".dock-card-main[data-main-name]")
+        .forEach((card) => {
+          const label = card.getAttribute("data-main-name") || "";
+          markRole(card, label);
+        });
     };
 
     applyMainCharacterRoles();
@@ -111,13 +214,17 @@
       otherToggle.setAttribute("tabindex", "0");
     }
 
-    const otherBlock = otherToggle ? otherToggle.closest(".dock-rail-block") : null;
-    const smallBlock = smallToggle ? smallToggle.closest(".dock-rail-block") : null;
+    const otherBlock = otherToggle
+      ? otherToggle.closest(".dock-rail-block")
+      : null;
+    const smallBlock = smallToggle
+      ? smallToggle.closest(".dock-rail-block")
+      : null;
     const bigBlock = bigToggle ? bigToggle.closest(".dock-rail-block") : null;
 
     const hasMeaningfulLabel = (text) => {
       const cleaned = String(text || "")
-        .replace(/\(\s*off(?:-screen)?\s*\)/ig, "")
+        .replace(/\(\s*off(?:-screen)?\s*\)/gi, "")
         .replace(/[\u200B-\u200D\uFEFF]/g, "")
         .trim();
       if (!cleaned) return false;
@@ -131,17 +238,21 @@
       return true;
     };
 
-    const otherPanel = scope.querySelector('.dock-cards[data-panel-type="other"]');
+    const otherPanel = scope.querySelector(
+      '.dock-cards[data-panel-type="other"]'
+    );
     const hasOtherEntriesFromButtons = otherButtons.some((button) => {
-      const label = button.getAttribute("title") || button.dataset.otherTarget || "";
+      const label =
+        button.getAttribute("title") || button.dataset.otherTarget || "";
       return hasMeaningfulLabel(label);
     });
     const hasOtherEntriesFromCards = otherPanel
-      ? Array.from(otherPanel.querySelectorAll(".dock-card .dock-name")).some((node) =>
-          hasMeaningfulLabel(node.textContent)
+      ? Array.from(otherPanel.querySelectorAll(".dock-card .dock-name")).some(
+          (node) => hasMeaningfulLabel(node.textContent)
         )
       : false;
-    const hasOtherEntries = hasOtherEntriesFromButtons || hasOtherEntriesFromCards;
+    const hasOtherEntries =
+      hasOtherEntriesFromButtons || hasOtherEntriesFromCards;
 
     if (!hasOtherEntries && otherBlock) {
       otherBlock.classList.add("is-hidden");
@@ -156,11 +267,23 @@
       });
     };
 
-    if (!hasEnemyEntries(smallPanel, ".dock-name, .dock-enemy-title, .small-name, .name") && smallBlock) {
+    if (
+      !hasEnemyEntries(
+        smallPanel,
+        ".dock-name, .dock-enemy-title, .small-name, .name"
+      ) &&
+      smallBlock
+    ) {
       smallBlock.classList.add("is-hidden");
     }
 
-    if (!hasEnemyEntries(bigPanel, ".dock-name, .dock-enemy-title, .quad-name, .name") && bigBlock) {
+    if (
+      !hasEnemyEntries(
+        bigPanel,
+        ".dock-name, .dock-enemy-title, .quad-name, .dock-enemy-name, .name"
+      ) &&
+      bigBlock
+    ) {
       bigBlock.classList.add("is-hidden");
     }
 
@@ -172,7 +295,7 @@
       mainButtons.forEach((btn) => btn.classList.remove("is-active"));
       clearPanels(scope, "main");
     };
-    
+
     const deactivateOtherButtons = () => {
       otherButtons.forEach((btn) => btn.classList.remove("is-active"));
       if (otherToggle) otherToggle.classList.remove("is-active");
@@ -180,10 +303,10 @@
     };
 
     const deactivateEnemyButtons = () => {
-        if (smallToggle) smallToggle.classList.remove("is-active");
-        if (bigToggle) bigToggle.classList.remove("is-active");
-        if (smallPanel) smallPanel.classList.remove("is-open");
-        if (bigPanel) bigPanel.classList.remove("is-open");
+      if (smallToggle) smallToggle.classList.remove("is-active");
+      if (bigToggle) bigToggle.classList.remove("is-active");
+      if (smallPanel) smallPanel.classList.remove("is-open");
+      if (bigPanel) bigPanel.classList.remove("is-open");
     };
 
     mainButtons.forEach((button) => {
@@ -223,7 +346,7 @@
         otherToggle.classList.add("is-open");
 
         if (otherButtons.length > 0) {
-            otherButtons[0].click();
+          otherButtons[0].click();
         }
       } else {
         otherToggle.classList.remove("is-open");
@@ -232,18 +355,22 @@
     });
 
     const enemyClickHandler = (toggle, panel) => {
-        deactivateMainButtons();
-        deactivateOtherButtons();
-        if (otherToggle) otherToggle.classList.remove("is-open");
+      deactivateMainButtons();
+      deactivateOtherButtons();
+      if (otherToggle) otherToggle.classList.remove("is-open");
 
-        if (!panel) return;
-        const nextState = !panel.classList.contains("is-open");
-        panel.classList.toggle("is-open", nextState);
-        toggle.classList.toggle("is-active", nextState);
+      if (!panel) return;
+      const nextState = !panel.classList.contains("is-open");
+      panel.classList.toggle("is-open", nextState);
+      toggle.classList.toggle("is-active", nextState);
     };
 
-    addListener(listeners, smallToggle, "click", () => enemyClickHandler(smallToggle, smallPanel));
-    addListener(listeners, bigToggle, "click", () => enemyClickHandler(bigToggle, bigPanel));
+    addListener(listeners, smallToggle, "click", () =>
+      enemyClickHandler(smallToggle, smallPanel)
+    );
+    addListener(listeners, bigToggle, "click", () =>
+      enemyClickHandler(bigToggle, bigPanel)
+    );
 
     if (mainButtons.length > 0) {
       mainButtons[0].click();
@@ -253,13 +380,27 @@
 
     const renderBarFromText = (el, kind) => {
       if (!el || el.__barized) return;
-      const t = (el.dataset.raw || el.textContent || "").trim();
+      const existingLine = el.querySelector(".tr-line");
+      const lineText =
+        existingLine?.querySelector(".tr-editable")?.textContent ||
+        existingLine?.textContent ||
+        "";
+      const t = (el.dataset.raw || lineText || el.textContent || "").trim();
       const m = t.match(/(\d+)\s*\/\s*(\d+)/);
       if (!m) return;
-      const cur = +m[1], max = +m[2];
+      const cur = +m[1],
+        max = +m[2];
       const pct = Math.max(0, Math.min(100, (cur / max) * 100));
       el.dataset.raw = t;
-      el.innerHTML = `<div class="labeltext">${t}</div>`;
+      el.textContent = "";
+      const textWrap = document.createElement("div");
+      textWrap.className = "labeltext";
+      if (existingLine) {
+        textWrap.appendChild(existingLine.cloneNode(true));
+      } else {
+        textWrap.textContent = t;
+      }
+      el.appendChild(textWrap);
       const bar = document.createElement("div");
       bar.className = "bar " + (kind === "hp" ? "hp" : "exp");
       const fill = document.createElement("span");
@@ -273,8 +414,70 @@
     };
 
     const initNumericBars = () => {
-      scope.querySelectorAll(".hp-line").forEach((el) => renderBarFromText(el, "hp"));
-      scope.querySelectorAll(".exp-line").forEach((el) => renderBarFromText(el, "exp"));
+      scope
+        .querySelectorAll(".hp-line")
+        .forEach((el) => renderBarFromText(el, "hp"));
+      scope
+        .querySelectorAll(".exp-line")
+        .forEach((el) => renderBarFromText(el, "exp"));
+    };
+
+    const splitPillText = (raw) => {
+      const trimmed = String(raw || "").trim();
+      if (!trimmed) return [];
+      if (trimmed.includes("{{")) return [];
+      const parts = trimmed.split(/\s*;\s*|\s*,\s*|\n+/);
+      return parts.map((part) => part.trim()).filter(Boolean);
+    };
+
+    const renderPillList = (lineEl) => {
+      if (!lineEl) return false;
+      const key = lineEl.getAttribute("data-path") || "";
+      const editable = lineEl.querySelector(".tr-editable");
+      const raw = editable?.textContent || lineEl.textContent || "";
+      const items = splitPillText(raw);
+      if (items.length === 0) return false;
+
+      const parent = lineEl.parentElement || lineEl;
+      let list = parent.querySelector(
+        `.dock-pill-list[data-pill-for="${key}"]`
+      );
+      if (!list) {
+        list = document.createElement("div");
+        list.className = "dock-pill-list";
+        list.dataset.pillFor = key;
+        list.addEventListener("click", () => {
+          lineEl.classList.add("dock-pill-source--editing");
+          lineEl.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+          setTimeout(() => {
+            const input = lineEl.querySelector(".tr-input");
+            if (!input) return;
+            const hide = () =>
+              lineEl.classList.remove("dock-pill-source--editing");
+            input.addEventListener("keydown", (ev) => {
+              if (ev.key === "Enter" || ev.key === "Escape") {
+                setTimeout(hide, 0);
+              }
+            });
+          }, 0);
+        });
+        parent.appendChild(list);
+      }
+
+      list.innerHTML = items
+        .map((item) => `<span class="dock-pill-item">${item}</span>`)
+        .join("");
+      lineEl.classList.add("dock-pill-source");
+      return true;
+    };
+
+    const initPillLists = () => {
+      const sources = Array.from(scope.querySelectorAll("[data-pill-list]"));
+      sources.forEach((lineEl) => {
+        if (renderPillList(lineEl)) return;
+        setTimeout(() => renderPillList(lineEl), 0);
+        setTimeout(() => renderPillList(lineEl), 250);
+      });
     };
 
     svgTargets.forEach((el) => {
@@ -298,10 +501,11 @@
     });
 
     initNumericBars();
+    initPillLists();
 
     const parseStats = (text) => {
       const map = {};
-      const regex = /\\b(STR|END|AGI|DEX|INT|CHA|PER|LCK)\\s*[:=]\\s*(\\d+)/gi;
+      const regex = /\b(STR|END|AGI|DEX|INT|CHA|PER|LCK)\s*[:=]\s*(\d+)/gi;
       let match;
       while ((match = regex.exec(text || ""))) {
         map[match[1].toUpperCase()] = match[2];
@@ -310,9 +514,7 @@
     };
 
     const buildStatsString = (order, map) => {
-      return order
-        .map((key) => `${key}: ${map[key] || ""}`.trim())
-        .join(" | ");
+      return order.map((key) => `${key}: ${map[key] || ""}`.trim()).join(" | ");
     };
 
     const commitTrLine = (lineEl, value) => {
@@ -322,23 +524,52 @@
         const input = lineEl.querySelector("textarea.tr-input");
         if (!input) return;
         input.value = value;
-        input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+        input.dispatchEvent(
+          new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
+        );
       }, 0);
     };
 
     statBlocks.forEach((block) => {
       const sourceLine = block.querySelector(".dock-stats-source");
-      const editable = sourceLine?.querySelector(".tr-editable");
-      const raw = editable ? editable.textContent : "";
-      const map = parseStats(raw);
       const pills = Array.from(block.querySelectorAll(".stat-pill"));
       const order = pills.map((pill) => pill.dataset.statKey);
+      let map = {};
+
+      const readSourceText = () => {
+        const editable = sourceLine?.querySelector(".tr-editable");
+        const raw = editable?.textContent || sourceLine?.textContent || "";
+        return String(raw || "").trim();
+      };
+
+      const applyMapToPills = (nextMap) => {
+        map = { ...nextMap };
+        pills.forEach((pill) => {
+          const key = pill.dataset.statKey;
+          const valEl = pill.querySelector(".stat-val");
+          if (!valEl) return;
+          valEl.textContent = map[key] || "";
+        });
+      };
+
+      const hydrateFromSource = () => {
+        const raw = readSourceText();
+        if (!raw || raw.includes("{{")) return false;
+        const nextMap = parseStats(raw);
+        if (Object.keys(nextMap).length === 0) return false;
+        applyMapToPills(nextMap);
+        return true;
+      };
+
+      if (!hydrateFromSource()) {
+        setTimeout(() => hydrateFromSource(), 0);
+        setTimeout(() => hydrateFromSource(), 250);
+      }
 
       pills.forEach((pill) => {
         const key = pill.dataset.statKey;
         const valEl = pill.querySelector(".stat-val");
         if (!valEl) return;
-        valEl.textContent = map[key] || "";
         const update = () => {
           const next = String(valEl.textContent || "").replace(/[^0-9]/g, "");
           valEl.textContent = next;
@@ -361,10 +592,19 @@
       const tabs = Array.from(group.querySelectorAll(".dock-tab"));
       if (tabs.length === 0) return;
       const card = group.closest(".dock-card");
-      const panels = card ? Array.from(card.querySelectorAll(".dock-tab-panel")) : [];
+      const panels = card
+        ? Array.from(card.querySelectorAll(".dock-tab-panel"))
+        : [];
       const setActive = (name) => {
-        tabs.forEach((tab) => tab.classList.toggle("is-active", name && tab.dataset.tab === name));
-        panels.forEach((panel) => panel.classList.toggle("is-active", name && panel.dataset.tabPanel === name));
+        tabs.forEach((tab) =>
+          tab.classList.toggle("is-active", name && tab.dataset.tab === name)
+        );
+        panels.forEach((panel) =>
+          panel.classList.toggle(
+            "is-active",
+            name && panel.dataset.tabPanel === name
+          )
+        );
       };
       tabs.forEach((tab) => {
         tab.addEventListener("click", () => {
@@ -386,7 +626,11 @@
     if (!listeners) return;
     listeners.forEach(([el, type, fn]) => el.removeEventListener(type, fn));
     scope.__dockFloaterListeners = [];
+    if (scope.__dockFloaterObserver) {
+      scope.__dockFloaterObserver.disconnect();
+      scope.__dockFloaterObserver = null;
+    }
   };
 
   return { init, cleanup };
-}
+};

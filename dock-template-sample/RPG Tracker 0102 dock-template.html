@@ -6,22 +6,27 @@
   </div>
   <div class="trackerrevamp-dock-actions">
     <span data-dock-indicator="regen" class="trackerrevamp-dock-regen-indicator"></span>
-    <button class="menu_button" data-dock-action="regenerate" title="Regenerate tracker">?Y3</button>
-    <button class="menu_button" data-dock-action="toggle-og" title="Show/Hide OG tracker">dY>?</button>
-    <button class="menu_button" data-dock-action="toggle-side" title="Toggle side">??,</button>
-    <button class="menu_button" data-dock-action="close" title="Close">A-</button>
+    <button class="menu_button" data-dock-action="regenerate" title="Regenerate tracker">⟳</button>
+    <button class="menu_button" data-dock-action="toggle-og" title="Show/Hide OG tracker">🛠</button>
+    <button class="menu_button" data-dock-action="toggle-side" title="Toggle side">⇄</button>
+    <button class="menu_button" data-dock-action="close" title="Close">×</button>
   </div>
 </div>
 
 <div class="dock-sample dock-floater">
   <aside class="dock-rail">
     <div class="dock-rail-block dock-rail-main">
-      {{#foreach MainCharacters mainCharacter}}
-      <button class="rail-btn rail-btn-main" data-main-target="{{mainCharacter}}" title="{{mainCharacter}}">
-        {{_key|substring(0,1)|toUpperCase()}}
-      </button>
-      {{/foreach}}
-    </div>
+  {{#foreach CharMain charMain}}
+  <button class="rail-btn rail-btn-main" data-main-target="{{charMain}}" title="{{charMain}}">
+    {{_key|substring(0,1)|toUpperCase()}}
+  </button>
+  {{/foreach}}
+  {{#foreach UserMain userMain}}
+  <button class="rail-btn rail-btn-main" data-main-target="{{userMain}}" title="{{userMain}}">
+    {{_key|substring(0,1)|toUpperCase()}}
+  </button>
+  {{/foreach}}
+</div>
 
     <div class="dock-rail-block dock-rail-others">
       <div class="rail-btn rail-btn-group" data-other-toggle title="Other Characters">
@@ -57,306 +62,180 @@
 
   <section class="dock-stage">
     <div class="dock-cards" data-panel-type="main">
-      {{#foreach MainCharacters mainCharacter}}
-      <article class="dock-card dock-card-main" data-panel="main:{{mainCharacter}}" data-main-name="{{mainCharacter}}">
+      {{#foreach CharMain charMain}}
+      <article class="dock-card dock-card-main is-char" data-panel="main:{{charMain}}" data-main-name="{{charMain}}">
         <div class="dock-layout dock-layout-char">
-        <div class="dock-main-top">
-          <div class="dock-chip">
-            <span class="dock-label">{{mainCharacter.Relationship}}</span>
-          </div>
-          <div class="dock-chip">
-            <span class="dock-label">{{mainCharacter.Weather}}</span>
-          </div>
-        </div>
-
-        <div class="dock-main-hero">
-          <div class="dock-hero-left">
-            <div class="dock-name">{{mainCharacter}}</div>
-            <div class="dock-pill">
-              <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.Devotion" data-type="STRING">
-                <span class="tr-editable">{{mainCharacter.Devotion}}</span>
+          <div class="dock-header">
+            <div class="dock-header-left">
+              <span class="dock-ico" data-svg="/scripts/extensions/third-party/ST-TrackerRevamp/icons/relationship.svg"></span>
+              <span class="dock-label">
+                <span class="tr-line" data-path="CharMain.{{charMain}}.Relationship" data-type="STRING">
+                  <span class="tr-editable">{{charMain.Relationship}}</span>
+                </span>
               </span>
             </div>
-          </div>
-          <div class="dock-hero-right">
-            <div class="dock-kv-line">
-              <span class="dock-label">{{mainCharacter.RelationshipDate}}</span>
-            </div>
-            <div class="dock-kv-line">
-              <span class="dock-label">{{mainCharacter.Duration}}</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="dock-main-row">
-          <div class="dock-pill-stack">
-            <img class="dock-ico" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAACXBIWXMAAAsTAAALEwEAmpwYAAAEXUlEQVR4nO2cT4scRRiHSwMKegkejEfNRdCjhFxy0S+gl+BBkHwBWcK67zt7mjl6EMKC7FTNHAKCoLnoST9APOTgwUsgQbzlEFlyiChJEPcXdvyDdlf3VFVXdVX1vs+xZ7v6/fWzPf1W7VJKCYIgCIIgCIIgCIIgCIJgBQrPgMwnreOWY2NSal1JweUbZ0DGgA1an7FBrvD46OB5kPmytLqSgvmN58D6q03AruA8fnhcXb8ENjdLqyspmJsXQOa7f8P1BefxwmN2eB5s7pRWV1Kwc/0syHz/v2DbgnP68JiZi2DzS2l1JQUff/YKyPzYCuUSnNOFx555D2R+L62upICXr4L0T9ZArsE5fniw2QGZP0urKynYX74BMvc6w/gE5zjh/2lre6+Toa7kYGYugM1R1OA8LPx/29qS6koO9szbYP1rkuAcFr7Z1pZSV3LAy3dB+lHS4OwX3tbWllBXcsDLD0Hmj1GCs1v4rrY2d13J2XQtrI9HDc794fva2px1JcW1a0kWnO3ht7W1ueoabZEwa3CON0708caS0lwkzB1cxbqBKcZLLcW2SJg7uIp5AxOMl0xK1yJh7uCqdCEppPQtEoYVqOeta8w0572B+vikhtZ4pK8XJWXbImEMGUOkqDhCHmOm37fWtPv5iyBzuwgpLouEsWSESlGDhegHYHOptyZavQnWv2WV4rpIGFNGiJTWuX4352fsHb6uHACvrsS7F55SfBYJh8gAm0VXcXCUEiyEzC3sHr7cOeGdmcvJ3ic+UnwXCQfJ2FIcHKQECvn6pIW3z7HMF3//zBH21+eSvU9cpIQsEg6WMVCK8hdygPn82dZ5Jzeb9beNmr5J+j7pkxK6SBhFxgApylmIva3dnLO/PgfSP1jPs311xXyfuDwpqeiVEShFta/h2dauXgPpuz01tb66JoGTDPaXYrmOc1uL2fotkL7vUE/rq6t6vCd95Cal9bljWwtevQMyD4d8/VZPCimq+dmWtnbzM3urD0D6SdEyQteSYr0LQsdRzeM9ba33H7BCGpOge9UhPfqF2CwiXWfRNY7l2DVrW/vXhO/TDLUHXafaJ8WFxoSv/CdjylJgm/DVJGNKUtA34atJxhSkYPuEry4ZNUuB64SvNhk1SoHPhK9GGTVJgc+Er2YZNcxTwGbXc7W6jHnGZJ8UHv4bW82TMSkpNDEZVUuhicqoUgpNXEZVUuiUyKhCCp0yGUVLoVMqo0gpdMplFCWFREY5UkhklCOFREZJa1+LnDVUw1hPig15MgqSApFRjhSIjHKkQGTklaKa44uMvFJUc2yRkVeKao4rMvJKUc0xRUZeKao5nsjIK0U1xxIZcci61wmJjHL2OiGRUc5eJyQyytnrhESGF0i514nICAMp9joRGcNAzL1OREYcEGOvE5ERFwzZ60RkpAEhe52IjLTAa68TkTEKcNrrRGSMCvr2OhEZeYB9r5O6/29KEARBEARBEARBEARBEFQdPAXTLPumqlYIIgAAAABJRU5ErkJggg==" alt="diamond-heart">
-            <div class="dock-pill-text">
-              <div class="dock-pill-label">{{mainCharacter.Affection}}</div>
-            </div>
-          </div>
-
-          <div class="dock-pill-stack">
-            <img class="dock-ico" src="data:image/png;base64,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" alt="fire-heart">
-            <div class="dock-pill-text">
-              <div class="dock-pill-label">{{mainCharacter.Arousal}}</div>
-            </div>
-          </div>
-
-          <div class="dock-pill-stack">
-            <div class="dock-pill-top">{{mainCharacter.Kaomoji}}</div>
-            <div class="dock-pill-label">{{mainCharacter.Emotion}}</div>
-          </div>
-
-          <div class="dock-pill-stack">
-            <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/placeholder-gender.svg"></span>
-            <div class="dock-pill-label">{{mainCharacter.Genitals}}</div>
-          </div>
-
-          <div class="dock-pill-stack">
-            <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/placeholder-protection.svg"></span>
-            <div class="dock-pill-label">{{mainCharacter.Protection}}</div>
-          </div>
-
-          <div class="dock-pill-stack">
-            <div class="dock-pill-label">{{mainCharacter.State}}</div>
-          </div>
-        </div>
-
-        <div class="dock-quote">
-          <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.Thoughts" data-type="STRING">
-            <span class="tr-editable">{{mainCharacter.Thoughts}}</span>
-          </span>
-        </div>
-
-        <div class="dock-kv-strip">
-          <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/placeholder-role.svg"></span>
-          <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.Role" data-type="STRING">
-            <span class="tr-editable">{{mainCharacter.Role}}</span>
-          </span>
-          <span class="dock-divider">|</span>
-          <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.Income" data-type="STRING">
-            <span class="tr-editable">{{mainCharacter.Income}}</span>
-          </span>
-        </div>
-
-        <div class="dock-vitals">
-          <div class="dock-vital">
-            <div class="dock-vital-label">HP</div>
-            <div class="labeltext hp-line">{{mainCharacter.HP}}</div>
-          </div>
-          <div class="dock-vital">
-            <div class="dock-vital-label">LEVEL</div>
-            <div class="dock-vital-value">{{mainCharacter.Level}}</div>
-            <div class="labeltext exp-line">{{mainCharacter.Exp}}</div>
-          </div>
-        </div>
-
-        <div class="dock-kv-row">
-          <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/location.svg"></span>
-          <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.Location" data-type="STRING">
-            <span class="tr-editable">{{mainCharacter.Location}}</span>
-          </span>
-          <span class="dock-spacer"></span>
-          <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/injury.svg"></span>
-          <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.InjuryAilments" data-type="STRING">
-            <span class="tr-editable">{{mainCharacter.InjuryAilments}}</span>
-          </span>
-        </div>
-
-        <div class="dock-stats">
-          <div class="dock-stats-header">
-            <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/stat-1.svg"></span>
-            <span class="dock-stats-title">ABILITIES</span>
-          </div>
-          <span class="tr-line dock-stats-source" data-path="MainCharacters.{{mainCharacter}}.Stats" data-type="STRING" style="display:none;">
-            <span class="tr-editable">{{mainCharacter.Stats}}</span>
-          </span>
-          <div class="dock-stats-pills">
-            <div class="stat-pill" data-stat-key="STR"><span class="stat-key">STR</span><span class="stat-val" contenteditable="true"></span></div>
-            <div class="stat-pill" data-stat-key="END"><span class="stat-key">END</span><span class="stat-val" contenteditable="true"></span></div>
-            <div class="stat-pill" data-stat-key="AGI"><span class="stat-key">AGI</span><span class="stat-val" contenteditable="true"></span></div>
-            <div class="stat-pill" data-stat-key="DEX"><span class="stat-key">DEX</span><span class="stat-val" contenteditable="true"></span></div>
-            <div class="stat-pill" data-stat-key="INT"><span class="stat-key">INT</span><span class="stat-val" contenteditable="true"></span></div>
-            <div class="stat-pill" data-stat-key="CHA"><span class="stat-key">CHA</span><span class="stat-val" contenteditable="true"></span></div>
-            <div class="stat-pill" data-stat-key="PER"><span class="stat-key">PER</span><span class="stat-val" contenteditable="true"></span></div>
-            <div class="stat-pill" data-stat-key="LCK"><span class="stat-key">LCK</span><span class="stat-val" contenteditable="true"></span></div>
-          </div>
-        </div>
-
-        <div class="dock-finance">
-          <div class="dock-finance-left">
-            <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/cash.svg"></span>
-            <div class="dock-finance-title">CASH</div>
-            <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.Cash" data-type="STRING">
-              <span class="tr-editable">{{mainCharacter.Cash}}</span>
-            </span>
-          </div>
-          <div class="dock-finance-right">
-            <div class="dock-finance-row">
-              <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/placeholder-bank.svg"></span>
-              <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.PersonalSavings" data-type="STRING">
-                <span class="tr-editable">{{mainCharacter.PersonalSavings}}</span>
-              </span>
-            </div>
-            <div class="dock-finance-row">
-              <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/piggy-bank.svg"></span>
-              <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.JointSavings" data-type="STRING">
-                <span class="tr-editable">{{mainCharacter.JointSavings}}</span>
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div class="dock-tabs" data-tabs>
-          <button class="dock-tab" data-tab="appearance">
-            <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/characters-main-appearance.svg"></span>
-            <span class="dock-tab-label">Appearance</span>
-          </button>
-          <button class="dock-tab" data-tab="state">
-            <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/posture.svg"></span>
-            <span class="dock-tab-label">State</span>
-          </button>
-          <button class="dock-tab" data-tab="inventory">
-            <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/inventory.svg"></span>
-            <span class="dock-tab-label">Inventory</span>
-          </button>
-        </div>
-
-        <div class="dock-tab-panels">
-          <div class="dock-tab-panel" data-tab-panel="appearance">
-            <div class="dock-panel-row">
-              <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/outfit.svg"></span>
-              <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.Outfit" data-type="STRING">
-                <span class="tr-editable">{{mainCharacter.Outfit}}</span>
-              </span>
-            </div>
-            <div class="dock-panel-row">
-              <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/state-of-dress.svg"></span>
-              <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.StateOfDress" data-type="STRING">
-                <span class="tr-editable">{{mainCharacter.StateOfDress}}</span>
-              </span>
-            </div>
-            <div class="dock-panel-row">
-              <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/hair-2.svg"></span>
-              <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.Hair" data-type="STRING">
-                <span class="tr-editable">{{mainCharacter.Hair}}</span>
+            <div class="dock-header-right">
+              <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/weather.svg"></span>
+              <span class="dock-label">
+                <span class="tr-line" data-path="CharMain.{{charMain}}.Weather" data-type="STRING">
+                  <span class="tr-editable">{{charMain.Weather}}</span>
+                </span>
               </span>
             </div>
           </div>
 
-          <div class="dock-tab-panel" data-tab-panel="state">
-            <div class="dock-panel-row">
-              <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/posture.svg"></span>
-              <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.PostureAndInteraction" data-type="STRING">
-                <span class="tr-editable">{{mainCharacter.PostureAndInteraction}}</span>
-              </span>
-            </div>
-            <div class="dock-panel-row">
-              <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/sensory.svg"></span>
-              <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.Sensory" data-type="STRING">
-                <span class="tr-editable">{{mainCharacter.Sensory}}</span>
-              </span>
-            </div>
-          </div>
-
-          <div class="dock-tab-panel" data-tab-panel="inventory">
-            <div class="dock-panel-row">
-              <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/items.svg"></span>
-              <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.Items" data-type="STRING">
-                <span class="tr-editable">{{mainCharacter.Items}}</span>
-              </span>
-            </div>
-            <div class="dock-panel-row">
-              <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/weapons.svg"></span>
-              <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.Weapons" data-type="STRING">
-                <span class="tr-editable">{{mainCharacter.Weapons}}</span>
-              </span>
-            </div>
-            <div class="dock-panel-row">
-              <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/ammos-1.svg"></span>
-              <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.Ammos" data-type="STRING">
-                <span class="tr-editable">{{mainCharacter.Ammos}}</span>
-              </span>
-            </div>
-          </div>
-        </div>
-        </div>
-
-        <div class="dock-layout dock-layout-user">
-          <div class="dock-main-top">
-            <div class="dock-chip">
-              <span class="dock-label">{{mainCharacter.Protection}}</span>
-            </div>
-            <div class="dock-chip">
-              <span class="dock-label">{{mainCharacter.Period}}</span>
-            </div>
-            <div class="dock-chip">
-              <span class="dock-label">{{mainCharacter.Weather}}</span>
-            </div>
-          </div>
-
-          <div class="dock-main-hero">
-            <div class="dock-hero-left">
-              <div class="dock-name">{{mainCharacter}}</div>
+          <div class="dock-name-row">
+            <div class="dock-name-main">{{charMain}}</div>
+            <div class="dock-name-meta">
               <div class="dock-pill">
-                <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.Pregnancy" data-type="STRING">
-                  <span class="tr-editable">{{mainCharacter.Pregnancy}}</span>
+                <span class="dock-ico" data-svg="/scripts/extensions/third-party/ST-TrackerRevamp/icons/bond-2.svg"></span>
+                <span class="tr-line" data-path="CharMain.{{charMain}}.Devotion" data-type="STRING">
+                  <span class="tr-editable">{{charMain.Devotion}}</span>
+                </span>
+              </div>
+              <div class="dock-name-sub">
+                <span class="dock-label">
+                  <span class="tr-line" data-path="CharMain.{{charMain}}.RelationshipDate" data-type="STRING">
+                    <span class="tr-editable">{{charMain.RelationshipDate}}</span>
+                  </span>
+                </span>
+                <span class="dock-pill-inline">
+                  <span class="tr-line" data-path="CharMain.{{charMain}}.Duration" data-type="STRING">
+                    <span class="tr-editable">{{charMain.Duration}}</span>
+                  </span>
                 </span>
               </div>
             </div>
-            <div class="dock-hero-right">
-              <div class="dock-kv-line">
-                <span class="dock-label">{{mainCharacter.Conceive}}</span>
+          </div>
+
+          <div class="dock-pill-grid">
+            <div class="dock-pill-stack has-pill">
+              <img class="dock-ico" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAACXBIWXMAAAsTAAALEwEAmpwYAAAEXUlEQVR4nO2cT4scRRiHSwMKegkejEfNRdCjhFxy0S+gl+BBkHwBWcK67zt7mjl6EMKC7FTNHAKCoLnoST9APOTgwUsgQbzlEFlyiChJEPcXdvyDdlf3VFVXdVX1vs+xZ7v6/fWzPf1W7VJKCYIgCIIgCIIgCIIgCIJgBQrPgMwnreOWY2NSal1JweUbZ0DGgA1an7FBrvD46OB5kPmytLqSgvmN58D6q03AruA8fnhcXb8ENjdLqyspmJsXQOa7f8P1BefxwmN2eB5s7pRWV1Kwc/0syHz/v2DbgnP68JiZi2DzS2l1JQUff/YKyPzYCuUSnNOFx555D2R+L62upICXr4L0T9ZArsE5fniw2QGZP0urKynYX74BMvc6w/gE5zjh/2lre6+Toa7kYGYugM1R1OA8LPx/29qS6koO9szbYP1rkuAcFr7Z1pZSV3LAy3dB+lHS4OwX3tbWllBXcsDLD0Hmj1GCs1v4rrY2d13J2XQtrI9HDc794fva2px1JcW1a0kWnO3ht7W1ueoabZEwa3CON0708caS0lwkzB1cxbqBKcZLLcW2SJg7uIp5AxOMl0xK1yJh7uCqdCEppPQtEoYVqOeta8w0572B+vikhtZ4pK8XJWXbImEMGUOkqDhCHmOm37fWtPv5iyBzuwgpLouEsWSESlGDhegHYHOptyZavQnWv2WV4rpIGFNGiJTWuX4352fsHb6uHACvrsS7F55SfBYJh8gAm0VXcXCUEiyEzC3sHr7cOeGdmcvJ3ic+UnwXCQfJ2FIcHKQECvn6pIW3z7HMF3//zBH21+eSvU9cpIQsEg6WMVCK8hdygPn82dZ5Jzeb9beNmr5J+j7pkxK6SBhFxgApylmIva3dnLO/PgfSP1jPs311xXyfuDwpqeiVEShFta/h2dauXgPpuz01tb66JoGTDPaXYrmOc1uL2fotkL7vUE/rq6t6vCd95Cal9bljWwtevQMyD4d8/VZPCimq+dmWtnbzM3urD0D6SdEyQteSYr0LQsdRzeM9ba33H7BCGpOge9UhPfqF2CwiXWfRNY7l2DVrW/vXhO/TDLUHXafaJ8WFxoSv/CdjylJgm/DVJGNKUtA34atJxhSkYPuEry4ZNUuB64SvNhk1SoHPhK9GGTVJgc+Er2YZNcxTwGbXc7W6jHnGZJ8UHv4bW82TMSkpNDEZVUuhicqoUgpNXEZVUuiUyKhCCp0yGUVLoVMqo0gpdMplFCWFREY5UkhklCOFREZJa1+LnDVUw1hPig15MgqSApFRjhSIjHKkQGTklaKa44uMvFJUc2yRkVeKao4rMvJKUc0xRUZeKao5nsjIK0U1xxIZcci61wmJjHL2OiGRUc5eJyQyytnrhESGF0i514nICAMp9joRGcNAzL1OREYcEGOvE5ERFwzZ60RkpAEhe52IjLTAa68TkTEKcNrrRGSMCvr2OhEZeYB9r5O6/29KEARBEARBEARBEARBEFQdPAXTLPumqlYIIgAAAABJRU5ErkJggg==" alt="diamond-heart">
+              <div class="dock-pill-text">
+                <div class="dock-pill-label">
+                  <span class="tr-line" data-path="CharMain.{{charMain}}.Affection" data-type="STRING">
+                    <span class="tr-editable">{{charMain.Affection}}</span>
+                  </span>
+                </div>
               </div>
-              <div class="dock-kv-line">
-                <span class="dock-label">{{mainCharacter.DurationOfConceive}}</span>
+            </div>
+
+            <div class="dock-pill-stack has-pill">
+              <img class="dock-ico" src="data:image/png;base64,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" alt="fire-heart">
+              <div class="dock-pill-text">
+                <div class="dock-pill-label">
+                  <span class="tr-line" data-path="CharMain.{{charMain}}.Arousal" data-type="STRING">
+                    <span class="tr-editable">{{charMain.Arousal}}</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="dock-pill-stack pill-outline">
+              <div class="dock-pill-top">
+                <span class="tr-line" data-path="CharMain.{{charMain}}.Kaomoji" data-type="STRING">
+                  <span class="tr-editable">{{charMain.Kaomoji}}</span>
+                </span>
+              </div>
+              <div class="dock-pill-label">
+                <span class="tr-line" data-path="CharMain.{{charMain}}.Emotion" data-type="STRING">
+                  <span class="tr-editable">{{charMain.Emotion}}</span>
+                </span>
+              </div>
+            </div>
+
+            <div class="dock-pill-stack pill-outline">
+              <span class="dock-ico" data-svg="/scripts/extensions/third-party/ST-TrackerRevamp/icons/gender.png"></span>
+              <div class="dock-pill-label">
+                <span class="tr-line" data-path="CharMain.{{charMain}}.Genitals" data-type="STRING">
+                  <span class="tr-editable">{{charMain.Genitals}}</span>
+                </span>
+              </div>
+            </div>
+
+            <div class="dock-pill-stack has-pill">
+              <span class="dock-ico" data-svg="/scripts/extensions/third-party/ST-TrackerRevamp/icons/protection.svg"></span>
+              <div class="dock-pill-label">
+                <span class="tr-line" data-path="CharMain.{{charMain}}.Protection" data-type="STRING">
+                  <span class="tr-editable">{{charMain.Protection}}</span>
+                </span>
+              </div>
+            </div>
+
+            <div class="dock-pill-stack is-tall pill-state">
+              <div class="dock-pill-label">
+                <span class="tr-line" data-path="CharMain.{{charMain}}.State" data-type="STRING">
+                  <span class="tr-editable">{{charMain.State}}</span>
+                </span>
               </div>
             </div>
           </div>
 
-          <div class="dock-kv-strip">
-            <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/placeholder-role.svg"></span>
-            <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.Role" data-type="STRING">
-              <span class="tr-editable">{{mainCharacter.Role}}</span>
+          <div class="dock-quote">
+            <span class="dock-ico dock-ico-thought" data-svg="/scripts/extensions/third-party/ST-TrackerRevamp/icons/thoughts.png"></span>
+            <span class="tr-line" data-path="CharMain.{{charMain}}.Thoughts" data-type="STRING">
+              <span class="tr-editable">{{charMain.Thoughts}}</span>
+            </span>
+          </div>
+
+          <div class="dock-role-row">
+            <span class="dock-ico" data-svg="/scripts/extensions/third-party/ST-TrackerRevamp/icons/role-3.svg"></span>
+            <span class="tr-line" data-path="CharMain.{{charMain}}.Role" data-type="STRING">
+              <span class="tr-editable">{{charMain.Role}}</span>
             </span>
             <span class="dock-divider">|</span>
-            <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.Income" data-type="STRING">
-              <span class="tr-editable">{{mainCharacter.Income}}</span>
+            <span class="tr-line" data-path="CharMain.{{charMain}}.Income" data-type="STRING">
+              <span class="tr-editable">{{charMain.Income}}</span>
             </span>
           </div>
 
           <div class="dock-vitals">
-            <div class="dock-vital">
+            <div class="dock-vital hp">
               <div class="dock-vital-label">HP</div>
-              <div class="labeltext hp-line">{{mainCharacter.HP}}</div>
+              <div class="labeltext hp-line">
+                <span class="tr-line" data-path="CharMain.{{charMain}}.HP" data-type="STRING">
+                  <span class="tr-editable">{{charMain.HP}}</span>
+                </span>
+              </div>
             </div>
-            <div class="dock-vital">
-              <div class="dock-vital-label">LEVEL</div>
-              <div class="dock-vital-value">{{mainCharacter.Level}}</div>
-              <div class="labeltext exp-line">{{mainCharacter.Exp}}</div>
+            <div class="dock-vital exp">
+              <div class="dock-vital-label">LEVEL
+                <span class="dock-vital-value">
+                  <span class="tr-line" data-path="CharMain.{{charMain}}.Level" data-type="STRING">
+                    <span class="tr-editable">{{charMain.Level}}</span>
+                  </span>
+                </span>
+              </div>
+              <div class="labeltext exp-line">
+                <span class="tr-line" data-path="CharMain.{{charMain}}.Exp" data-type="STRING">
+                  <span class="tr-editable">{{charMain.Exp}}</span>
+                </span>
+              </div>
             </div>
           </div>
 
-          <div class="dock-kv-row">
-            <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/location.svg"></span>
-            <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.Location" data-type="STRING">
-              <span class="tr-editable">{{mainCharacter.Location}}</span>
-            </span>
-            <span class="dock-spacer"></span>
-            <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/injury.svg"></span>
-            <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.InjuryAilments" data-type="STRING">
-              <span class="tr-editable">{{mainCharacter.InjuryAilments}}</span>
-            </span>
+          <div class="dock-kv-list">
+            <div class="dock-kv-row">
+              <span class="dock-ico" data-svg="/scripts/extensions/third-party/ST-TrackerRevamp/icons/location.svg"></span>
+              <span class="tr-line" data-path="CharMain.{{charMain}}.Location" data-type="STRING">
+                <span class="tr-editable">{{charMain.Location}}</span>
+              </span>
+            </div>
+            <div class="dock-kv-row">
+              <span class="dock-ico" data-svg="/scripts/extensions/third-party/ST-TrackerRevamp/icons/injury.svg"></span>
+              <span class="tr-line" data-path="CharMain.{{charMain}}.InjuryAilments" data-type="STRING">
+                <span class="tr-editable">{{charMain.InjuryAilments}}</span>
+              </span>
+            </div>
           </div>
 
           <div class="dock-stats">
             <div class="dock-stats-header">
-              <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/stat-1.svg"></span>
+              <span class="dock-ico" data-svg="/scripts/extensions/third-party/ST-TrackerRevamp/icons/stat-1.svg"></span>
               <span class="dock-stats-title">ABILITIES</span>
             </div>
-            <span class="tr-line dock-stats-source" data-path="MainCharacters.{{mainCharacter}}.Stats" data-type="STRING" style="display:none;">
-              <span class="tr-editable">{{mainCharacter.Stats}}</span>
+            <span class="tr-line dock-stats-source" data-path="CharMain.{{charMain}}.Stats" data-type="STRING" style="display:none;">
+              <span class="tr-editable">{{charMain.Stats}}</span>
             </span>
             <div class="dock-stats-pills">
               <div class="stat-pill" data-stat-key="STR"><span class="stat-key">STR</span><span class="stat-val" contenteditable="true"></span></div>
@@ -371,24 +250,26 @@
           </div>
 
           <div class="dock-finance">
-            <div class="dock-finance-left">
-              <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/cash.svg"></span>
-              <div class="dock-finance-title">CASH</div>
-              <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.Cash" data-type="STRING">
-                <span class="tr-editable">{{mainCharacter.Cash}}</span>
+            <div class="dock-finance-left dock-cards">
+              <div class="dock-cash-header ">
+                <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/cash.svg"></span>
+                <div class="dock-finance-title">CASH</div>
+              </div>
+              <span class="tr-line" data-path="CharMain.{{charMain}}.Cash" data-type="STRING">
+                <span class="tr-editable">{{charMain.Cash}}</span>
               </span>
             </div>
-            <div class="dock-finance-right">
+            <div class="dock-finance-right dock-cards">
               <div class="dock-finance-row">
-                <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/placeholder-bank.svg"></span>
-                <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.PersonalSavings" data-type="STRING">
-                  <span class="tr-editable">{{mainCharacter.PersonalSavings}}</span>
+                <span class="dock-ico" data-svg="/scripts/extensions/third-party/ST-TrackerRevamp/icons/savings.svg"></span>
+                <span class="tr-line" data-path="CharMain.{{charMain}}.PersonalSavings" data-type="STRING">
+                  <span class="tr-editable">{{charMain.PersonalSavings}}</span>
                 </span>
               </div>
               <div class="dock-finance-row">
                 <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/piggy-bank.svg"></span>
-                <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.JointSavings" data-type="STRING">
-                  <span class="tr-editable">{{mainCharacter.JointSavings}}</span>
+                <span class="tr-line" data-path="CharMain.{{charMain}}.JointSavings" data-type="STRING">
+                  <span class="tr-editable">{{charMain.JointSavings}}</span>
                 </span>
               </div>
             </div>
@@ -413,20 +294,220 @@
             <div class="dock-tab-panel" data-tab-panel="appearance">
               <div class="dock-panel-row">
                 <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/outfit.svg"></span>
-                <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.Outfit" data-type="STRING">
-                  <span class="tr-editable">{{mainCharacter.Outfit}}</span>
+                <span class="tr-line" data-pill-list data-path="CharMain.{{charMain}}.Outfit" data-type="STRING">
+                  <span class="tr-editable">{{charMain.Outfit}}</span>
                 </span>
               </div>
               <div class="dock-panel-row">
                 <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/state-of-dress.svg"></span>
-                <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.StateOfDress" data-type="STRING">
-                  <span class="tr-editable">{{mainCharacter.StateOfDress}}</span>
+                <span class="tr-line single-pill" data-path="CharMain.{{charMain}}.StateOfDress" data-type="STRING">
+                  <span class="tr-editable">{{charMain.StateOfDress}}</span>
                 </span>
               </div>
               <div class="dock-panel-row">
                 <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/hair-2.svg"></span>
-                <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.Hair" data-type="STRING">
-                  <span class="tr-editable">{{mainCharacter.Hair}}</span>
+                <span class="tr-line  single-pill" data-path="CharMain.{{charMain}}.Hair" data-type="STRING">
+                  <span class="tr-editable">{{charMain.Hair}}</span>
+                </span>
+              </div>
+            </div>
+
+            <div class="dock-tab-panel dock-state" data-tab-panel="state">
+              <div class="dock-panel-col">
+                <div class="dock-panel-posture">
+                  <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/posture.svg"></span>
+                  <div class="dock-panel-title">Posture</div>
+                </div>
+                <span class="tr-line single-pill" data-path="CharMain.{{charMain}}.PostureAndInteraction" data-type="STRING">
+                  <span class="tr-editable">{{charMain.PostureAndInteraction}}</span>
+                </span>
+              </div>
+              <div class="dock-panel-col">
+                <div class="dock-panel-sensory ">
+                    <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/sensory.svg"></span>
+                    <div class="dock-panel-title">Sensory</div>
+                </div>
+                <span class="tr-line single-pill" data-path="CharMain.{{charMain}}.Sensory" data-type="STRING">
+                  <span class="tr-editable">{{charMain.Sensory}}</span>
+                </span>
+              </div>
+            </div>
+
+            <div class="dock-tab-panel dock-inventory" data-tab-panel="inventory">
+              <div class="dock-panel-block">
+                <div class="dock-panel-title-row">
+                  <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/items.svg"></span>
+                  <span class="dock-panel-title">Items</span>
+                </div>
+                <span class="tr-line" data-pill-list data-path="CharMain.{{charMain}}.Items" data-type="STRING">
+                  <span class="tr-editable">{{charMain.Items}}</span>
+                </span>
+              </div>
+              <div class="dock-panel-block">
+                <div class="dock-panel-title-row">
+                  <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/weapons.svg"></span>
+                  <span class="dock-panel-title">Weapons</span>
+                </div>
+                <span class="tr-line" data-pill-list data-path="CharMain.{{charMain}}.Weapons" data-type="STRING">
+                  <span class="tr-editable">{{charMain.Weapons}}</span>
+                </span>
+              </div>
+              <div class="dock-panel-block">
+                <div class="dock-panel-title-row">
+                  <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/ammos-1.svg"></span>
+                  <span class="dock-panel-title">Ammos</span>
+                </div>
+                <span class="tr-line" data-pill-list data-path="CharMain.{{charMain}}.Ammos" data-type="STRING">
+                  <span class="tr-editable">{{charMain.Ammos}}</span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="dock-layout dock-layout-user">
+          <div class="dock-main-top">
+            <div class="dock-chip">
+              <span class="dock-label">{{charMain.Protection}}</span>
+            </div>
+            <div class="dock-chip">
+              <span class="dock-label">{{charMain.Period}}</span>
+            </div>
+            <div class="dock-chip">
+              <span class="dock-label">{{charMain.Weather}}</span>
+            </div>
+          </div>
+
+          <div class="dock-main-hero">
+            <div class="dock-hero-left">
+              <div class="dock-name">{{charMain}}</div>
+              <div class="dock-pill">
+                <span class="tr-line" data-path="CharMain.{{charMain}}.Pregnancy" data-type="STRING">
+                  <span class="tr-editable">{{charMain.Pregnancy}}</span>
+                </span>
+              </div>
+            </div>
+            <div class="dock-hero-right">
+              <div class="dock-kv-line">
+                <span class="dock-label">{{charMain.Conceive}}</span>
+              </div>
+              <div class="dock-kv-line">
+                <span class="dock-label">{{charMain.DurationOfConceive}}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="dock-kv-strip">
+            <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/placeholder-role.svg"></span>
+            <span class="tr-line" data-path="CharMain.{{charMain}}.Role" data-type="STRING">
+              <span class="tr-editable">{{charMain.Role}}</span>
+            </span>
+            <span class="dock-divider">|</span>
+            <span class="tr-line" data-path="CharMain.{{charMain}}.Income" data-type="STRING">
+              <span class="tr-editable">{{charMain.Income}}</span>
+            </span>
+          </div>
+
+          <div class="dock-vitals">
+            <div class="dock-vital">
+              <div class="dock-vital-label">HP</div>
+              <div class="labeltext hp-line">{{charMain.HP}}</div>
+            </div>
+            <div class="dock-vital">
+              <div class="dock-vital-label">LEVEL</div>
+              <div class="dock-vital-value">{{charMain.Level}}</div>
+              <div class="labeltext exp-line">{{charMain.Exp}}</div>
+            </div>
+          </div>
+
+          <div class="dock-kv-row">
+            <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/location.svg"></span>
+            <span class="tr-line" data-path="CharMain.{{charMain}}.Location" data-type="STRING">
+              <span class="tr-editable">{{charMain.Location}}</span>
+            </span>
+            <span class="dock-spacer"></span>
+            <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/injury.svg"></span>
+            <span class="tr-line" data-path="CharMain.{{charMain}}.InjuryAilments" data-type="STRING">
+              <span class="tr-editable">{{charMain.InjuryAilments}}</span>
+            </span>
+          </div>
+
+          <div class="dock-stats">
+            <div class="dock-stats-header">
+              <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/stat-1.svg"></span>
+              <span class="dock-stats-title">ABILITIES</span>
+            </div>
+            <span class="tr-line dock-stats-source" data-path="CharMain.{{charMain}}.Stats" data-type="STRING" style="display:none;">
+              <span class="tr-editable">{{charMain.Stats}}</span>
+            </span>
+            <div class="dock-stats-pills">
+              <div class="stat-pill" data-stat-key="STR"><span class="stat-key">STR</span><span class="stat-val" contenteditable="true"></span></div>
+              <div class="stat-pill" data-stat-key="END"><span class="stat-key">END</span><span class="stat-val" contenteditable="true"></span></div>
+              <div class="stat-pill" data-stat-key="AGI"><span class="stat-key">AGI</span><span class="stat-val" contenteditable="true"></span></div>
+              <div class="stat-pill" data-stat-key="DEX"><span class="stat-key">DEX</span><span class="stat-val" contenteditable="true"></span></div>
+              <div class="stat-pill" data-stat-key="INT"><span class="stat-key">INT</span><span class="stat-val" contenteditable="true"></span></div>
+              <div class="stat-pill" data-stat-key="CHA"><span class="stat-key">CHA</span><span class="stat-val" contenteditable="true"></span></div>
+              <div class="stat-pill" data-stat-key="PER"><span class="stat-key">PER</span><span class="stat-val" contenteditable="true"></span></div>
+              <div class="stat-pill" data-stat-key="LCK"><span class="stat-key">LCK</span><span class="stat-val" contenteditable="true"></span></div>
+            </div>
+          </div>
+
+          <div class="dock-finance">
+            <div class="dock-finance-left">
+              <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/cash.svg"></span>
+              <div class="dock-finance-title">CASH</div>
+              <span class="tr-line" data-path="CharMain.{{charMain}}.Cash" data-type="STRING">
+                <span class="tr-editable">{{charMain.Cash}}</span>
+              </span>
+            </div>
+            <div class="dock-finance-right">
+              <div class="dock-finance-row">
+                <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/placeholder-bank.svg"></span>
+                <span class="tr-line" data-path="CharMain.{{charMain}}.PersonalSavings" data-type="STRING">
+                  <span class="tr-editable">{{charMain.PersonalSavings}}</span>
+                </span>
+              </div>
+              <div class="dock-finance-row">
+                <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/piggy-bank.svg"></span>
+                <span class="tr-line" data-path="CharMain.{{charMain}}.JointSavings" data-type="STRING">
+                  <span class="tr-editable">{{charMain.JointSavings}}</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="dock-tabs" data-tabs>
+            <button class="dock-tab" data-tab="appearance">
+              <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/characters-main-appearance.svg"></span>
+              <span class="dock-tab-label">Appearance</span>
+            </button>
+            <button class="dock-tab" data-tab="state">
+              <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/posture.svg"></span>
+              <span class="dock-tab-label">State</span>
+            </button>
+            <button class="dock-tab" data-tab="inventory">
+              <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/inventory.svg"></span>
+              <span class="dock-tab-label">Inventory</span>
+            </button>
+          </div>
+
+          <div class="dock-tab-panels">
+            <div class="dock-tab-panel" data-tab-panel="appearance">
+              <div class="dock-panel-row">
+                <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/outfit.svg"></span>
+                <span class="tr-line" data-path="CharMain.{{charMain}}.Outfit" data-type="STRING">
+                  <span class="tr-editable">{{charMain.Outfit}}</span>
+                </span>
+              </div>
+              <div class="dock-panel-row">
+                <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/state-of-dress.svg"></span>
+                <span class="tr-line" data-path="CharMain.{{charMain}}.StateOfDress" data-type="STRING">
+                  <span class="tr-editable">{{charMain.StateOfDress}}</span>
+                </span>
+              </div>
+              <div class="dock-panel-row">
+                <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/hair-2.svg"></span>
+                <span class="tr-line" data-path="CharMain.{{charMain}}.Hair" data-type="STRING">
+                  <span class="tr-editable">{{charMain.Hair}}</span>
                 </span>
               </div>
             </div>
@@ -434,14 +515,14 @@
             <div class="dock-tab-panel" data-tab-panel="state">
               <div class="dock-panel-row">
                 <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/posture.svg"></span>
-                <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.PostureAndInteraction" data-type="STRING">
-                  <span class="tr-editable">{{mainCharacter.PostureAndInteraction}}</span>
+                <span class="tr-line" data-path="CharMain.{{charMain}}.PostureAndInteraction" data-type="STRING">
+                  <span class="tr-editable">{{charMain.PostureAndInteraction}}</span>
                 </span>
               </div>
               <div class="dock-panel-row">
                 <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/sensory.svg"></span>
-                <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.Sensory" data-type="STRING">
-                  <span class="tr-editable">{{mainCharacter.Sensory}}</span>
+                <span class="tr-line" data-path="CharMain.{{charMain}}.Sensory" data-type="STRING">
+                  <span class="tr-editable">{{charMain.Sensory}}</span>
                 </span>
               </div>
             </div>
@@ -449,20 +530,259 @@
             <div class="dock-tab-panel" data-tab-panel="inventory">
               <div class="dock-panel-row">
                 <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/items.svg"></span>
-                <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.Items" data-type="STRING">
-                  <span class="tr-editable">{{mainCharacter.Items}}</span>
+                <span class="tr-line" data-path="CharMain.{{charMain}}.Items" data-type="STRING">
+                  <span class="tr-editable">{{charMain.Items}}</span>
                 </span>
               </div>
               <div class="dock-panel-row">
                 <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/weapons.svg"></span>
-                <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.Weapons" data-type="STRING">
-                  <span class="tr-editable">{{mainCharacter.Weapons}}</span>
+                <span class="tr-line" data-path="CharMain.{{charMain}}.Weapons" data-type="STRING">
+                  <span class="tr-editable">{{charMain.Weapons}}</span>
                 </span>
               </div>
               <div class="dock-panel-row">
                 <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/ammos-1.svg"></span>
-                <span class="tr-line" data-path="MainCharacters.{{mainCharacter}}.Ammos" data-type="STRING">
-                  <span class="tr-editable">{{mainCharacter.Ammos}}</span>
+                <span class="tr-line" data-path="CharMain.{{charMain}}.Ammos" data-type="STRING">
+                  <span class="tr-editable">{{charMain.Ammos}}</span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+      {{/foreach}}
+      {{#foreach UserMain userMain}}
+      <article class="dock-card dock-card-main is-user" data-panel="main:{{userMain}}" data-main-name="{{userMain}}">
+        <div class="dock-layout dock-layout-user">
+          <div class="dock-header">
+            <div class="dock-header-left">
+              <span class="dock-header-item">
+                <span class="dock-ico" data-svg="/scripts/extensions/third-party/ST-TrackerRevamp/icons/protection.svg"></span>
+                <span class="tr-line dock-pill-label" data-path="UserMain.{{userMain}}.Protection" data-type="STRING">
+                  <span class="tr-editable">{{userMain.Protection}}</span>
+                </span>
+              </span>
+              <span class="divider">|</span>
+              <span class="dock-header-item">
+                <span class="dock-ico" data-svg="/scripts/extensions/third-party/ST-TrackerRevamp/icons/period.svg"></span>
+                <span class="tr-line" data-path="UserMain.{{userMain}}.Period" data-type="STRING">
+                  <span class="tr-editable">{{userMain.Period}}</span>
+                </span>
+              </span>
+            </div>
+            <div class="dock-header-right">
+              <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/weather.svg"></span>
+              <span class="tr-line" data-path="UserMain.{{userMain}}.Weather" data-type="STRING">
+                <span class="tr-editable">{{userMain.Weather}}</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="dock-name-row">
+            <div class="dock-name-main">{{userMain}}</div>
+            <div class="dock-name-meta">
+              <div class="dock-pill">
+                <span class="dock-ico" data-svg="/scripts/extensions/third-party/ST-TrackerRevamp/icons/pregnancy.svg"></span>
+                <span class="tr-line" data-path="UserMain.{{userMain}}.Pregnancy" data-type="STRING">
+                  <span class="tr-editable">{{userMain.Pregnancy}}</span>
+                </span>
+              </div>
+              <div class="dock-name-sub">
+                <span class="dock-label">
+                  <span class="tr-line" data-path="UserMain.{{userMain}}.Conceive" data-type="STRING">
+                    <span class="tr-editable">{{userMain.Conceive}}</span>
+                  </span>
+                </span>
+                <span class="dock-pill-inline">
+                  <span class="tr-line" data-path="UserMain.{{userMain}}.DurationOfConceive" data-type="STRING">
+                    <span class="tr-editable">{{userMain.DurationOfConceive}}</span>
+                  </span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="dock-role-row">
+            <span class="dock-ico" data-svg="/scripts/extensions/third-party/ST-TrackerRevamp/icons/role-3.svg"></span>
+            <span class="tr-line" data-path="UserMain.{{userMain}}.Role" data-type="STRING">
+              <span class="tr-editable">{{userMain.Role}}</span>
+            </span>
+            <span class="dock-divider">|</span>
+            <span class="tr-line" data-path="UserMain.{{userMain}}.Income" data-type="STRING">
+              <span class="tr-editable">{{userMain.Income}}</span>
+            </span>
+          </div>
+
+          <div class="dock-vitals">
+            <div class="dock-vital hp">
+              <div class="dock-vital-label">HP</div>
+              <div class="labeltext hp-line">
+                <span class="tr-line" data-path="UserMain.{{userMain}}.HP" data-type="STRING">
+                  <span class="tr-editable">{{userMain.HP}}</span>
+                </span>
+              </div>
+            </div>
+            <div class="dock-vital exp">
+              <div class="dock-vital-label">LEVEL
+                <span class="dock-vital-value">
+                  <span class="tr-line" data-path="UserMain.{{userMain}}.Level" data-type="STRING">
+                    <span class="tr-editable">{{userMain.Level}}</span>
+                  </span>
+                </span>
+              </div>
+              <div class="labeltext exp-line">
+                <span class="tr-line" data-path="UserMain.{{userMain}}.Exp" data-type="STRING">
+                  <span class="tr-editable">{{userMain.Exp}}</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="dock-kv-list">
+            <div class="dock-kv-row">
+              <span class="dock-ico" data-svg="/scripts/extensions/third-party/ST-TrackerRevamp/icons/location.svg"></span>
+              <span class="tr-line" data-path="UserMain.{{userMain}}.Location" data-type="STRING">
+                <span class="tr-editable">{{userMain.Location}}</span>
+              </span>
+            </div>
+            <div class="dock-kv-row">
+              <span class="dock-ico" data-svg="/scripts/extensions/third-party/ST-TrackerRevamp/icons/injury.svg"></span>
+              <span class="tr-line" data-path="UserMain.{{userMain}}.InjuryAilments" data-type="STRING">
+                <span class="tr-editable">{{userMain.InjuryAilments}}</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="dock-stats">
+            <div class="dock-stats-header">
+              <span class="dock-ico" data-svg="/scripts/extensions/third-party/ST-TrackerRevamp/icons/stat-1.svg"></span>
+              <span class="dock-stats-title">ABILITIES</span>
+            </div>
+            <span class="tr-line dock-stats-source" data-path="UserMain.{{userMain}}.Stats" data-type="STRING" style="display:none;">
+              <span class="tr-editable">{{userMain.Stats}}</span>
+            </span>
+            <div class="dock-stats-pills">
+              <div class="stat-pill" data-stat-key="STR"><span class="stat-key">STR</span><span class="stat-val" contenteditable="true"></span></div>
+              <div class="stat-pill" data-stat-key="END"><span class="stat-key">END</span><span class="stat-val" contenteditable="true"></span></div>
+              <div class="stat-pill" data-stat-key="AGI"><span class="stat-key">AGI</span><span class="stat-val" contenteditable="true"></span></div>
+              <div class="stat-pill" data-stat-key="DEX"><span class="stat-key">DEX</span><span class="stat-val" contenteditable="true"></span></div>
+              <div class="stat-pill" data-stat-key="INT"><span class="stat-key">INT</span><span class="stat-val" contenteditable="true"></span></div>
+              <div class="stat-pill" data-stat-key="CHA"><span class="stat-key">CHA</span><span class="stat-val" contenteditable="true"></span></div>
+              <div class="stat-pill" data-stat-key="PER"><span class="stat-key">PER</span><span class="stat-val" contenteditable="true"></span></div>
+              <div class="stat-pill" data-stat-key="LCK"><span class="stat-key">LCK</span><span class="stat-val" contenteditable="true"></span></div>
+            </div>
+          </div>
+
+          <div class="dock-finance">
+            <div class="dock-finance-left dock-cards">
+              <div class="dock-cash-header">
+                <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/cash.svg"></span>
+                <div class="dock-finance-title">CASH</div>
+              </div>
+              <span class="tr-line" data-path="UserMain.{{userMain}}.Cash" data-type="STRING">
+                <span class="tr-editable">{{userMain.Cash}}</span>
+              </span>
+            </div>
+            <div class="dock-finance-right dock-cards">
+              <div class="dock-finance-row">
+                <span class="dock-ico" data-svg="/scripts/extensions/third-party/ST-TrackerRevamp/icons/savings.svg"></span>
+                <span class="tr-line" data-path="UserMain.{{userMain}}.PersonalSavings" data-type="STRING">
+                  <span class="tr-editable">{{userMain.PersonalSavings}}</span>
+                </span>
+              </div>
+              <div class="dock-finance-row">
+                <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/piggy-bank.svg"></span>
+                <span class="tr-line" data-path="UserMain.{{userMain}}.JointSavings" data-type="STRING">
+                  <span class="tr-editable">{{userMain.JointSavings}}</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="dock-tabs" data-tabs>
+            <button class="dock-tab" data-tab="appearance">
+              <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/characters-main-appearance.svg"></span>
+              <span class="dock-tab-label">Appearance</span>
+            </button>
+            <button class="dock-tab" data-tab="state">
+              <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/posture.svg"></span>
+              <span class="dock-tab-label">State</span>
+            </button>
+            <button class="dock-tab" data-tab="inventory">
+              <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/inventory.svg"></span>
+              <span class="dock-tab-label">Inventory</span>
+            </button>
+          </div>
+
+          <div class="dock-tab-panels">
+            <div class="dock-tab-panel" data-tab-panel="appearance">
+              <div class="dock-panel-row">
+                <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/outfit.svg"></span>
+                <span class="tr-line" data-pill-list data-path="UserMain.{{userMain}}.Outfit" data-type="STRING">
+                  <span class="tr-editable">{{userMain.Outfit}}</span>
+                </span>
+              </div>
+              <div class="dock-panel-row">
+                <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/state-of-dress.svg"></span>
+                <span class="tr-line single-pill" data-path="UserMain.{{userMain}}.StateOfDress" data-type="STRING">
+                  <span class="tr-editable">{{userMain.StateOfDress}}</span>
+                </span>
+              </div>
+              <div class="dock-panel-row">
+                <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/hair-2.svg"></span>
+                <span class="tr-line single-pill" data-path="UserMain.{{userMain}}.Hair" data-type="STRING">
+                  <span class="tr-editable">{{userMain.Hair}}</span>
+                </span>
+              </div>
+            </div>
+
+            <div class="dock-tab-panel dock-state" data-tab-panel="state">
+              <div class="dock-panel-col">
+                <div class="dock-panel-posture">
+                  <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/posture.svg"></span>
+                  <div class="dock-panel-title">Posture</div>
+                </div>
+                <span class="tr-line single-pill" data-path="UserMain.{{userMain}}.PostureAndInteraction" data-type="STRING">
+                  <span class="tr-editable">{{userMain.PostureAndInteraction}}</span>
+                </span>
+              </div>
+              <div class="dock-panel-col">
+                <div class="dock-panel-sensory">
+                  <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/sensory.svg"></span>
+                  <div class="dock-panel-title">Sensory</div>
+                </div>
+                <span class="tr-line single-pill" data-path="UserMain.{{userMain}}.Sensory" data-type="STRING">
+                  <span class="tr-editable">{{userMain.Sensory}}</span>
+                </span>
+              </div>
+            </div>
+
+            <div class="dock-tab-panel dock-inventory" data-tab-panel="inventory">
+              <div class="dock-panel-block">
+                <div class="dock-panel-title-row">
+                  <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/items.svg"></span>
+                  <span class="dock-panel-title">Items</span>
+                </div>
+                <span class="tr-line" data-pill-list data-path="UserMain.{{userMain}}.Items" data-type="STRING">
+                  <span class="tr-editable">{{userMain.Items}}</span>
+                </span>
+              </div>
+              <div class="dock-panel-block">
+                <div class="dock-panel-title-row">
+                  <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/weapons.svg"></span>
+                  <span class="dock-panel-title">Weapons</span>
+                </div>
+                <span class="tr-line" data-pill-list data-path="UserMain.{{userMain}}.Weapons" data-type="STRING">
+                  <span class="tr-editable">{{userMain.Weapons}}</span>
+                </span>
+              </div>
+              <div class="dock-panel-block">
+                <div class="dock-panel-title-row">
+                  <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/ammos-1.svg"></span>
+                  <span class="dock-panel-title">Ammos</span>
+                </div>
+                <span class="tr-line" data-pill-list data-path="UserMain.{{userMain}}.Ammos" data-type="STRING">
+                  <span class="tr-editable">{{userMain.Ammos}}</span>
                 </span>
               </div>
             </div>
@@ -473,59 +793,201 @@
     </div>
 
     <div class="dock-cards" data-panel-type="other">
-      {{#foreach OtherCharacters otherCharacter}}
-      <article class="dock-card" data-panel="other:{{otherCharacter}}">
-        <header class="dock-card-hd">
-          <div class="dock-name">{{otherCharacter}}</div>
-          <div class="dock-pill">
-            HP
+  {{#foreach OtherCharacters otherCharacter}}
+  <article class="dock-card dock-card-main dock-card-other" data-panel="other:{{otherCharacter}}">
+    <div class="dock-layout">
+      <div class="dock-header">
+        <div class="dock-header-left">
+          <span class="dock-ico" data-svg="/scripts/extensions/third-party/ST-TrackerRevamp/icons/bond-3.svg"></span>
+          <span class="tr-line" data-path="OtherCharacters.{{otherCharacter}}.Relationship" data-type="STRING">
+            <span class="tr-editable">{{otherCharacter.Relationship}}</span>
+          </span>
+        </div>
+        <div class="dock-header-right">
+          <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/weather.svg"></span>
+          <span class="tr-line" data-path="OtherCharacters.{{otherCharacter}}.Weather" data-type="STRING">
+            <span class="tr-editable">{{otherCharacter.Weather}}</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="dock-name-row">
+        <div class="dock-name-main">{{otherCharacter}}</div>
+        <div class="dock-name-meta">
+          <div class="dock-cash-header">
+            <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/cash.svg"></span>
+            <div class="dock-finance-title">CASH</div>
+          </div>
+          <span class="dock-pill-inline">
+            <span class="tr-line" data-path="OtherCharacters.{{otherCharacter}}.Cash" data-type="STRING">
+              <span class="tr-editable">{{otherCharacter.Cash}}</span>
+            </span>
+          </span>
+        </div>
+      </div>
+
+      <div class="dock-quote">
+        <span class="dock-ico dock-ico-thought" data-svg="/scripts/extensions/third-party/ST-TrackerRevamp/icons/thoughts.png"></span>
+        <span class="tr-line" data-path="OtherCharacters.{{otherCharacter}}.Thoughts" data-type="STRING">
+          <span class="tr-editable">{{otherCharacter.Thoughts}}</span>
+        </span>
+      </div>
+
+      <div class="dock-role-row">
+        <span class="dock-ico" data-svg="/scripts/extensions/third-party/ST-TrackerRevamp/icons/role-3.svg"></span>
+        <span class="tr-line" data-path="OtherCharacters.{{otherCharacter}}.Role" data-type="STRING">
+          <span class="tr-editable">{{otherCharacter.Role}}</span>
+        </span>
+        <span class="dock-divider">|</span>
+        <span class="tr-line" data-path="OtherCharacters.{{otherCharacter}}.Income" data-type="STRING">
+          <span class="tr-editable">{{otherCharacter.Income}}</span>
+        </span>
+      </div>
+
+      <div class="dock-vitals">
+        <div class="dock-vital hp">
+          <div class="dock-vital-label">HP</div>
+          <div class="labeltext hp-line">
             <span class="tr-line" data-path="OtherCharacters.{{otherCharacter}}.HP" data-type="STRING">
               <span class="tr-editable">{{otherCharacter.HP}}</span>
             </span>
           </div>
-        </header>
-        <div class="dock-row">
-          <div class="dock-kv">
-            <span class="dock-label">Role</span>
-            <span class="tr-line" data-path="OtherCharacters.{{otherCharacter}}.Role" data-type="STRING">
-              <span class="tr-editable">{{otherCharacter.Role}}</span>
+        </div>
+        <div class="dock-vital exp">
+          <div class="dock-vital-label">LEVEL
+            <span class="dock-vital-value">
+              <span class="tr-line" data-path="OtherCharacters.{{otherCharacter}}.Level" data-type="STRING">
+                <span class="tr-editable">{{otherCharacter.Level}}</span>
+              </span>
             </span>
           </div>
-          <div class="dock-kv">
-            <span class="dock-label">Location</span>
-            <span class="tr-line" data-path="OtherCharacters.{{otherCharacter}}.Location" data-type="STRING">
-              <span class="tr-editable">{{otherCharacter.Location}}</span>
+          <div class="labeltext exp-line">
+            <span class="tr-line" data-path="OtherCharacters.{{otherCharacter}}.Exp" data-type="STRING">
+              <span class="tr-editable">{{otherCharacter.Exp}}</span>
             </span>
           </div>
         </div>
-      </article>
-      {{/foreach}}
+      </div>
+
+      <div class="dock-kv-list">
+        <div class="dock-kv-row">
+          <span class="dock-ico" data-svg="/scripts/extensions/third-party/ST-TrackerRevamp/icons/location.svg"></span>
+          <span class="tr-line" data-path="OtherCharacters.{{otherCharacter}}.Location" data-type="STRING">
+            <span class="tr-editable">{{otherCharacter.Location}}</span>
+          </span>
+        </div>
+        <div class="dock-kv-row">
+          <span class="dock-ico" data-svg="/scripts/extensions/third-party/ST-TrackerRevamp/icons/injury.svg"></span>
+          <span class="tr-line" data-path="OtherCharacters.{{otherCharacter}}.InjuryAilments" data-type="STRING">
+            <span class="tr-editable">{{otherCharacter.InjuryAilments}}</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="dock-tabs" data-tabs>
+        <button class="dock-tab" data-tab="appearance">
+          <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/characters-main-appearance.svg"></span>
+          <span class="dock-tab-label">Appearance</span>
+        </button>
+        <button class="dock-tab" data-tab="state">
+          <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/posture.svg"></span>
+          <span class="dock-tab-label">State</span>
+        </button>
+        <button class="dock-tab" data-tab="inventory">
+          <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/inventory.svg"></span>
+          <span class="dock-tab-label">Inventory</span>
+        </button>
+      </div>
+
+      <div class="dock-tab-panels">
+        <div class="dock-tab-panel" data-tab-panel="appearance">
+          <div class="dock-panel-row">
+            <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/outfit.svg"></span>
+            <span class="tr-line" data-pill-list data-path="OtherCharacters.{{otherCharacter}}.Outfit" data-type="STRING">
+              <span class="tr-editable">{{otherCharacter.Outfit}}</span>
+            </span>
+          </div>
+          <div class="dock-panel-row">
+            <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/state-of-dress.svg"></span>
+            <span class="tr-line single-pill" data-path="OtherCharacters.{{otherCharacter}}.StateOfDress" data-type="STRING">
+              <span class="tr-editable">{{otherCharacter.StateOfDress}}</span>
+            </span>
+          </div>
+          <div class="dock-panel-row">
+            <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/hair-2.svg"></span>
+            <span class="tr-line single-pill" data-path="OtherCharacters.{{otherCharacter}}.Hair" data-type="STRING">
+              <span class="tr-editable">{{otherCharacter.Hair}}</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="dock-tab-panel dock-state" data-tab-panel="state">
+          <div class="dock-panel-col">
+            <div class="dock-panel-posture">
+              <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/posture.svg"></span>
+              <div class="dock-panel-title">Posture</div>
+            </div>
+            <span class="tr-line single-pill" data-path="OtherCharacters.{{otherCharacter}}.PostureAndInteraction" data-type="STRING">
+              <span class="tr-editable">{{otherCharacter.PostureAndInteraction}}</span>
+            </span>
+          </div>
+          <div class="dock-panel-col">
+            <div class="dock-panel-sensory">
+              <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/sensory.svg"></span>
+              <div class="dock-panel-title">Sensory</div>
+            </div>
+            <span class="tr-line single-pill" data-path="OtherCharacters.{{otherCharacter}}.Sensory" data-type="STRING">
+              <span class="tr-editable">{{otherCharacter.Sensory}}</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="dock-tab-panel dock-inventory" data-tab-panel="inventory">
+          <div class="dock-panel-block">
+            <div class="dock-panel-title-row">
+              <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/items.svg"></span>
+              <span class="dock-panel-title">Items</span>
+            </div>
+            <span class="tr-line" data-pill-list data-path="OtherCharacters.{{otherCharacter}}.Items" data-type="STRING">
+              <span class="tr-editable">{{otherCharacter.Items}}</span>
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
+  </article>
+  {{/foreach}}
+</div>
 
     <div class="dock-enemies">
       <div class="dock-enemy-block" data-enemy-panel="small">
         {{#foreach SmallEnemies smallEnemy}}
-        <article class="dock-card dock-card-enemy">
-          <header class="dock-card-hd">
-            <div class="dock-name">{{smallEnemy}}</div>
-            <div class="dock-pill">
-              EXP
-              <span class="tr-line" data-path="SmallEnemies.{{smallEnemy}}.ExpGain" data-type="STRING">
-                <span class="tr-editable">{{smallEnemy.ExpGain}}</span>
-              </span>
-            </div>
-          </header>
-          <div class="dock-row">
-            <div class="dock-kv">
-              <span class="dock-label">Number</span>
+        <article class="dock-card dock-card-enemy dock-card-enemy-small">
+          <div class="dock-enemy-header dock-header">
+            <div class="dock-enemy-left dock-header-left">
+              <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/herd.svg"></span>
               <span class="tr-line" data-path="SmallEnemies.{{smallEnemy}}.Number" data-type="STRING">
                 <span class="tr-editable">{{smallEnemy.Number}}</span>
               </span>
             </div>
-            <div class="dock-kv">
-              <span class="dock-label">Location</span>
+            <div class="dock-enemy-right dock-header-right">
+              <span class="tr-line dock-pill-inline" data-path="SmallEnemies.{{smallEnemy}}.ExpGain" data-type="STRING">
+                <span class="tr-editable">{{smallEnemy.ExpGain}}</span>
+              </span>
+            </div>
+          </div>
+          <div class="dock-enemy-name dock-name">{{smallEnemy}}</div>
+          <div class="dock-enemy-rows">
+            <div class="dock-enemy-row">
+              <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/location.svg"></span>
               <span class="tr-line" data-path="SmallEnemies.{{smallEnemy}}.Location" data-type="STRING">
                 <span class="tr-editable">{{smallEnemy.Location}}</span>
+              </span>
+            </div>
+            <div class="dock-enemy-row">
+              <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/enemies-appearance.svg"></span>
+              <span class="tr-line" data-path="SmallEnemies.{{smallEnemy}}.Appearance" data-type="STRING">
+                <span class="tr-editable">{{smallEnemy.Appearance}}</span>
               </span>
             </div>
           </div>
@@ -535,27 +997,73 @@
 
       <div class="dock-enemy-block" data-enemy-panel="big">
         {{#foreach BigEnemies bigEnemy}}
-        <article class="dock-card dock-card-enemy">
-          <header class="dock-card-hd">
-            <div class="dock-name">{{bigEnemy}}</div>
-            <div class="dock-pill">
-              LV
+        <article class="dock-card dock-card-enemy dock-card-enemy-big">
+          <div class="dock-enemy-header dock-header">
+            <div class="dock-enemy-left dock-header-left">
+              <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/herd.svg"></span>
+              <span class="dock-label">Type:</span>
+              <span class="tr-line" data-path="BigEnemies.{{bigEnemy}}.Type" data-type="STRING">
+                <span class="tr-editable">{{bigEnemy.Type}}</span>
+              </span>
+            </div>
+            <div class="dock-enemy-right dock-header-right">
+              <span class="dock-label">Lv</span>
               <span class="tr-line" data-path="BigEnemies.{{bigEnemy}}.Level" data-type="STRING">
                 <span class="tr-editable">{{bigEnemy.Level}}</span>
               </span>
-            </div>
-          </header>
-          <div class="dock-row">
-            <div class="dock-kv">
-              <span class="dock-label">HP</span>
-              <span class="tr-line" data-path="BigEnemies.{{bigEnemy}}.HP" data-type="STRING">
-                <span class="tr-editable">{{bigEnemy.HP}}</span>
+              <span class="dock-pill-inline">
+                <span class="tr-line" data-path="BigEnemies.{{bigEnemy}}.ExpGain" data-type="STRING">
+                  <span class="tr-editable">{{bigEnemy.ExpGain}}</span>
+                </span>
               </span>
             </div>
-            <div class="dock-kv">
-              <span class="dock-label">Type</span>
-              <span class="tr-line" data-path="BigEnemies.{{bigEnemy}}.Type" data-type="STRING">
-                <span class="tr-editable">{{bigEnemy.Type}}</span>
+          </div>
+
+          <div class="dock-enemy-core">
+            <div class="dock-enemy-name">{{bigEnemy}}</div>
+            <div class="dock-enemy-hp">
+              <div class="dock-enemy-hp-top">
+                <span class="dock-label">HP:</span>
+                <span class="tr-line" data-path="BigEnemies.{{bigEnemy}}.HP" data-type="STRING">
+                  <span class="tr-editable">{{bigEnemy.HP}}</span>
+                </span>
+              </div>
+              <div class="dock-enemy-hp-bar">
+                <div class="hp-line">
+                  <span class="tr-line" data-path="BigEnemies.{{bigEnemy}}.HP" data-type="STRING">
+                    <span class="tr-editable">{{bigEnemy.HP}}</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="dock-enemy-rows">
+            <div class="dock-enemy-row">
+              <span class="dock-ico" data-svg="/scripts/extensions/third-party/SillyTavern-Tracker/icons/location.svg"></span>
+              <span class="tr-line" data-path="BigEnemies.{{bigEnemy}}.Location" data-type="STRING">
+                <span class="tr-editable">{{bigEnemy.Location}}</span>
+              </span>
+            </div>
+            <div class="dock-enemy-row">
+              <span class="dock-ico" data-svg="/scripts/extensions/third-party/ST-TrackerRevamp/icons/injury.svg"></span>
+              <span class="tr-line" data-path="BigEnemies.{{bigEnemy}}.Ailments" data-type="STRING">
+                <span class="tr-editable">{{bigEnemy.Ailments}}</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="dock-enemy-rows dock-enemy-rows-secondary">
+            <div class="dock-enemy-row">
+              <span class="dock-ico" data-svg="/scripts/extensions/third-party/ST-TrackerRevamp/icons/enemies-appearance.svg"></span>
+              <span class="tr-line" data-path="BigEnemies.{{bigEnemy}}.Appearance" data-type="STRING">
+                <span class="tr-editable">{{bigEnemy.Appearance}}</span>
+              </span>
+            </div>
+            <div class="dock-enemy-row">
+              <span class="dock-ico" data-svg="/scripts/extensions/third-party/ST-TrackerRevamp/icons/enemy-ability-2.png"></span>
+              <span class="tr-line" data-path="BigEnemies.{{bigEnemy}}.Ability" data-type="STRING">
+                <span class="tr-editable">{{bigEnemy.Ability}}</span>
               </span>
             </div>
           </div>
