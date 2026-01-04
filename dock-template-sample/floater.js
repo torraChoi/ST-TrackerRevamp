@@ -1,4 +1,4 @@
-() => {
+(() => {
   const addListener = (listeners, el, type, fn) => {
     if (!el) return;
     el.addEventListener(type, fn);
@@ -35,6 +35,15 @@
     const dockStage = scope.querySelector(".dock-stage");
     const dockBody =
       hostDock?.querySelector("#trackerrevamp-dock-body") || null;
+    const trackerMeta =
+      hostDock?.querySelector("[data-tracker-message]") ||
+      document.querySelector("[data-tracker-message]");
+    const trackerHeader = document.querySelector("#trackerInterfaceHeader");
+    if (hostDock) {
+      hostDock
+        .querySelectorAll('[class*="dock-drawer-handle"]')
+        .forEach((el) => el.remove());
+    }
 
     const mainButtons = Array.from(
       scope.querySelectorAll("[data-main-target]")
@@ -50,75 +59,81 @@
     const bigPanel = scope.querySelector('[data-enemy-panel="big"]');
     const statBlocks = Array.from(scope.querySelectorAll(".dock-stats"));
     const tabGroups = Array.from(scope.querySelectorAll("[data-tabs]"));
-    const drawerHandle = (() => {
-      if (!hostDock) return null;
-      let handle = hostDock.querySelector(".dock-drawer-handle");
-      if (!handle) {
-        handle = document.createElement("button");
-        handle.type = "button";
-        handle.className = "dock-drawer-handle";
-        handle.setAttribute("aria-label", "Toggle dock drawer");
-        hostDock.appendChild(handle);
-      }
-      return handle;
-    })();
+    const regenButton = hostDock
+      ? hostDock.querySelector('[data-dock-action="regenerate"]')
+      : null;
+    const regenIndicator = hostDock
+      ? hostDock.querySelector('[data-dock-indicator="regen"]')
+      : null;
+    let regenStopTimer = null;
 
-    const syncDrawerHandle = () => {
-      if (!hostDock || !drawerHandle || !dockStage || !dockRail) return;
-      drawerHandle.classList.toggle(
-        "is-left",
-        hostDock.classList.contains("is-left")
-      );
-      drawerHandle.classList.toggle(
-        "is-right",
-        hostDock.classList.contains("is-right")
-      );
-      drawerHandle.classList.toggle(
-        "is-collapsed",
-        hostDock.classList.contains("is-collapsed")
-      );
+    const queueDrawerHandleSync = () => {};
 
-      const isCollapsed = hostDock.classList.contains("is-collapsed");
-      const isLeft = hostDock.classList.contains("is-left");
-      const stageRect = dockStage.getBoundingClientRect();
-      const railRect = dockRail.getBoundingClientRect();
-
-      const edgeX = isLeft
-        ? isCollapsed
-          ? railRect.right
-          : stageRect.right
-        : isCollapsed
-        ? railRect.left
-        : stageRect.left;
-
-      const centerY = railRect.top + railRect.height / 2;
-
-      drawerHandle.style.left = `${edgeX}px`;
-      drawerHandle.style.top = `${centerY}px`;
+    const ensureRegenIcon = () => {
+      if (!regenButton) return;
+      const existing = regenButton.querySelector(".regen-icon");
+      if (existing) return;
+      const text = regenButton.textContent || "";
+      regenButton.textContent = "";
+      const icon = document.createElement("span");
+      icon.className = "regen-icon";
+      icon.textContent = text.trim() || "⟳";
+      regenButton.appendChild(icon);
     };
 
-    if (hostDock && drawerHandle) {
-      addListener(listeners, drawerHandle, "click", (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        hostDock.classList.toggle("is-collapsed");
-        syncDrawerHandle();
-      });
+    const setRegenState = (isActive) => {
+      if (!regenButton) return;
+      regenButton.classList.toggle("is-regenerating", isActive);
+      regenButton.setAttribute("aria-busy", isActive ? "true" : "false");
+    };
 
-      addListener(listeners, dockStage, "transitionend", syncDrawerHandle);
-
-      const observer = new MutationObserver(syncDrawerHandle);
-      observer.observe(hostDock, {
-        attributes: true,
-        attributeFilter: ["class", "data-side"],
-      });
-      scope.__dockFloaterObserver = observer;
-      if (dockBody) {
-        addListener(listeners, dockBody, "scroll", syncDrawerHandle);
+    const stopRegen = () => {
+      setRegenState(false);
+      if (regenStopTimer) {
+        clearTimeout(regenStopTimer);
+        regenStopTimer = null;
       }
-      addListener(listeners, window, "resize", syncDrawerHandle);
-      syncDrawerHandle();
-    }
+    };
+
+    const indicatorLooksActive = () => {
+      if (!regenIndicator) return false;
+      const state = (regenIndicator.getAttribute("data-state") || "").toLowerCase();
+      const busy = (regenIndicator.getAttribute("aria-busy") || "").toLowerCase();
+      const cls = regenIndicator.classList;
+      return (
+        cls.contains("is-active") ||
+        cls.contains("active") ||
+        cls.contains("is-busy") ||
+        cls.contains("busy") ||
+        cls.contains("is-loading") ||
+        state === "active" ||
+        state === "busy" ||
+        busy === "true"
+      );
+    };
+
+    const getTrackerMessageLabel = () => {
+      const raw = trackerHeader?.textContent || "";
+      const match = String(raw).match(/message\s*(\d+)/i);
+      if (!match) return "";
+      return `#${match[1]}`;
+    };
+
+    const syncTrackerMeta = () => {
+      if (!trackerMeta) return;
+      const label = getTrackerMessageLabel();
+      trackerMeta.textContent = label;
+      trackerMeta.classList.toggle("is-hidden", !label);
+    };
+
+    const syncRegenFromIndicator = () => {
+      if (!regenButton || !regenIndicator) return;
+      if (indicatorLooksActive()) {
+        setRegenState(true);
+      } else {
+        stopRegen();
+      }
+    };
 
     const applyInitial = (button) => {
       const label =
@@ -139,26 +154,26 @@
       const isJill = name.includes("jill");
       if (isJill) {
         button.style.setProperty("--rail-ring", "rgba(202, 106, 127, 0.72)");
-        button.style.setProperty("--rail-core", "rgba(202, 106, 127, 0.28)");
+        button.style.setProperty("--rail-core", "rgba(196, 63, 132, 0.63)");
         button.style.setProperty(
           "--rail-ring-hover",
           "rgba(225, 135, 155, 0.95)"
         );
         button.style.setProperty(
           "--rail-core-hover",
-          "rgba(225, 135, 155, 0.45)"
+          "rgb(255 123 152 / 63%)"
         );
         button.style.setProperty("--rail-glow", "rgba(202, 106, 127, 0.55)");
       } else {
         button.style.setProperty("--rail-ring", "rgba(64, 160, 238, 0.72)");
-        button.style.setProperty("--rail-core", "rgba(64, 160, 238, 0.28)");
+        button.style.setProperty("--rail-core", "rgba(74, 126, 238, 0.63)");
         button.style.setProperty(
           "--rail-ring-hover",
           "rgba(120, 190, 245, 0.95)"
         );
         button.style.setProperty(
           "--rail-core-hover",
-          "rgba(120, 190, 245, 0.45)"
+          "rgb(95 183 255 / 74%)"
         );
         button.style.setProperty("--rail-glow", "rgba(64, 160, 238, 0.55)");
       }
@@ -309,8 +324,30 @@
       if (bigPanel) bigPanel.classList.remove("is-open");
     };
 
+    const closeCards = (cards, onDone) => {
+      const list = Array.from(cards || []);
+      if (list.length === 0) {
+        if (onDone) onDone();
+        return;
+      }
+      list.forEach((card) => card.classList.add("is-closing"));
+      setTimeout(() => {
+        if (onDone) onDone();
+        requestAnimationFrame(() => {
+          list.forEach((card) => card.classList.remove("is-closing"));
+        });
+      }, 220);
+    };
+
     mainButtons.forEach((button) => {
       addListener(listeners, button, "click", () => {
+        if (button.classList.contains("is-active")) {
+          const activeCards = scope.querySelectorAll(
+            ".dock-card-main.is-active"
+          );
+          closeCards(activeCards, deactivateMainButtons);
+          return;
+        }
         deactivateEnemyButtons();
         deactivateMainButtons();
         deactivateOtherButtons();
@@ -324,6 +361,13 @@
     otherButtons.forEach((button) => {
       addListener(listeners, button, "click", (event) => {
         event.stopPropagation();
+        if (button.classList.contains("is-active")) {
+          const activeCards = scope.querySelectorAll(
+            ".dock-card-other.is-active"
+          );
+          closeCards(activeCards, deactivateOtherButtons);
+          return;
+        }
         deactivateEnemyButtons();
         deactivateMainButtons();
         deactivateOtherButtons();
@@ -350,7 +394,10 @@
         }
       } else {
         otherToggle.classList.remove("is-open");
-        deactivateOtherButtons();
+        const activeCards = scope.querySelectorAll(
+          ".dock-card-other.is-active"
+        );
+        closeCards(activeCards, deactivateOtherButtons);
       }
     });
 
@@ -361,8 +408,14 @@
 
       if (!panel) return;
       const nextState = !panel.classList.contains("is-open");
-      panel.classList.toggle("is-open", nextState);
-      toggle.classList.toggle("is-active", nextState);
+      if (nextState) {
+        panel.classList.add("is-open");
+        toggle.classList.add("is-active");
+        return;
+      }
+
+      panel.classList.remove("is-open");
+      toggle.classList.remove("is-active");
     };
 
     addListener(listeners, smallToggle, "click", () =>
@@ -376,6 +429,36 @@
       mainButtons[0].click();
     } else if (otherButtons.length > 0) {
       otherButtons[0].click();
+    }
+
+    if (regenButton) {
+      ensureRegenIcon();
+      addListener(listeners, regenButton, "click", () => {
+        setRegenState(true);
+        if (regenStopTimer) clearTimeout(regenStopTimer);
+        regenStopTimer = setTimeout(stopRegen, 10000);
+      });
+    }
+
+    if (regenIndicator) {
+      const regenObserver = new MutationObserver(syncRegenFromIndicator);
+      regenObserver.observe(regenIndicator, {
+        attributes: true,
+        childList: true,
+        subtree: true,
+      });
+      scope.__dockRegenObserver = regenObserver;
+    }
+
+    if (trackerHeader && trackerMeta) {
+      syncTrackerMeta();
+      const metaObserver = new MutationObserver(syncTrackerMeta);
+      metaObserver.observe(trackerHeader, {
+        childList: true,
+        characterData: true,
+        subtree: true,
+      });
+      scope.__dockMetaObserver = metaObserver;
     }
 
     const renderBarFromText = (el, kind) => {
@@ -595,17 +678,136 @@
       const panels = card
         ? Array.from(card.querySelectorAll(".dock-tab-panel"))
         : [];
+
+      const ensurePanelPadding = (panel) => {
+        if (!panel || panel.dataset.padTop) return;
+        const style = getComputedStyle(panel);
+        panel.dataset.padTop = style.paddingTop || "0px";
+        panel.dataset.padRight = style.paddingRight || "0px";
+        panel.dataset.padBottom = style.paddingBottom || "0px";
+        panel.dataset.padLeft = style.paddingLeft || "0px";
+      };
+
+      const applyPanelPadding = (panel, useStored) => {
+        if (!panel) return;
+        if (useStored) {
+          panel.style.paddingTop = panel.dataset.padTop || "";
+          panel.style.paddingRight = panel.dataset.padRight || "";
+          panel.style.paddingBottom = panel.dataset.padBottom || "";
+          panel.style.paddingLeft = panel.dataset.padLeft || "";
+        } else {
+          panel.style.paddingTop = "0px";
+          panel.style.paddingRight = "0px";
+          panel.style.paddingBottom = "0px";
+          panel.style.paddingLeft = "0px";
+        }
+      };
+
+      const clearPanelPadding = (panel) => {
+        if (!panel) return;
+        panel.style.paddingTop = "";
+        panel.style.paddingRight = "";
+        panel.style.paddingBottom = "";
+        panel.style.paddingLeft = "";
+      };
+
+      const openPanel = (panel) => {
+        if (!panel) return;
+        panel.style.display = "flex";
+        panel.classList.add("is-active");
+        ensurePanelPadding(panel);
+        panel.style.overflow = "hidden";
+        applyPanelPadding(panel, true);
+        panel.style.height = "auto";
+        const height = panel.scrollHeight;
+        panel.style.height = "0px";
+        panel.style.opacity = "0";
+        panel.style.transform = "translateY(6px)";
+        applyPanelPadding(panel, false);
+        requestAnimationFrame(() => {
+          panel.style.height = `${height}px`;
+          panel.style.opacity = "1";
+          panel.style.transform = "translateY(0)";
+          applyPanelPadding(panel, true);
+          panel.addEventListener(
+            "transitionend",
+            (event) => {
+              if (event.propertyName !== "height") return;
+              panel.style.height = "auto";
+              panel.style.overflow = "";
+              clearPanelPadding(panel);
+            },
+            { once: true }
+          );
+        });
+      };
+
+      const closePanel = (panel) => {
+        if (!panel) return;
+        ensurePanelPadding(panel);
+        panel.style.overflow = "hidden";
+        panel.style.height = `${panel.scrollHeight}px`;
+        panel.style.opacity = "1";
+        panel.style.transform = "translateY(0)";
+        applyPanelPadding(panel, true);
+        let closed = false;
+        const finishClose = () => {
+          if (closed) return;
+          closed = true;
+          panel.classList.remove("is-active");
+          panel.style.display = "none";
+          panel.style.height = "";
+          panel.style.opacity = "";
+          panel.style.transform = "";
+          panel.style.overflow = "";
+          clearPanelPadding(panel);
+        };
+        requestAnimationFrame(() => {
+          panel.style.height = "0px";
+          panel.style.opacity = "0";
+          panel.style.transform = "translateY(6px)";
+          applyPanelPadding(panel, false);
+          panel.addEventListener(
+            "transitionend",
+            (event) => {
+              if (event.propertyName !== "height") return;
+              finishClose();
+            },
+            { once: true }
+          );
+          setTimeout(finishClose, 300);
+        });
+      };
+
+      const immediateClosePanel = (panel) => {
+        if (!panel) return;
+        panel.classList.remove("is-active");
+        panel.style.display = "none";
+        panel.style.height = "";
+        panel.style.opacity = "";
+        panel.style.transform = "";
+        panel.style.overflow = "";
+        clearPanelPadding(panel);
+      };
+
       const setActive = (name) => {
         tabs.forEach((tab) =>
           tab.classList.toggle("is-active", name && tab.dataset.tab === name)
         );
-        panels.forEach((panel) =>
-          panel.classList.toggle(
-            "is-active",
-            name && panel.dataset.tabPanel === name
-          )
-        );
+        panels.forEach((panel) => {
+          const shouldOpen = name && panel.dataset.tabPanel === name;
+          if (shouldOpen) {
+            openPanel(panel);
+          } else if (panel.classList.contains("is-active")) {
+            if (name) {
+              immediateClosePanel(panel);
+            } else {
+              closePanel(panel);
+            }
+          }
+        });
       };
+
       tabs.forEach((tab) => {
         tab.addEventListener("click", () => {
           const name = tab.dataset.tab;
@@ -630,7 +832,15 @@
       scope.__dockFloaterObserver.disconnect();
       scope.__dockFloaterObserver = null;
     }
+    if (scope.__dockMetaObserver) {
+      scope.__dockMetaObserver.disconnect();
+      scope.__dockMetaObserver = null;
+    }
+    if (scope.__dockRegenObserver) {
+      scope.__dockRegenObserver.disconnect();
+      scope.__dockRegenObserver = null;
+    }
   };
 
   return { init, cleanup };
-};
+})();

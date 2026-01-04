@@ -23,21 +23,9 @@
   const init = ({ root } = {}) => {
     const scope = root || document.querySelector(".dock-sample");
     if (!scope) return;
-
-    const hostDock =
-      scope.closest("#trackerrevamp-dock") ||
-      document.querySelector("#trackerrevamp-dock");
-
-    const expandDrawer = () => {
-      if (hostDock && hostDock.classList.contains("is-collapsed")) {
-        hostDock.classList.remove("is-collapsed");
-      }
-    };
-
     const listeners = [];
     scope.__dockFloaterListeners = listeners;
     const svgTargets = Array.from(scope.querySelectorAll("[data-svg]"));
-
     const mainButtons = Array.from(
       scope.querySelectorAll("[data-main-target]")
     );
@@ -244,7 +232,6 @@
 
     mainButtons.forEach((button) => {
       addListener(listeners, button, "click", () => {
-        expandDrawer();
         deactivateEnemyButtons();
         deactivateMainButtons();
         deactivateOtherButtons();
@@ -257,7 +244,6 @@
 
     otherButtons.forEach((button) => {
       addListener(listeners, button, "click", (event) => {
-        expandDrawer();
         event.stopPropagation();
         deactivateEnemyButtons();
         deactivateMainButtons();
@@ -276,7 +262,6 @@
       const willBeOpen = !otherToggle.classList.contains("is-open");
 
       if (willBeOpen) {
-        expandDrawer();
         deactivateEnemyButtons();
         deactivateMainButtons();
         otherToggle.classList.add("is-open");
@@ -291,7 +276,6 @@
     });
 
     const enemyClickHandler = (toggle, panel) => {
-      expandDrawer();
       deactivateMainButtons();
       deactivateOtherButtons();
       if (otherToggle) otherToggle.classList.remove("is-open");

@@ -5,72 +5,35 @@
   max-height: 100vh;
   background: none;
   backdrop-filter: none !important;
+  border: none;
+  box-shadow: none;
   --dock-handle-width: 44px;
   --dock-handle-height: 92px;
-  transition: transform 0.35s ease;
+  transition: none;
 }
 
 #trackerrevamp-dock-body {
   padding: 0;
 }
 
-#trackerrevamp-dock.is-collapsed .dock-meta {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.35s ease;
+#trackerrevamp-dock .dock-meta,
+#trackerrevamp-dock .dock-stage {
+  transition: transform 0.35s ease, opacity 0.2s ease;
+  will-change: transform;
 }
 
+#trackerrevamp-dock.is-left.is-collapsed .dock-meta,
 #trackerrevamp-dock.is-left.is-collapsed .dock-stage {
-  transform: translateX(calc(-100% - 14px)); /* 14px is the gap */
+  transform: translateX(-110%);
   opacity: 0;
   pointer-events: none;
 }
 
+#trackerrevamp-dock.is-right.is-collapsed .dock-meta,
 #trackerrevamp-dock.is-right.is-collapsed .dock-stage {
-  transform: translateX(calc(100% + 14px)); /* 14px is the gap */
+  transform: translateX(110%);
   opacity: 0;
   pointer-events: none;
-}
-
-.dock-drawer-handle {
-  position: fixed;
-  width: var(--dock-handle-width);
-  height: var(--dock-handle-height);
-  transform: translate(-50%, -50%);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(30, 30, 30, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45);
-  color: rgba(255, 255, 255, 0.65);
-  cursor: pointer;
-  z-index: 10002;
-  transition: left 0.35s ease, top 0.35s ease, transform 0.35s ease;
-  padding: 0;
-}
-
-#trackerrevamp-dock.is-left .dock-drawer-handle {
-  border-radius: 0 999px 999px 0;
-}
-
-#trackerrevamp-dock.is-right .dock-drawer-handle {
-  border-radius: 999px 0 0 999px;
-}
-
-#trackerrevamp-dock.is-collapsed .dock-drawer-handle {
-  transform: translate(-50%, -50%);
-}
-
-.dock-drawer-handle::before {
-  content: ">";
-  font-size: 28px;
-  font-weight: 700;
-  line-height: 1;
-}
-
-#trackerrevamp-dock.is-left .dock-drawer-handle::before {
-  content: "<";
 }
 
 /* Layout shell */
@@ -80,6 +43,38 @@
 
 .trackerrevamp-dock-actions .menu_button {
   background-color: rgba(94, 98, 105, 0.38);
+}
+
+.trackerrevamp-dock-actions .menu_button[data-dock-action="regenerate"] {
+  position: relative;
+  overflow: visible;
+}
+
+.trackerrevamp-dock-actions
+  .menu_button[data-dock-action="regenerate"]
+  .regen-icon {
+  display: inline-block;
+  transform-origin: center;
+}
+
+.trackerrevamp-dock-actions
+  .menu_button[data-dock-action="regenerate"].is-regenerating
+  .regen-icon {
+  animation: dock-regen-spin 0.9s linear infinite;
+}
+
+.trackerrevamp-dock-actions
+  .menu_button[data-dock-action="regenerate"].is-regenerating::after {
+  content: "";
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(58, 169, 255, 0.95);
+  box-shadow: 0 0 8px rgba(58, 169, 255, 0.7);
+  animation: dock-regen-pulse 1s ease-in-out infinite;
 }
 
 .dock-value {
@@ -122,7 +117,6 @@
   gap: 10px;
   padding: 8px 6px;
   border-radius: 14px;
-  background: rgba(0, 0, 0, 0.35);
 }
 
 .dock-rail-block {
@@ -152,6 +146,8 @@
   align-items: center;
   justify-content: center;
   position: relative;
+  z-index: 0;
+  isolation: isolate;
   transition: transform 0.2s ease-out, border-color 0.2s ease,
     box-shadow 0.2s ease;
 }
@@ -178,9 +174,9 @@
 
 .rail-btn-group {
   --rail-ring: rgba(162, 200, 145, 0.72);
-  --rail-core: rgba(162, 200, 145, 0.3);
+  --rail-core: rgba(128, 150, 118, 0.81);
   --rail-ring-hover: rgba(176, 214, 160, 0.9);
-  --rail-core-hover: rgba(176, 214, 160, 0.4);
+  --rail-core-hover: rgb(156 234 123 / 61%);
   --rail-glow: rgba(162, 200, 145, 0.45);
   flex-direction: column;
   gap: 8px;
@@ -326,7 +322,8 @@
   }
 }
 
-.dock-layout-user .dock-header {
+.dock-layout-user .dock-header,
+.dock-card-other .dock-header {
   color: var(--sub-text);
   letter-spacing: 0.12em;
 }
@@ -429,11 +426,7 @@
 }
 
 .dock-pill-stack.has-pill .dock-pill-label,
-.dock-layout-user
-  .dock-header
-  .dock-header-left
-  .dock-header-item
-  .dock-pill-label {
+.dock-layout-user .dock-header .dock-header-left .dock-header-item .dock-pill-label {
   display: inline-block;
   padding: 0px 6px;
   border-radius: 10px;
@@ -443,6 +436,10 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   margin-top: 6px;
+}
+
+.dock-layout-user .dock-header .dock-header-left .dock-header-item .dock-pill-label {
+  margin-top:0 !important;
 }
 
 /* per-pill widths (left -> right) */
@@ -550,10 +547,10 @@
 
 .dock-vital {
   display: grid;
-  gap: 8px;
   border-radius: 8px;
   padding: 12px;
   height: 100%;
+  align-items: center;
 }
 
 .dock-vital-label {
@@ -718,6 +715,7 @@
   border-radius: 5px;
   padding: 0;
   overflow: hidden;
+  cursor: pointer;
   transition: width 0.3s ease, background-color 0.2s ease;
 }
 
@@ -751,6 +749,11 @@
 
 .dock-tab-panel {
   display: none;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: height 0.25s ease, opacity 0.2s ease, transform 0.25s ease;
+  will-change: height, opacity, transform;
 }
 
 .dock-tab-panel.is-active {
@@ -858,6 +861,30 @@
   opacity: 0.9;
 }
 
+.dock-meta-right {
+  display: flex;
+  align-items: center;
+}
+
+.dock-meta-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sub-text);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: rgb(98 145 255 / 35%);
+  width: 32px;
+  height: 32px;
+  text-align: center;
+  border-radius: 100px;
+}
+
+.dock-meta-message.is-hidden {
+  display: none;
+}
+
 .dock-label {
   text-transform: uppercase;
   letter-spacing: 0.12em;
@@ -886,6 +913,20 @@
 
 .dock-card.is-active {
   display: block;
+  animation: dock-card-slide-in 0.25s ease-out;
+  will-change: transform, opacity;
+}
+
+#trackerrevamp-dock.is-right .dock-card.is-active {
+  animation-name: dock-card-slide-in-right;
+}
+
+.dock-card.is-closing {
+  animation: dock-card-slide-out 0.2s ease-in;
+}
+
+#trackerrevamp-dock.is-right .dock-card.is-closing {
+  animation-name: dock-card-slide-out-right;
 }
 
 .dock-card-hd {
@@ -894,6 +935,77 @@
   justify-content: space-between;
   gap: 10px;
   margin-bottom: 10px;
+}
+
+@keyframes dock-card-slide-in {
+  from {
+    transform: translateX(-18px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes dock-card-slide-in-right {
+  from {
+    transform: translateX(18px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes dock-card-slide-out {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-18px);
+    opacity: 0;
+  }
+}
+
+@keyframes dock-card-slide-out-right {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(18px);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dock-card.is-active {
+    animation: none;
+  }
+}
+
+@keyframes dock-regen-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes dock-regen-pulse {
+  0%,
+  100% {
+    transform: scale(0.75);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
 }
 
 .dock-name {
@@ -941,20 +1053,54 @@
 }
 
 .dock-enemy-block {
-  display: none;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transform: translateY(6px);
+  transition: max-height 0.45s cubic-bezier(0.22, 0.7, 0.2, 1),
+    opacity 0.25s ease, transform 0.35s ease;
+  will-change: max-height, opacity, transform;
 }
 
 .dock-enemy-block.is-open {
-  display: block;
+  max-height: 2000px;
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
 }
 
 .dock-enemy-block .dock-card {
   display: block;
   margin-bottom: 12px;
+  opacity: 1;
+  transform: translateX(0);
+  animation: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
 }
 
 .dock-enemy-block .dock-card:last-child {
   margin-bottom: 0;
+}
+
+.dock-enemy-block.is-open .dock-card {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#trackerrevamp-dock.is-right .dock-enemy-block.is-open .dock-card {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.dock-enemy-block .dock-card.is-closing {
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+#trackerrevamp-dock.is-right .dock-enemy-block .dock-card.is-closing {
+  opacity: 0;
+  transform: translateY(6px);
 }
 
 /* Small enemy cards */
@@ -1124,7 +1270,7 @@
   inset: 11px;
   border-radius: 999px;
   background: var(--rail-core, rgba(255, 255, 255, 0.12));
-  z-index: 0;
+  z-index: -1;
   transition: background-color 0.2s ease;
 }
 
