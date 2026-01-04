@@ -689,6 +689,9 @@ function removeTrackerEntry(entryPath) {
   const updated = saveTracker(tracker, extensionSettings.trackerDef, ti.mesId, true);
   if (updated) {
     ti.tracker = updated;
+    if (typeof ti.refreshContent === "function") {
+      ti.refreshContent(ti.mode || "view");
+    }
   }
   scheduleDockRefresh("remove-entry");
   return true;
